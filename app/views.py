@@ -48,8 +48,8 @@ def index(path):
             trend = True if trend is not None else False
             align = True if align is not None else False
 
-            smooth = None if smooth == "" else int(smooth)
-            nyears = None if nyears == "" else int(nyears)
+            smooth = None if (smooth == "" or smooth is None) else int(smooth)
+            nyears = None if (nyears == "" or nyears is None) else int(nyears)
 
             if (region is None) or (realm is None):
                 return render_template( "login.html" )
