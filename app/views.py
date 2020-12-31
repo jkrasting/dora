@@ -3,6 +3,8 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+import os
+
 # Flask modules
 from flask   import render_template
 from flask   import Response
@@ -54,8 +56,13 @@ def index(path):
             if (region is None) or (realm is None):
                 return render_template( "login.html" )
 
-            #dset = gfdlvitals.open_db(f"/Users/krasting/dbverif5/orig/{region}Ave{realm}.db")
-            dset = gfdlvitals.open_db(f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db")
+            fname = f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db" 
+
+            if os.path.exists(fname):
+                dset = gfdlvitals.open_db(fname)
+            else:
+                msg = f"Unable to load SQLite file: {fname}"
+                return render_template('page-500.html',msg=msg)
 
             def plot_gen():
                 for x in sorted(list(dset.columns)):
