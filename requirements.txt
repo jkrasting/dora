@@ -1,2 +1,3 @@
 flask
 gunicorn
+-e git://github.com/jkrasting/gfdlvitals.git#egg=gfdlvitals
