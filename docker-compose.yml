@@ -1,9 +1,12 @@
-version: '3'
+version: '3.8'
 services:
   appseed-app:
     restart: always
     env_file: .env
     build: .
+    hostname: "dashboard"
+    volumes:
+      - /Users/krasting/dbverif5:/Users/krasting/dbverif5
     ports:
       - "5005:5005"
     networks:
@@ -20,6 +23,19 @@ services:
       - web_network
     depends_on: 
       - appseed-app
+  mariadb:
+    restart: always
+    env_file: .dbenv
+    build: mariadb
+    hostname: "dbserver"
+    volumes:
+      - /Users/krasting/database/persist:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - db_network
+    
+
 networks:
   db_network:
     driver: bridge

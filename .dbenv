@@ -1,0 +1,4 @@
+MYSQL_ROOT_PASSWORD=rootpassword
+MYSQL_DATABASE=mdt_tracker
+MYSQL_USER=mdtadmin
+MYSQL_PASSWORD=adminpassword
