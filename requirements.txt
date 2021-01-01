@@ -1,3 +1,8 @@
 flask
 gunicorn
+pymysql
+Flask-Login
+oauthlib
+requests
+pyOpenSSL
 -e git://github.com/jkrasting/gfdlvitals.git#egg=gfdlvitals
