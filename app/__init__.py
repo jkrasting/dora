@@ -6,12 +6,11 @@ Copyright (c) 2019 - present AppSeed.us
 # import Flask 
 from flask import Flask
 
-# Inject Flask magic
+# Configuration
 app = Flask(__name__)
-
-# App Config - the minimal footprint
-app.config['TESTING'   ] = True 
-app.config['SECRET_KEY'] = 'S#perS3crEt_JamesBond' 
+app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+app.config['TESTING'] = True 
+app.config['PERMANENT_SESSION_LIFETIME'] =  timedelta(minutes=30)
 
 # Import routing to render the pages
 from app import views
