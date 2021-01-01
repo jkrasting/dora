@@ -3,20 +3,71 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
+dbhost = "127.0.0.1"
+dbport = 3306
+
+import json
+import sqlite3
+import pymysql
 import os
 
-# Flask modules
-from flask   import render_template
-from flask   import Response
-from flask   import request
-from jinja2  import TemplateNotFound
+from flask import (
+    Flask, 
+    Response,
+    redirect, 
+    render_template,
+    request, 
+    url_for
+)
+
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user    
+)
+
+from jinja2 import TemplateNotFound
+
+from oauthlib.oauth2 import WebApplicationClient
+import requests
+
+from app.db import init_db_command
+from app.user import User
+
+import base64
+import io
+import gfdlvitals
+
+import matplotlib.pyplot as plt
+plt.switch_backend("Agg")
 
 # App modules
 from app import app
 
+# Global 
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
+GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+try:
+    init_db_command()
+except sqlite3.OperationalError:
+    pass
+
+client = WebApplicationClient(GOOGLE_CLIENT_ID)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 def stream_template(template_name, **context):
-    app.update_template_context(context)
+    ## possibly needed, broke with login:
+    ##     app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
     rv.enable_buffering(5)
@@ -28,10 +79,101 @@ def stream_template(template_name, **context):
 def index(path):
     try:
         # Serve the file (if exists) from app/templates/FILE.html
-        return render_template( path )
+        if current_user.is_authenticated:
+            user_params = {"username":current_user.name, 
+                "userpic":current_user.profile_pic,
+            }
+        else:
+            user_params = {"username":"","userpic":""}
+        return render_template( path , **user_params)
     
     except TemplateNotFound:
         return render_template('page-404.html'), 404
+
+@app.route("/protected.html")
+def protected():
+    if current_user.is_authenticated:
+        return (
+            "<p>Hello, {}! You're logged in! Email: {} </p>"
+            "<div><p>Google Profile Picture:</p>"
+            '<img src="{}" alt="Google profile pic"></img>'
+            '<a class="button" href="/logout">Logout</a>'.format(
+            current_user.name, current_user.email, current_user.profile_pic
+            )
+        )
+    else:
+        return '<a class="button" href="/login">Google Login</a>'
+
+def get_google_provider_cfg():
+    return requests.get(GOOGLE_DISCOVERY_URL).json()
+
+@app.route("/login")
+def login():
+    google_provider_cfg = get_google_provider_cfg()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", 'profile']
+    )
+
+    return redirect(request_uri)
+
+@app.route("/login/callback")
+def callback():
+    code = request.args.get("code")
+
+    google_provider_cfg = get_google_provider_cfg()
+    token_endpoint = google_provider_cfg["token_endpoint"]
+
+    token_url, headers, body = client.prepare_token_request(
+        token_endpoint,
+        authorization_response=request.url,
+        redirect_url=request.base_url,
+        code=code
+    )
+
+    token_response = requests.post(
+        token_url,
+        headers=headers,
+        data=body,
+        auth=(GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET)
+    )
+
+    client.parse_request_body_response(json.dumps(token_response.json()))
+
+    userinfo_endpoint = google_provider_cfg["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    if userinfo_response.json().get("email_verified"):
+        unique_id = userinfo_response.json()["sub"]
+        users_email = userinfo_response.json()["email"]
+        picture = userinfo_response.json()["picture"]
+        users_name = userinfo_response.json()["name"]
+    else:
+        return "User email not available or not verified", 400
+
+    user = User(
+        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
+    )
+
+    if not User.get(unique_id):
+        User.create(unique_id, users_name, users_email, picture)
+
+    login_user(user)
+
+    return redirect(url_for("index"))
+
+@app.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
+
+if __name__ == "__main__":
+    app.run(ssl_context="adhoc")
 
 
 @app.route("/scalar-diags.html")
@@ -40,8 +182,6 @@ def scalardiags():
     idnum = request.args.getlist("id")
     idnum = None if len(idnum) == 0 else idnum
 
-    region = request.args.get("region") 
-            region = request.args.get("region") 
     region = request.args.get("region") 
     realm = request.args.get("realm")
     smooth = request.args.get("smooth")
@@ -58,8 +198,6 @@ def scalardiags():
     if (region is None) or (realm is None):
         return render_template( "scalar-menu.html" )
 
-    fname = f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db" 
-            fname = f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db" 
     fname = f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db" 
 
     if os.path.exists(fname):
