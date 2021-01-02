@@ -189,20 +189,17 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
-  `uid` int(6) NOT NULL COMMENT 'Numerical user id for internal reference',
-  `email` varchar(100) NOT NULL COMMENT 'Email address',
-  `mellon_user` varchar(25) DEFAULT NULL COMMENT 'Mellon/SAML user ID',
-  `oidc_user` varchar(100) DEFAULT NULL COMMENT 'OpenID Remote User',
-  `picture` varchar(300) DEFAULT NULL,
+  `id` varchar(100) DEFAULT NULL COMMENT 'OpenID Remote User',
   `name` varchar(100) DEFAULT NULL COMMENT 'Full name',
-  `linux_uid` int(6) DEFAULT NULL COMMENT 'Linux user id',
-  `linux_uname` varchar(100) DEFAULT NULL COMMENT 'Linux username',
-  `linux_groups` varchar(200) DEFAULT NULL COMMENT 'Linux group membership',
+  `email` varchar(100) NOT NULL COMMENT 'Email address',
+  `profile_pic` varchar(100) NOT NULL COMMENT 'Profile picture',
+  `remote_addr` varchar(40) DEFAULT NULL,
+  `login_date` datetime DEFAULT NULL,
   `perm_view` varchar(150) DEFAULT NULL COMMENT 'CSV list of project IDs that user can view entries',
   `perm_add` varchar(150) DEFAULT '1' COMMENT 'CSV list of project IDs that user can add entries',
   `perm_modify` varchar(150) DEFAULT NULL COMMENT 'CSV list of project IDs that user can modify entries',
   `perm_del` varchar(150) DEFAULT NULL COMMENT 'CSV list of project IDs that user can delete entries',
-  PRIMARY KEY (`uid`),
+  PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
