@@ -30,6 +30,8 @@ from flask_login import (
 
 from jinja2 import TemplateNotFound
 
+from datetime import datetime
+
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 
@@ -152,15 +154,23 @@ def callback():
         users_email = userinfo_response.json()["email"]
         picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["name"]
+        if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
+            remote_addr = request.environ['REMOTE_ADDR']
+        else:
+            remote_addr = request.environ['HTTP_X_FORWARDED_FOR']
+        print("Remote address: ",remote_addr)
+        login_date = str(datetime.now().isoformat())
     else:
         return "User email not available or not verified", 400
 
     user = User(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture
+        id_=unique_id, name=users_name, email=users_email, profile_pic=picture, remote_addr=remote_addr, login_date=login_date
     )
 
     if not User.get(unique_id):
-        User.create(unique_id, users_name, users_email, picture)
+        User.create(unique_id, users_name, users_email, picture, remote_addr, login_date)
+    else:
+        User.update(unique_id, users_name, users_email, picture, remote_addr, login_date)
 
     login_user(user)
 
