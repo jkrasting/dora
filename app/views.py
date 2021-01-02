@@ -35,9 +35,11 @@ from datetime import datetime
 from oauthlib.oauth2 import WebApplicationClient
 import requests
 
-from app.db import init_db_command
 from app.user import User
 
+from flaskext.mysql import MySQL
+
+from flask import g
 import base64
 import io
 import gfdlvitals
@@ -56,10 +58,10 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-try:
-    init_db_command()
-except sqlite3.OperationalError:
-    pass
+#try:
+#    init_db_command()
+#except sqlite3.OperationalError:
+#    pass
 
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
@@ -168,6 +170,7 @@ def callback():
     )
 
     if not User.get(unique_id):
+        print("params: ",unique_id, users_name, users_email, picture, remote_addr, login_date)
         User.create(unique_id, users_name, users_email, picture, remote_addr, login_date)
     else:
         User.update(unique_id, users_name, users_email, picture, remote_addr, login_date)
@@ -231,6 +234,12 @@ def scalardiags():
     content = {"rows":plot_gen(),"region":region.capitalize(),"realm":realm.capitalize()}
     return Response(stream_template("scalar-diags.html", **content ))
 
+@app.teardown_appcontext
+def teardown_db(exception):
+    db = g.pop('db', None)
+
+    if db is not None:
+        db.close()
 
 # Some sample database code below
 #    conn = pymysql.connect(host=dbhost,
