@@ -37,8 +37,6 @@ import requests
 
 from app.user import User
 
-from flaskext.mysql import MySQL
-
 from flask import g
 import base64
 import io
