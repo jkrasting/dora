@@ -7,6 +7,7 @@ services:
     hostname: "dashboard"
     volumes:
       - /Users/krasting/dbverif5:/Users/krasting/dbverif5
+      - ./certs:/etc/nginx/certs
     ports:
       - "5005:5005"
     networks:
@@ -16,9 +17,11 @@ services:
     restart: always
     image: "nginx:latest"
     ports:
-      - "85:85"
+      - "80:80"
+      - "443:443"
     volumes:
       - ./nginx:/etc/nginx/conf.d
+      - ./certs:/etc/nginx/certs
     networks:
       - web_network
     depends_on: 
@@ -29,7 +32,7 @@ services:
     build: mariadb
     hostname: "dbserver"
     volumes:
-      - /Users/krasting/database/persist:/var/lib/mysql
+      - ./persist:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
