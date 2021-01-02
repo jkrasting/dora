@@ -1,3 +1,6 @@
+certs/cert.pem
+certs/key.pem
+persist/
 flask/
 *.pyc
 dev
