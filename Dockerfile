@@ -9,4 +9,4 @@ COPY app app
 RUN pip install -r requirements.txt
 
 EXPOSE 5005
-CMD ["gunicorn","--certfile", "/etc/nginx/certs/cert.pem", "--keyfile", "/etc/nginx/certs/key.pem", "--config", "gunicorn-cfg.py", "run:app"]
+CMD ["gunicorn","--certfile", "/etc/certificates/cert.pem", "--keyfile", "/etc/certificates/key.pem", "--config", "gunicorn-cfg.py", "run:app"]
