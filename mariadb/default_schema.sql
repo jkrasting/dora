@@ -136,11 +136,13 @@ DROP TABLE IF EXISTS `projects`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `projects` (
-  `project_id` int(5) NOT NULL COMMENT 'Integer project number used for internal reference',
+  `project_id` int(5) NOT NULL AUTO_INCREMENT COMMENT 'Integer project number used for internal reference',
   `project_name` varchar(50) NOT NULL COMMENT 'Project name, used in URLs and for reference',
   `project_remap` int(11) NOT NULL DEFAULT '0' COMMENT 'Project has unique numbering scheme; 1 = True; 0 = False',
   `project_description` varchar(500) DEFAULT NULL COMMENT 'Project description',
+  `project_config` varchar(500) DEFAULT NULL COMMENT 'Project configuration',
   PRIMARY KEY (`project_id`),
+  UNIQUE KEY `project_id` (`project_id`),
   UNIQUE KEY `project_name` (`project_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -151,7 +153,6 @@ CREATE TABLE `projects` (
 
 LOCK TABLES `projects` WRITE;
 /*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-INSERT INTO `projects` VALUES (0,'master',0,'Master list of all experiments'),(1,'public',0,'List of publically-available experiments'),(2,'mdt',0,'Table of MDT experiments'),(3,'cmip6',0,'List of CMIP6 experiments'),(4,'odiv',1,'O-Division experiments'),(5,'cmip5',0,'List of selected CMIP5 experiments'),(6,'pmip',1,'Collection of paleoclimate experiments'),(7,'esm4.2',0,'Development experiments for ESM4.2');
 /*!40000 ALTER TABLE `projects` ENABLE KEYS */;
 UNLOCK TABLES;
 

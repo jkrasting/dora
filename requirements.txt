@@ -5,4 +5,5 @@ Flask-Login
 oauthlib
 requests
 pyOpenSSL
+pyyaml
 -e git://github.com/jkrasting/gfdlvitals.git#egg=gfdlvitals
