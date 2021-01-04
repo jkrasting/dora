@@ -10,6 +10,7 @@ import json
 import sqlite3
 import pymysql
 import os
+import yaml
 
 from flask import (
     Flask, 
@@ -31,6 +32,8 @@ from flask_login import (
 from jinja2 import TemplateNotFound
 
 from datetime import datetime
+
+from .db import get_db
 
 from oauthlib.oauth2 import WebApplicationClient
 import requests
@@ -185,6 +188,52 @@ def logout():
 
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
+
+@app.route("/admin/project/<project_id>")
+def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
+    params["project_id"] = project_id
+    if project_id != "new": 
+        db = get_db()
+        cursor = db.cursor()
+        sql = f"select * from projects where project_id={project_id}"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        params = result if isinstance(result,dict) else params
+        #print(yaml.load(params["project_config"]))
+    #D = {"main":{"label":"Main table of experiments","sql":"SELECT * from experiments where ID=890"}}
+    #print(yaml.dump(D))
+    #content['project_config'] = yaml.dump(D)
+    content = {}
+    content['project_id'] = params["project_id"]
+    content['project_name'] = params["project_name"]
+    content['project_description'] = params["project_description"]
+    content['project_config'] = params["project_config"]
+    return render_template("project.html", **content)
+
+@app.route("/admin/project_update.html")
+def project_update():
+    args = dict(request.args)
+
+    db = get_db()
+    cursor = db.cursor()
+    sql = 'select AUTO_INCREMENT from information_schema.TABLES where TABLE_SCHEMA = "mdt_tracker" and TABLE_NAME = "projects"'
+    cursor.execute(sql)
+    nextid = cursor.fetchone()['AUTO_INCREMENT']
+
+    if args["project_id"] == "new":
+        args["project_id"] = nextid
+    
+    if int(args["project_id"]) >  int(nextid):
+        return render_template('page-500.html',msg="Project ID is too high.")
+    keys = str(",").join([f"{x}" for x in list(args.keys())])
+    keys = f"({keys})"
+    vals = str(",").join([f"'{x}'" for x in list(args.values())])
+    vals = f"({vals})"
+    update = str(",").join([f"{k}='{v}'" for (k,v) in args.items()])
+    sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
+    cursor.execute(sql)
+    db.commit()
+    return render_template("success.html", msg="Updated project successfully.")
 
 
 @app.route("/scalar-diags.html")
