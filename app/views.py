@@ -198,6 +198,7 @@ def project(project_id,params={"project_description":"","project_name":"","proje
         sql = f"select * from projects where project_id={project_id}"
         cursor.execute(sql)
         result = cursor.fetchone()
+        cursor.close()
         params = result if isinstance(result,dict) else params
         #print(yaml.load(params["project_config"]))
     #D = {"main":{"label":"Main table of experiments","sql":"SELECT * from experiments where ID=890"}}
@@ -233,6 +234,7 @@ def project_update():
     sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
     cursor.execute(sql)
     db.commit()
+    cursor.close()
     return render_template("success.html", msg="Updated project successfully.")
 
 
