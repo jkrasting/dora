@@ -189,6 +189,25 @@ def logout():
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
 
+@app.route("/projects/<project_name>")
+def display_project(project_name):
+    db = get_db()
+    cursor = db.cursor()
+    sql = f"SELECT project_id,project_config from projects where project_name='{project_name}'"
+    cursor.execute(sql)
+    result = cursor.fetchone()
+    if result["project_config"] != "":
+        config = yaml.load(result["project_config"])
+    result = []
+    for k in list(config.keys()):
+        cursor.execute(config[k]["sql"])
+        table_data = {}
+        table_data["title"] = config[k]["title"]
+        table_data["results"] = cursor.fetchall()
+        result.append(table_data)
+    cursor.close
+    return render_template("display-table.html", result=result)
+
 @app.route("/admin/project/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
     params["project_id"] = project_id
