@@ -202,23 +202,27 @@ def display_project(project_name):
     for k in list(config.keys()):
         cursor.execute(config[k]["sql"])
         table_data = {}
-        table_data["title"] = config[k]["title"]
+        table_data["title"] = k
         table_data["results"] = cursor.fetchall()
         result.append(table_data)
     cursor.close
     return render_template("display-table.html", result=result)
 
-@app.route("/admin/project/<project_id>")
+@app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
     params["project_id"] = project_id
-    if project_id != "new": 
+    if project_id != "new":
         db = get_db()
         cursor = db.cursor()
-        sql = f"select * from projects where project_id={project_id}"
+        if not project_id[0].isdigit():
+            sql = f"SELECT * from projects where project_name='{project_id}'"
+        else:
+            sql = f"select * from projects where project_id={project_id}"
         cursor.execute(sql)
         result = cursor.fetchone()
         cursor.close()
         params = result if isinstance(result,dict) else params
+        project_id = result["project_id"]
         #print(yaml.load(params["project_config"]))
     #D = {"main":{"label":"Main table of experiments","sql":"SELECT * from experiments where ID=890"}}
     #print(yaml.dump(D))
