@@ -230,9 +230,11 @@ def project(project_id,params={"project_description":"","project_name":"","proje
     content['project_config'] = params["project_config"]
     return render_template("project.html", **content)
 
-@app.route("/admin/project_update.html")
+@app.route("/admin/project_update.html", methods=["POST"])
 def project_update():
-    args = dict(request.args)
+    args = dict(request.form)
+
+    print("ARGS: ",args)
 
     db = get_db()
     cursor = db.cursor()
