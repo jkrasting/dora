@@ -193,20 +193,25 @@ if __name__ == "__main__":
 def display_project(project_name):
     db = get_db()
     cursor = db.cursor()
-    sql = f"SELECT project_id,project_config from projects where project_name='{project_name}'"
+    sql = f"SELECT project_id,project_config,project_description from projects where project_name='{project_name}'"
     cursor.execute(sql)
-    result = cursor.fetchone()
-    if result["project_config"] != "":
-        config = yaml.load(result["project_config"])
-    result = []
+    config_result = cursor.fetchone()
+    if config_result["project_config"] != "":
+        config = yaml.load(config_result["project_config"])
+    tables = []
     for k in list(config.keys()):
         cursor.execute(config[k]["sql"])
         table_data = {}
         table_data["title"] = k
-        table_data["results"] = cursor.fetchall()
-        result.append(table_data)
+        table_data["experiments"] = cursor.fetchall()
+        tables.append(table_data)
     cursor.close
-    return render_template("display-table.html", result=result)
+    tables.append(tables[0])
+    return render_template("view-table.html", 
+        tables=tables, 
+        project_name=project_name,
+        project_description=config_result["project_description"],
+    )
 
 @app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
