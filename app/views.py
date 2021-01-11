@@ -200,10 +200,25 @@ def display_project(project_name):
         config = yaml.load(config_result["project_config"])
     tables = []
     for k in list(config.keys()):
-        cursor.execute(config[k]["sql"])
         table_data = {}
         table_data["title"] = k
-        table_data["experiments"] = cursor.fetchall()
+        if "remap_sql" in list(config[k].keys()):
+            sql_ = f"SELECT A.*,B.experiment_id from master A join project_map B on A.id = B.master_id " + \
+                   f"where A.id in (select B.master_id from project_map where B.project_id=(" + \
+                   f"select project_id from projects where project_name='{project_name}')) " + \
+                   f"{config[k]['remap_sql']} order by id DESC;"
+            cursor.execute(sql_)
+            table_data["experiments"] = cursor.fetchall()
+            for x in table_data["experiments"]:
+                x["id"] = f"{project_name}-{x['experiment_id']}"
+        elif "mod_sql" in list(config[k].keys()):
+            cursor.execute(config[k]["mod_sql"])
+            table_data["experiments"] = cursor.fetchall()
+        elif "sql" in list(config[k].keys()):
+            cursor.execute(config[k]["sql"])
+            table_data["experiments"] = cursor.fetchall()
+        else:
+            return render_template('page-500.html',msg="Malformed SQL query in project config.")
         tables.append(table_data)
     cursor.close
     tables.append(tables[0])
