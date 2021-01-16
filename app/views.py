@@ -228,6 +228,15 @@ def display_project(project_name):
         project_description=config_result["project_description"],
     )
 
+@app.route("/admin/experiments/new", methods=["GET","POST"])
+def newexp():
+    args = dict(request.form)
+    print(args)
+    if "xmlfile" not in list(args.keys()):
+        return render_template("experiment-add-splash.html")
+    else:
+        return render_template("ui-general.html")
+
 @app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
     params["project_id"] = project_id
