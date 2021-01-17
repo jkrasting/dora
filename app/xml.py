@@ -1,24 +1,52 @@
 #!/usr/bin/env python
 
-import hashlib
-import fnmatch
-import os, sys
-#import webtoolbox, cgitb
+""" Light-weight XML Parser for FRE XMLs """
+
+import os
+import sys
+
 from lxml import etree as ET
 
-from icecream import ic
 
-def fix_path(x):
-    if len(x) > 0:
-        x = x.replace("//","/")
-        x = x+"/" if x[-1] != "/" else x
-    return x
+def fix_path(path):
+    """Formats path-like strings to ensure directories end with a
+    trailing slash and double slashes are removed
 
-def resolve_paths(x,properties,**kwargs):
-    local_properties = {k:v for (k,v) in kwargs.items() if v is not None}
-    local_properties = {**properties,**x.attrib,**local_properties}
+    Parameters
+    ----------
+    path : str, path-like
+        Path string to reformat
 
-    paths = {child.tag:child.text for child in x if isinstance(child.tag,str)}
+    Returns
+    -------
+    str
+        Reformatted path string
+    """
+    if len(path) > 0:
+        path = path.replace("//", "/")
+        path = path + "/" if path[-1] != "/" else path
+    return path
+
+
+def resolve_paths(path, properties, **kwargs):
+    """Resolved abstracted properties in path strings
+
+    Parameters
+    ----------
+    path : lxml.etree._Element
+        Path element from XML
+    properties : dict
+        Dictionary of property key,value pairs
+
+    Returns
+    -------
+    dict
+        Dictionary of resolved paths
+    """
+    local_properties = {k: v for (k, v) in kwargs.items() if v is not None}
+    local_properties = {**properties, **path.attrib, **local_properties}
+
+    paths = {child.tag: child.text for child in path if isinstance(child.tag, str)}
     if "scripts" not in paths.keys():
         paths["scripts"] = "$(rootDir)/$(name)/$(platform)-$(target)/scripts"
     if "analysis" not in paths.keys():
@@ -28,62 +56,60 @@ def resolve_paths(x,properties,**kwargs):
     if "postProcess" not in paths.keys():
         paths["postProcess"] = ""
 
-    return {k:fix_path(sub_properties(v,local_properties)) for (k,v) in paths.items()}
+    return {
+        k: fix_path(sub_properties(v, local_properties)) for (k, v) in paths.items()
+    }
 
-def sub_properties(x,properties,**kwargs):
-    local_properties = {k:v for (k,v) in kwargs.items() if v is not None}
-    local_properties = {**properties,**local_properties}
+
+def sub_properties(strobj, properties, **kwargs):
+    """Substitues XML properties in a string
+
+    Parameters
+    ----------
+    strobj : str
+        String containing unresolved properties
+    properties : dict
+        Dictionary of key,value properties from XML
+
+    Returns
+    -------
+    str
+        Resolved string
+    """
+    local_properties = {k: v for (k, v) in kwargs.items() if v is not None}
+    local_properties = {**properties, **local_properties}
     count = 1
     while count > 0:
         count = 0
-        for (k,v) in local_properties.items():
-            if f"${k}" in x or f"$({k})" in x:
-                x = x.replace(f"$({k})",v)
-                x = x.replace(f"${k}",v)
+        for (key, value) in local_properties.items():
+            if f"${key}" in strobj or f"$({key})" in strobj:
+                strobj = strobj.replace(f"$({key})", value)
+                strobj = strobj.replace(f"${key}", value)
                 count += 1
-    return x
+    return strobj
 
-def frelist(
-    xmlfile,
-    result="experiments",
-    experiment="",
-    platform="",
-    target="",
-    user=None,
-    gfdl=False,
-):
-    """Light-weight parser for FRE (Flexibile Runtime Environment) Experiments
+
+def parse_xml(xmlfile, user=None):
+    """Parses a Flexible Runtime Environment (FRE) XML and returns
+    a experiment names, platforms, and path locations
 
     Parameters
     ----------
     xmlfile : str, path-like
-        [description], by default None
-    result : str, optional
-        [description], by default "experiments"
-    experiment : str, optional
-        [description], by default ""
-    platform : str, optional
-        [description], by default ""
-    target : str, optional
-        [description], by default ""
+        Path to XML file
     user : str, optional
-        [description], by default ""
-    gfdl : bool, optional
-        [description], by default False
+        Specify a user name, otherwise `logname` is extracted from,
+        the environment variable set, by default None
 
     Returns
     -------
-    [type]
-        [description]
+    tuple
+        (list of experiment names, list of platforms, dictionary of paths)
     """
-    if gfdl is True:
-        platform = "gfdl." + "-".join(platform.split("."))
-    _result = []
-    tree = ET.parse(xmlfile.replace("/home/", "/gfdlhome/"))
+    # Light-weight parser for FRE (Flexibile Runtime Environment) Experiments
+    tree = ET.parse(xmlfile)
     tree.xinclude()
-    ic(tree)
     root = tree.getroot()
-    ic(root)
 
     # resolve xml properties
     properties = {}
@@ -91,7 +117,7 @@ def frelist(
         properties[_property.attrib["name"]] = _property.attrib["value"]
 
     # get username
-    properties["USER"] = os.environ['LOGNAME'] if user is None else user
+    properties["USER"] = os.environ["LOGNAME"] if user is None else user
     properties["ARCHIVE"] = "/archive/$USER"
     properties["archiveDir"] = "$(archive)"
     properties["rootDir"] = "/home/$(USER)/$(stem)"
@@ -103,33 +129,65 @@ def frelist(
     properties["DEV"] = "/lustre/f2/dev"
 
     # set archive property
-    #properties["archiveDir"] = "$(_GFDL_ARCHIVE)"
+    # properties["archiveDir"] = "$(_GFDL_ARCHIVE)"
     properties["_GFDL_ARCHIVE"] = f"/archive/{properties['USER']}"
     properties["_GAEA_ARCHIVE"] = f"{properties['CTMP']}/{properties['USER']}"
 
     # define FRE targets
-    targets = ["prod","repro","debug"]
+    targets = ["prod", "repro", "debug"]
+    targets = sorted(targets + [f"{x}-openmp" for x in targets])
 
     # get list of experiments
-    exps = [sub_properties(x.attrib["name"],properties) for x in root if x.tag == "experiment"]
-    ic(exps)
+    exps = [
+        sub_properties(x.attrib["name"], properties)
+        for x in root
+        if x.tag == "experiment"
+    ]
 
     # get list of platforms
-    platforms = [sub_properties(x.attrib["name"],properties) for x in root.iter("platform")]
-    ic(platforms)
+    platforms = [
+        sub_properties(x.attrib["name"], properties) for x in root.iter("platform")
+    ]
 
     # directories
     directories = {}
-    for x in root.iter("platform"):
-        _directories = {x.attrib["name"]:resolve_paths(i,properties,platform=x.attrib["name"]) for i in x.iter("directory")}
-        _directories = {k:{i:fix_path(sub_properties(j,v)) for (i,j) in v.items()} for (k,v) in _directories.items()}
-        directories = {**directories,**_directories}
+    for platform in root.iter("platform"):
+        _directories = {
+            platform.attrib["name"]: resolve_paths(
+                i, properties, platform=platform.attrib["name"]
+            )
+            for i in platform.iter("directory")
+        }
+        _directories = {
+            k: {i: fix_path(sub_properties(j, v)) for (i, j) in v.items()}
+            for (k, v) in _directories.items()
+        }
+        directories = {**directories, **_directories}
 
-    paths = {}
+    # iterate of platform/target combos
+    resolved_paths = {}
     for target in targets:
-        _paths = {f"{k}-{target}":{i:sub_properties(j,{},target=target) for (i,j) in v.items()} for (k,v) in directories.items()}
+        _paths = {
+            f"{k}-{target}": {
+                i: sub_properties(j, {}, target=target) for (i, j) in v.items()
+            }
+            for (k, v) in directories.items()
+        }
+        resolved_paths = {**resolved_paths, **_paths}
+
+    # iterate over experiments
+    resolved_paths = {
+        x: {
+            k: {i: fix_path(sub_properties(j, {}, name=x)) for (i, j) in v.items()}
+            for (k, v) in resolved_paths.items()
+        }
+        for x in exps
+    }
+
+    return (exps, platforms, resolved_paths)
+
 
 if __name__ == "__main__":
-    xmlfile = sys.argv[1]
+    xmlfile_ = sys.argv[1]
 
-    frelist(xmlfile)
+    A = parse_xml(xmlfile_)
