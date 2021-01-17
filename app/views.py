@@ -11,6 +11,7 @@ import sqlite3
 import pymysql
 import os
 import yaml
+import lxml
 
 from flask import (
     Flask, 
@@ -32,6 +33,8 @@ from flask_login import (
 from jinja2 import TemplateNotFound
 
 from datetime import datetime
+
+from .xml import parse_xml
 
 from .db import get_db
 
@@ -235,7 +238,21 @@ def newexp():
     if "xmlfile" not in list(args.keys()):
         return render_template("experiment-add-splash.html")
     else:
-        return render_template("ui-general.html")
+        exps, platforms, paths = parse_xml(args["xmlfile"])
+        exps = sorted(exps)
+        platforms = sorted([x for x in platforms if "gfdl" not in x])
+        targets = ["prod","repro","debug"]
+        targets = sorted(targets + [f"{x}-openmp" for x in targets])
+        if not all(item in list(args.keys()) for item in ["experiment","platform","target"]):
+            return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms)
+        else:
+            platform_target = f"{args['platform']}-{args['target']}"
+            gfdlplatform = "gfdl." + platform_target.replace(".","-")
+            directories = paths[args["experiment"]][platform_target]
+            gfdldirectories = paths[args["experiment"]][gfdlplatform]
+            print(directories)
+            print(gfdldirectories)
+            return render_template("ui-general.html")
 
 @app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):

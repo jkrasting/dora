@@ -1,0 +1,188 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- pace-progress -->
+  <link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+  <!-- adminlte-->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}  
+
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Add a New Experiment</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Start</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <form action="/admin/experiments/new" method="POST">
+      <input type="hidden" id="xmlfile" name="xmlfile" value="{{xmlfile}}">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Select Experiment and Platform</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+
+      <h3></h3>
+      <div class="col-sm-8">
+      <p>Processing XML: {{xmlfile}}</p>
+
+      
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Experiment</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <!-- radio -->
+                      <div class="form-group">
+                        {% for exp in exps %}
+                        <div class="custom-control custom-radio">
+                          <input class="custom-control-input" type="radio" id="experiment{{loop.index}}" name="experiment" value={{exp}}>
+                          <label for="experiment{{loop.index}}" class="custom-control-label">{{exp}}</label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Platform</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <!-- radio -->
+                      <div class="form-group">
+                        {% for platform in platforms %}
+                        <div class="custom-control custom-radio">
+                          <input class="custom-control-input" type="radio" id="platform{{loop.index}}" name="platform" value={{platform}}>
+                          <label for="platform{{loop.index}}" class="custom-control-label">{{platform}}</label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Target</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-6">
+                      <!-- radio -->
+                      <div class="form-group">
+                        {% for target in targets %}
+                        <div class="custom-control custom-radio">
+                          <input class="custom-control-input" type="radio" id="target{{loop.index}}" name="target" value={{target}}>
+                          <label for="target{{loop.index}}" class="custom-control-label">{{target}}</label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+
+      <!--  
+
+      if P is not None:
+        print('<p>You are adding an experiment to the <b>'+P.project_name+'</b> Project.
+        if len(authorized) > 2:
+          print('You are also authorized to add this experiment to the following projects:<br>
+          for p in authorized:
+            if p.project_id == 1:
+              print('<input type="hidden" name="projectid" value="'+str(p.project_id)+'">
+            else:
+              if p.project_id == P.project_id:
+                checked = 'checked="checked"'
+              else:
+                checked = ''
+              print('<input type="checkbox" name="projectid" value="'+str(p.project_id)+'" '+checked+'> '+p.project_name+'<br>
+        else:
+          print('<input type="hidden" name="projectid" value="'+str(P.project_id)+'">
+  
+      f.send()
+      webtoolbox.formClose()
+      exit(0)
+        -->    
+
+        </div>
+        <!-- /.card-body -->
+        <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        </form>
+        <!-- /.card-footer-->
+      </div>
+      <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- pace-progress -->
+  <script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}
