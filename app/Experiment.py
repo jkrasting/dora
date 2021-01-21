@@ -35,6 +35,7 @@ class Experiment:
         "refresh",
         "pathLog",
         "status",
+        "owner",
     ]
 
     def __init__(self, input, db=None):
@@ -55,6 +56,7 @@ class Experiment:
             cursor.execute(sql)
             result = cursor.fetchone()
             self.__dict__ = {**self.__dict__, **result}
+            cursor.close()
 
         elif id[0:5] == "exper":
             import UseCurator
@@ -102,6 +104,39 @@ class Experiment:
         }
         self.__dict__ = {**self.__dict__, **modifications}
 
+    def insert(self, db):
+        attrs = self.__dict__
+        attrs = {k: v for (k, v) in attrs.items() if v is not None}
+        del attrs["id"]
+        del attrs["source"]
+        keys, values = list(zip(*attrs.items()))
+        keys = str(tuple([str(x) for x in keys])).replace("'", "")
+        values = str(tuple([str(x) for x in values]))
+        sql = f"insert into master {keys} values {values}"
+        db = get_db() if db is None else db
+        cursor = db.cursor()
+        cursor.execute(sql)
+        db.commit()
+        cursor.execute("SELECT @@IDENTITY")
+        result = cursor.fetchone()
+        cursor.close()
+        return result["@@IDENTITY"]
+
+    def update(self, db):
+        attrs = self.__dict__
+        idnum = attrs["id"]
+        attrs = {k: v for (k, v) in attrs.items() if v is not None}
+        del attrs["id"]
+        del attrs["source"]
+        pairs = [f"{k}='{str(v)}'" for (k, v) in attrs.items()]
+        pairs = str(", ").join(pairs)
+        sql = f"update master set {pairs} where id='{idnum}'"
+        db = get_db() if db is None else db
+        cursor = db.cursor()
+        cursor.execute(sql)
+        db.commit()
+        cursor.close()
+
     def to_dict(self):
         return self.__dict__
 
@@ -114,5 +149,7 @@ if __name__ == "__main__":
 
     A = Experiment(int(sys.argv[1]), db=db)
     print(A)
+    # A.modify(userName="Da Joker")
+    # A.update(db)
 
     db.close()
