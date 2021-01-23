@@ -35,6 +35,7 @@ from jinja2 import TemplateNotFound
 from datetime import datetime
 
 from .xml import parse_xml
+from .Experiment import Experiment
 
 from .db import get_db
 
@@ -61,6 +62,13 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 
 login_manager = LoginManager()
 login_manager.init_app(app)
+
+model_types = sorted(['CM4', 'OM4', 'AM4', 'CM4p5', 'ESM4p5', 'ESM4', 'ESM2G', 
+               'OM4p5', 'CM3', 'LM3', 'SPEAR', 'SM4', 'CMIP6-CM4', 'LM4', 
+               'OM4p125', 'CMIP6-ESM4', 'C4MIP-ESM4'])
+
+cmip6_mips = sorted(['AerChemMIP','CDRMIP','C4MIP','CFMIP','DECK','DAMIP',
+                     'FAFMIP','GMMIP','LUMIP','OMIP','RFMIP','SIMIP','ScenarioMIP'])
 
 #try:
 #    init_db_command()
@@ -234,25 +242,36 @@ def display_project(project_name):
 @app.route("/admin/experiments/new", methods=["GET","POST"])
 def newexp():
     args = dict(request.form)
-    print(args)
     if "xmlfile" not in list(args.keys()):
         return render_template("experiment-add-splash.html")
     else:
-        exps, platforms, paths = parse_xml(args["xmlfile"])
+        exps, platforms, paths = parse_xml(args["xmlfile"],user=args["user"])
         exps = sorted(exps)
         platforms = sorted([x for x in platforms if "gfdl" not in x])
         targets = ["prod","repro","debug"]
         targets = sorted(targets + [f"{x}-openmp" for x in targets])
-        if not all(item in list(args.keys()) for item in ["experiment","platform","target"]):
-            return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms)
+        if not all(item in list(args.keys()) for item in ["experiment","platform","target","user"]):
+            return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms,user=args["user"])
         else:
             platform_target = f"{args['platform']}-{args['target']}"
             gfdlplatform = "gfdl." + platform_target.replace(".","-")
             directories = paths[args["experiment"]][platform_target]
             gfdldirectories = paths[args["experiment"]][gfdlplatform]
-            print(directories)
-            print(gfdldirectories)
-            return render_template("ui-general.html")
+            db = get_db()
+            cursor = db.cursor()
+            sql = "SELECT project_id,project_name from projects;"
+            cursor.execute(sql)
+            projects = cursor.fetchall()
+            projects = [tuple(x.values()) for x in projects]
+            return render_template("experiment-add-review.html",
+                xmlfile=args["xmlfile"],
+                directories=directories,
+                gfdldirectories=gfdldirectories,
+                experiment=args["experiment"],
+                model_types=model_types,
+                cmip6_mips=cmip6_mips,
+                user=args["user"],
+                projects=projects)
 
 @app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
@@ -280,11 +299,32 @@ def project(project_id,params={"project_description":"","project_name":"","proje
     content['project_config'] = params["project_config"]
     return render_template("project.html", **content)
 
+@app.route("/admin/experiment_update.html", methods=["POST"])
+def experiment_update():
+    args = dict(request.form)
+    projects = request.form.getlist("projects")
+    experiment = Experiment(args)
+    db = get_db()
+    if experiment.id is None:
+        _id = experiment.insert(db)
+    for project in projects:
+        create_project_map(project)
+        associate_with_project(_id,project)
+    return render_template("success.html", msg=f"New experiment added as ID#: {_id}")
+
+def associate_with_project(idnum,project):
+    sql = f"INSERT INTO {project}_map (master_id) SELECT '{idnum}' "+\
+          f"WHERE NOT EXISTS (SELECT * FROM {project}_map "+\
+          f"WHERE master_id='{idnum}')"
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    db.commit()
+    cursor.close()
+
 @app.route("/admin/project_update.html", methods=["POST"])
 def project_update():
     args = dict(request.form)
-
-    print("ARGS: ",args)
 
     db = get_db()
     cursor = db.cursor()
@@ -305,8 +345,16 @@ def project_update():
     sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
     cursor.execute(sql)
     db.commit()
+    cursor.close()
 
-    sql = f"CREATE TABLE IF NOT EXISTS `{args['project_name']}_map` "+\
+    create_project_map(args['project_name'])
+
+    return render_template("success.html", msg="Updated project successfully.")
+
+def create_project_map(project_name):
+    db = get_db()
+    cursor = db.cursor()
+    sql = f"CREATE TABLE IF NOT EXISTS `{project_name}_map` "+\
            "(`id` int(11) NOT NULL AUTO_INCREMENT COMMENT "+\
            "'Local project id', `master_id` int(11) NOT NULL "+\
            "COMMENT 'Master project id', PRIMARY KEY (`id`), "+\
@@ -314,10 +362,7 @@ def project_update():
            "ENGINE=InnoDB DEFAULT CHARSET=latin1"
     cursor.execute(sql)
     db.commit()
-
     cursor.close()
-    return render_template("success.html", msg="Updated project successfully.")
-
 
 @app.route("/scalar-diags.html")
 def scalardiags():

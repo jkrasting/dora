@@ -92,15 +92,29 @@
       </div>
 
       <div class="col-sm-10">
-      <p>To get started, please provide a path to an xml file:</p>
 
           <form action="/admin/experiments/new" method="POST">
+
+                <label for="xmlfile">To get started, please provide a path to an xml file:</label>
                 <div class="input-group mb-3">
                   <div class="input-group-prepend">
                     <span class="input-group-text"><i class="fas fa-file-code"></i></span>
                   </div>
-                  <input type="text" class="form-control" name="xmlfile" placeholder="e.g. /home/oar.gfdl.cmip6/ncrc/xml/ESM4/production/ESM4_historical_D1.xml">
+                  <input type="text" class="form-control" id="xmlfile" name="xmlfile" placeholder="e.g. /home/oar.gfdl.cmip6/ncrc/xml/ESM4/production/ESM4_historical_D1.xml">
                 </div>
+
+                <label for="user">User Name of Experiment Owner:</label>
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text"><i class="fas fa-user"></i></span>
+                  </div>
+                  <input type="text" class="form-control" id="user" name="user" placeholder="First.Last">
+                </div>
+
+
+
+
+
 
       </div>
       <!--  
