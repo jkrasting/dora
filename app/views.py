@@ -305,6 +305,16 @@ def project_update():
     sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
     cursor.execute(sql)
     db.commit()
+
+    sql = f"CREATE TABLE IF NOT EXISTS `{args['project_name']}_map` "+\
+           "(`id` int(11) NOT NULL AUTO_INCREMENT COMMENT "+\
+           "'Local project id', `master_id` int(11) NOT NULL "+\
+           "COMMENT 'Master project id', PRIMARY KEY (`id`), "+\
+           "UNIQUE KEY `id` (`id`), UNIQUE KEY `master_id` (`master_id`)) "+\
+           "ENGINE=InnoDB DEFAULT CHARSET=latin1"
+    cursor.execute(sql)
+    db.commit()
+
     cursor.close()
     return render_template("success.html", msg="Updated project successfully.")
 
