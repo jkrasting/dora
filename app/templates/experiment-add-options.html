@@ -44,6 +44,7 @@
 
       <form action="/admin/experiments/new" method="POST">
       <input type="hidden" id="xmlfile" name="xmlfile" value="{{xmlfile}}">
+      <input type="hidden" id="user" name="user" value="{{user}}">
 
       <!-- Default box -->
       <div class="card">
@@ -65,7 +66,6 @@
       <div class="col-sm-8">
       <p>Processing XML: {{xmlfile}}</p>
 
-      
             <div class="card card-secondary">
               <div class="card-header">
                 <h3 class="card-title">Experiment</h3>

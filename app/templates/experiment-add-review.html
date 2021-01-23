@@ -1,0 +1,223 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- pace-progress -->
+  <link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+  <!-- adminlte-->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}  
+
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Add a New Experiment</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">Start</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+      <form action="/admin/experiment_update.html" method="POST">
+
+      <input type="hidden" id="pathXML" name="pathXML" value="{{xmlfile}}">
+      <input type="hidden" id="userName" name="userName" value="{{user}}">
+
+      <!-- Default box -->
+      <div class="card">
+        <div class="card-header">
+          <h3 class="card-title">Review Experiment Details</h3>
+
+          <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+              <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+
+      <h3></h3>
+      <div class="col-sm-10">
+      
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Experiment Metadata</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-8">
+                      <!-- radio -->
+                      <div class="form-group">
+                        <label for="expName">Experiment Name:</label>
+                        <input type="text" class="form-control form-control-sm" size=35 id="expName" name="expName" value="{{experiment}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="experiment">Experiment Type:</label>
+                        <input type="text" class="form-control form-control-sm" size=35 id="expType" name="expType" placeholder="e.g. piControl, 2kControl, historical, idealized ...">
+                      </div>
+                      <div class="form-group">
+                        <label>Model Type</label>
+                        <select class="form-control form-control-sm" name="modelType">
+                          {% for mtype in model_types %}
+                          <option>{{mtype}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Experiment Paths</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-8">
+                      <!-- radio -->
+                      <div class="form-group">
+                        <label for="pathScript">Run Script:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathScript" name="pathScript" value="{{directories['scripts']}}{{experiment}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="patXML">XML Path:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathXML" name="pathXML" value="{{xmlfile}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="pathPP">Post-processing Path:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathPP" name="pathPP" value="{{gfdldirectories['postProcess']}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="pathAnalysis">Analysis Figures Path:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathAnalysis" name="pathAnalysis" value="{{gfdldirectories['analysis']}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="pathDB">Scalar Diagnostic Database Path:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathDB" name="pathDB" value="{{gfdldirectories['scripts'] | replace('/scripts/','/db/')}}">
+                      </div>
+                      <div class="form-group">
+                        <label for="pathLog">Log File Path: (optional)</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathLog" name="pathLog" value="">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Optional Parameters</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-8">
+                      <div class="form-group">
+                        <label for="displayName">Alternate Display Name: (optional)</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="displayName" name="displayName" placeholder="Override the real experiment name with an alias (for display purposes)">
+                      </div>
+                      <div class="form-group">
+                        <label>Associated CMIP6 MIP (optional)</label>
+                        <select class="form-control form-control-sm" name="expMIP">
+                          <option></option>
+                          {% for mip in cmip6_mips %}
+                          <option>{{mip}}</option>
+                          {% endfor %}
+                        </select>
+                      </div>
+                      <div class="form-group">
+                        <label for="expLabels">Experiment Keywords:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="expLabels" name="expLabels" placeholder="Comma-separated list of keywords for searching">
+                      </div>
+                      <div class="form-group">
+                        <label for="expLabels">Curator Experiment ID:</label>
+                        <input type="text" class="form-control form-control-sm" size=75 id="urlCurator" name="urlCurator" placeholder="Curator database ID, e.g. exper_xxxxxxxx">
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+        
+            <div class="card card-secondary">
+              <div class="card-header">
+                <h3 class="card-title">Project Mapping</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                  <div class="row">
+                    <div class="col-sm-8">
+                      <div class="form-group">
+                        {% for proj in projects %}
+                        <div class="custom-control custom-checkbox">
+                          <input class="custom-control-input" type="checkbox" id="customCheckbox{{loop.index}}" name="projects" value="{{proj[1]}}">
+                          <label for="customCheckbox{{loop.index}}" class="custom-control-label">{{proj[1]}}</label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+           </div>
+
+        <!-- /.card-body -->
+        <div class="card-footer">
+                  <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+        </form>
+        <!-- /.card-footer-->
+      </div>
+      <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- pace-progress -->
+  <script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}

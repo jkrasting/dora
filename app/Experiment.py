@@ -3,7 +3,7 @@
 import os
 import pymysql
 import sys
-from db import get_db, close_db
+from .db import get_db, close_db
 
 
 def open_db():
@@ -107,8 +107,15 @@ class Experiment:
     def insert(self, db):
         attrs = self.__dict__
         attrs = {k: v for (k, v) in attrs.items() if v is not None}
-        del attrs["id"]
-        del attrs["source"]
+        attrs = {k: v for (k, v) in attrs.items() if v != ""}
+
+        if "owner" not in list(attrs.keys()):
+            attrs["owner"] = attrs["userName"]
+        if "id" in list(attrs.keys()):
+            del attrs["id"]
+        if "source" in list(attrs.keys()):
+            del attrs["source"]
+
         keys, values = list(zip(*attrs.items()))
         keys = str(tuple([str(x) for x in keys])).replace("'", "")
         values = str(tuple([str(x) for x in values]))
@@ -126,8 +133,11 @@ class Experiment:
         attrs = self.__dict__
         idnum = attrs["id"]
         attrs = {k: v for (k, v) in attrs.items() if v is not None}
-        del attrs["id"]
-        del attrs["source"]
+        attrs = {k: v for (k, v) in attrs.items() if v != ""}
+        if "id" in list(attrs.keys()):
+            del attrs["id"]
+        if "source" in list(attrs.keys()):
+            del attrs["source"]
         pairs = [f"{k}='{str(v)}'" for (k, v) in attrs.items()]
         pairs = str(", ").join(pairs)
         sql = f"update master set {pairs} where id='{idnum}'"
