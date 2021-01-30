@@ -41,24 +41,28 @@ class Experiment:
     def __init__(self, input, db=None):
         self.__dict__ = {k: None for k in self.expected_keys}
 
+        def _fetch_from_master(master_id, db=None):
+            db = get_db() if db is None else db
+            cursor = db.cursor()
+            sql = f"select * from master where id='{master_id}'"
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            cursor.close()
+            return result
+
         if isinstance(input, dict):
             self.id = None
             self.source = "sql"
             dict_items = {k: v for (k, v) in input.items() if k in self.expected_keys}
             self.__dict__ = {**self.__dict__, **dict_items}
 
-        elif isinstance(input, int):
+        elif isinstance(input, int) or input.isnumeric():
             self.id = str(input)
             self.source = "sql"
-            db = get_db() if db is None else db
-            cursor = db.cursor()
-            sql = f"select * from master where id='{self.id}'"
-            cursor.execute(sql)
-            result = cursor.fetchone()
+            result = _fetch_from_master(self.id, db=db)
             self.__dict__ = {**self.__dict__, **result}
-            cursor.close()
 
-        elif id[0:5] == "exper":
+        elif input[0:5] == "exper":
             import UseCurator
 
             # -- Curator tripleIDs begin with the 'exper' string
@@ -76,7 +80,7 @@ class Experiment:
             self.pathDB = self.pathDB.replace("/archive/", "/home/")
             self.source = "sqlite"
 
-        elif id[0] == "/":
+        elif input[0] == "/":
             id = fixDirPath(id)
             self.source = "sqlite"
             self.expName = id
@@ -88,6 +92,22 @@ class Experiment:
             self.pathAnalysis = id
             self.urlCurator = ""
             self.pathDB = self.pathDB.replace("/home/", "/gfdlhome/")
+
+        elif len(input.split("-")) == 2:
+            split_input = input.split("-")
+            db = get_db() if db is None else db
+            cursor = db.cursor()
+            sql = f"SELECT master_id from {split_input[0]}_map where experiment_id='{split_input[1]}'"
+            cursor.execute(sql)
+            result = cursor.fetchone()
+            print("RES", result)
+            master_id = result["master_id"]
+            cursor.close()
+
+            self.id = str(input)
+            self.source = "sql"
+            result = _fetch_from_master(master_id, db=db)
+            self.__dict__ = {**self.__dict__, **result}
 
         else:
             raise ValueError(
