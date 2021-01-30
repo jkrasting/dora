@@ -214,12 +214,16 @@ def display_project(project_name):
         table_data = {}
         table_data["title"] = k
         if "remap_sql" in list(config[k].keys()):
-            sql_ = f"SELECT A.*,B.experiment_id from master A join project_map B on A.id = B.master_id " + \
-                   f"where A.id in (select B.master_id from project_map where B.project_id=(" + \
-                   f"select project_id from projects where project_name='{project_name}')) " + \
-                   f"{config[k]['remap_sql']} order by id DESC;"
+            #sql_ = f"SELECT A.*,B.experiment_id from master A join project_map B on A.id = B.master_id " + \
+            #       f"where A.id in (select B.master_id from project_map where B.project_id=(" + \
+            #       f"select project_id from projects where project_name='{project_name}')) " + \
+            #       f"{config[k]['remap_sql']} order by id DESC;"
+
+            sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id order by B.experiment_id DESC"
+            print(sql_)
             cursor.execute(sql_)
             table_data["experiments"] = cursor.fetchall()
+            print(table_data)
             for x in table_data["experiments"]:
                 x["id"] = f"{project_name}-{x['experiment_id']}"
         elif "mod_sql" in list(config[k].keys()):
@@ -232,12 +236,16 @@ def display_project(project_name):
             return render_template('page-500.html',msg="Malformed SQL query in project config.")
         tables.append(table_data)
     cursor.close
-    tables.append(tables[0])
     return render_template("view-table.html", 
         tables=tables, 
         project_name=project_name,
         project_description=config_result["project_description"],
     )
+
+@app.route("/experiment/<experiment_id>")
+def view_experiment(experiment_id):
+    experiment = Experiment(experiment_id)
+    return render_template("experiment_view.html",experiment=experiment)
 
 @app.route("/admin/experiments/new", methods=["GET","POST"])
 def newexp():
@@ -355,10 +363,10 @@ def create_project_map(project_name):
     db = get_db()
     cursor = db.cursor()
     sql = f"CREATE TABLE IF NOT EXISTS `{project_name}_map` "+\
-           "(`id` int(11) NOT NULL AUTO_INCREMENT COMMENT "+\
+           "(`experiment_id` int(11) NOT NULL AUTO_INCREMENT COMMENT "+\
            "'Local project id', `master_id` int(11) NOT NULL "+\
-           "COMMENT 'Master project id', PRIMARY KEY (`id`), "+\
-           "UNIQUE KEY `id` (`id`), UNIQUE KEY `master_id` (`master_id`)) "+\
+           "COMMENT 'Master project id', PRIMARY KEY (`experiment_id`), "+\
+           "UNIQUE KEY `experiment_id` (`experiment_id`), UNIQUE KEY `master_id` (`master_id`)) "+\
            "ENGINE=InnoDB DEFAULT CHARSET=latin1"
     cursor.execute(sql)
     db.commit()
