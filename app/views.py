@@ -18,7 +18,8 @@ from flask import (
     Response,
     redirect, 
     render_template,
-    request, 
+    request,
+    send_from_directory, 
     url_for
 )
 
@@ -242,10 +243,23 @@ def display_project(project_name):
         project_description=config_result["project_description"],
     )
 
+@app.route("/cvdp/<project_id>")
+def view_cvdp_root(project_id):
+    path = "/cvdp_path"
+    return redirect(f"/cvdp/{project_id}/index.html",302)
+
+@app.route("/cvdp/<project_id>/<path:filename>")
+def view_cvdp(project_id,filename):
+    path = "/cvdp_path"
+    if not os.path.exists(path+filename):
+        return render_template('page-404.html'), 404
+    else:
+        return send_from_directory(path,filename)
+
 @app.route("/experiment/<experiment_id>")
 def view_experiment(experiment_id):
     experiment = Experiment(experiment_id)
-    return render_template("experiment_view.html",experiment=experiment)
+    return render_template("experiment_view.html",experiment=experiment,experiment_id=experiment_id)
 
 @app.route("/admin/experiments/new", methods=["GET","POST"])
 def newexp():
