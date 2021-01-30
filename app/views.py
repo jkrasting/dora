@@ -90,6 +90,13 @@ def stream_template(template_name, **context):
     rv.enable_buffering(5)
     return rv
 
+@app.context_processor
+def get_global_vars():
+    return {"model_types":model_types,
+            "cmip6_mips":cmip6_mips,
+            "projects":list_projects()
+    }
+
 # App main route + generic routing
 @app.route('/', defaults={'path': 'index.html'}, methods=["GET"])
 @app.route('/<path>', methods=['GET'])
@@ -210,6 +217,8 @@ def display_project(project_name):
     config_result = cursor.fetchone()
     if config_result["project_config"] != "":
         config = yaml.load(config_result["project_config"])
+    else:
+        config = {'All Experiments': {'remap_sql': ''}}
     tables = []
     for k in list(config.keys()):
         table_data = {}
@@ -221,10 +230,8 @@ def display_project(project_name):
             #       f"{config[k]['remap_sql']} order by id DESC;"
 
             sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id order by B.experiment_id DESC"
-            print(sql_)
             cursor.execute(sql_)
             table_data["experiments"] = cursor.fetchall()
-            print(table_data)
             for x in table_data["experiments"]:
                 x["id"] = f"{project_name}-{x['experiment_id']}"
         elif "mod_sql" in list(config[k].keys()):
@@ -261,39 +268,55 @@ def view_experiment(experiment_id):
     experiment = Experiment(experiment_id)
     return render_template("experiment_view.html",experiment=experiment,experiment_id=experiment_id)
 
-@app.route("/admin/experiments/new", methods=["GET","POST"])
-def newexp():
-    args = dict(request.form)
-    if "xmlfile" not in list(args.keys()):
-        return render_template("experiment-add-splash.html")
-    else:
-        exps, platforms, paths = parse_xml(args["xmlfile"],user=args["user"])
-        exps = sorted(exps)
-        platforms = sorted([x for x in platforms if "gfdl" not in x])
-        targets = ["prod","repro","debug"]
-        targets = sorted(targets + [f"{x}-openmp" for x in targets])
-        if not all(item in list(args.keys()) for item in ["experiment","platform","target","user"]):
-            return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms,user=args["user"])
+@app.route("/admin/experiment/<experiment_id>", methods=["GET","POST"])
+def expadmin(experiment_id=None):
+    if experiment_id == "new":
+        args = dict(request.form)
+        if "xmlfile" not in list(args.keys()):
+            return render_template("experiment-add-splash.html")
         else:
-            platform_target = f"{args['platform']}-{args['target']}"
-            gfdlplatform = "gfdl." + platform_target.replace(".","-")
-            directories = paths[args["experiment"]][platform_target]
-            gfdldirectories = paths[args["experiment"]][gfdlplatform]
-            db = get_db()
-            cursor = db.cursor()
-            sql = "SELECT project_id,project_name from projects;"
-            cursor.execute(sql)
-            projects = cursor.fetchall()
-            projects = [tuple(x.values()) for x in projects]
-            return render_template("experiment-add-review.html",
-                xmlfile=args["xmlfile"],
-                directories=directories,
-                gfdldirectories=gfdldirectories,
-                experiment=args["experiment"],
-                model_types=model_types,
-                cmip6_mips=cmip6_mips,
-                user=args["user"],
-                projects=projects)
+            exps, platforms, paths = parse_xml(args["xmlfile"],user=args["user"])
+            exps = sorted(exps)
+            platforms = sorted([x for x in platforms if "gfdl" not in x])
+            targets = ["prod","repro","debug"]
+            targets = sorted(targets + [f"{x}-openmp" for x in targets])
+            if not all(item in list(args.keys()) for item in ["experiment","platform","target","user"]):
+                return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms,user=args["user"])
+            else:
+                platform_target = f"{args['platform']}-{args['target']}"
+                gfdlplatform = "gfdl." + platform_target.replace(".","-")
+                directories = paths[args["experiment"]][platform_target]
+                gfdldirectories = paths[args["experiment"]][gfdlplatform]
+                projects = list_projects()
+                expdict = {}
+                expdict["id"] = "new"
+                expdict["userName"] = args["user"]
+                expdict["pathXML"] = args["xmlfile"]
+                expdict["pathScript"] = directories["scripts"]+args["experiment"]
+                expdict["expName"] = args["experiment"]
+                expdict["pathPP"] = gfdldirectories["postProcess"]
+                expdict["pathAnalysis"] = gfdldirectories["analysis"]
+                expdict["pathDB"] = gfdldirectories["scripts"].replace("/scripts","/db")
+                expobj = Experiment(expdict)
+                _ = [expobj.remove_key(x) for x in expobj.list_keys() if expobj.value(x) is None]
+                print(expobj)
+                return render_template("experiment-review.html",
+                    expobj=expobj)
+    else:
+        expobj = Experiment(experiment_id)
+        projects = list_projects()
+        print(expobj)
+        return render_template("experiment-review.html",
+            expobj=expobj)
+
+def list_projects():
+    db = get_db()
+    cursor = db.cursor()
+    sql = "SELECT project_id,project_name from projects;"
+    cursor.execute(sql)
+    projects = cursor.fetchall()
+    return [tuple(x.values()) for x in projects]
+
 
 @app.route("/admin/projects/<project_id>")
 def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
@@ -327,12 +350,15 @@ def experiment_update():
     projects = request.form.getlist("projects")
     experiment = Experiment(args)
     db = get_db()
-    if experiment.id is None:
+    if experiment.id == "new":
         _id = experiment.insert(db)
-    for project in projects:
-        create_project_map(project)
-        associate_with_project(_id,project)
-    return render_template("success.html", msg=f"New experiment added as ID#: {_id}")
+        for project in projects:
+            create_project_map(project)
+            associate_with_project(_id,project)
+        return render_template("success.html", msg=f"New experiment added as ID#: {_id}")
+    else:
+        experiment.update(db)
+        return render_template("success.html", msg=f"Updated experiment {experiment.id}")
 
 def associate_with_project(idnum,project):
     sql = f"INSERT INTO {project}_map (master_id) SELECT '{idnum}' "+\

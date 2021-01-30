@@ -27,7 +27,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>ID: {{experiment_id}}</h1>
+            <h1>Experiment: {{experiment_id}}</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -95,7 +95,7 @@
               <button type="submit" formaction="/scalar-diags.html" method="GET" class="btn btn-primary">Scalar Plots</button>
               <button type="submit" formaction="/om4labs.html" class="btn btn-primary">OM4Labs</button>
               <button type="submit" formaction="/cvdp/{{experiment_id}}" class="btn btn-primary">CVDP</button>
-              <button type="submit" class="btn btn-primary">Edit Experiment</button>
+              <button type="submit" formaction="/admin/experiment/{{experiment_id}}"class="btn btn-primary">Edit Experiment</button>
 
           </form>
         </div>
