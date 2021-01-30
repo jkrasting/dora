@@ -100,7 +100,6 @@ class Experiment:
             sql = f"SELECT master_id from {split_input[0]}_map where experiment_id='{split_input[1]}'"
             cursor.execute(sql)
             result = cursor.fetchone()
-            print("RES", result)
             master_id = result["master_id"]
             cursor.close()
 
@@ -109,7 +108,7 @@ class Experiment:
             result = _fetch_from_master(master_id, db=db)
             self.__dict__ = {**self.__dict__, **result}
 
-        #else:
+        # else:
         #    raise ValueError(
         #        "You have supplied an invalid type for id.  Expecting either "
         #        + "an integer corresponding to an experiment on the MDT Tracker, "
@@ -167,13 +166,13 @@ class Experiment:
         db.commit()
         cursor.close()
 
-    def remove_key(self,key):
+    def remove_key(self, key):
         del self.__dict__[key]
 
     def list_keys(self):
         return list(self.__dict__.keys())
 
-    def value(self,key):
+    def value(self, key):
         return self.__dict__[key]
 
     def to_dict(self):

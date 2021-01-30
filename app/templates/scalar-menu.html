@@ -112,6 +112,9 @@
                 <!-- /.card-body -->
 
                 <div class="card-footer">
+                  {% for idnum in id %}
+                      <input type="hidden" name="id" value="{{idnum}}">
+                  {% endfor %}
                   <button type="submit" class="btn btn-primary">Submit</button>
                 </div>
               </form>

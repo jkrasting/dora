@@ -82,7 +82,7 @@
                       </div>
                       <div class="form-group">
                         <label for="experiment">Experiment Type:</label>
-                        <input type="text" class="form-control form-control-sm" size=35 id="expType" name="expType" value="{{expobj.expType}}" placeholder="e.g. piControl, 2kControl, historical, idealized ...">
+                        <input type="text" class="form-control form-control-sm" size=35 id="expType" name="expType" {% if expobj.expType != "None" %}value="{{expobj.expType}}"{% endif %} placeholder="e.g. piControl, 2kControl, historical, idealized ...">
                       </div>
                       <div class="form-group">
                         <label>Model Type</label>
@@ -128,7 +128,7 @@
                       </div>
                       <div class="form-group">
                         <label for="pathLog">Log File Path: (optional)</label>
-                        <input type="text" class="form-control form-control-sm" size=75 id="pathLog" name="pathLog" value="{{expobj.pathLog}}">
+                        <input type="text" class="form-control form-control-sm" size=75 id="pathLog" name="pathLog" {% if expobj.pathLog != "None" %}value="{{expobj.pathLog}}"{% endif %}>
                       </div>
                     </div>
                   </div>
@@ -145,7 +145,7 @@
                     <div class="col-sm-8">
                       <div class="form-group">
                         <label for="displayName">Alternate Display Name: (optional)</label>
-                        <input type="text" class="form-control form-control-sm" size=75 id="displayName" name="displayName" value="{{expobj.displayName}}" placeholder="Override the real experiment name with an alias (for display purposes)">
+                        <input type="text" class="form-control form-control-sm" size=75 id="displayName" name="displayName" {% if expobj.displayName != "None" %}value="{{expobj.displayName}}"{% endif %} placeholder="Override the real experiment name with an alias (for display purposes)">
                       </div>
                       <div class="form-group">
                         <label>Associated CMIP6 MIP (optional)</label>
@@ -158,11 +158,11 @@
                       </div>
                       <div class="form-group">
                         <label for="expLabels">Experiment Keywords:</label>
-                        <input type="text" class="form-control form-control-sm" size=75 id="expLabels" name="expLabels" value="{{expobj.expLabels}}" placeholder="Comma-separated list of keywords for searching">
+                        <input type="text" class="form-control form-control-sm" size=75 id="expLabels" name="expLabels" {% if expobj.expLabels != "None" %}value="{{expobj.expLabels}}"{% endif %} placeholder="Comma-separated list of keywords for searching">
                       </div>
                       <div class="form-group">
                         <label for="expLabels">Curator Experiment ID:</label>
-                        <input type="text" class="form-control form-control-sm" size=75 id="urlCurator" name="urlCurator" value="{{expobj.urlCurator}}" placeholder="Curator database ID, e.g. exper_xxxxxxxx">
+                        <input type="text" class="form-control form-control-sm" size=75 id="urlCurator" name="urlCurator" {% if expobj.urlCurator != "None" %}value="{{expobj.urlCurator}}"{% endif %} placeholder="Curator database ID, e.g. exper_xxxxxxxx">
                       </div>
                     </div>
                   </div>

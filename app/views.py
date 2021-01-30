@@ -7,20 +7,22 @@ dbhost = "127.0.0.1"
 dbport = 3306
 
 import json
-import sqlite3
-import pymysql
-import os
-import yaml
 import lxml
+import os
+import pymysql
+import requests
+import sqlite3
+import yaml
 
 from flask import (
-    Flask, 
+    g,
+    Flask,
     Response,
-    redirect, 
+    redirect,
     render_template,
     request,
-    send_from_directory, 
-    url_for
+    send_from_directory,
+    url_for,
 )
 
 from flask_login import (
@@ -28,35 +30,25 @@ from flask_login import (
     current_user,
     login_required,
     login_user,
-    logout_user    
+    logout_user,
 )
 
 from jinja2 import TemplateNotFound
-
 from datetime import datetime
+from oauthlib.oauth2 import WebApplicationClient
+from app.user import User
 
 from .xml import parse_xml
 from .Experiment import Experiment
-
 from .db import get_db
-
-from oauthlib.oauth2 import WebApplicationClient
-import requests
-
-from app.user import User
-
-from flask import g
-import base64
-import io
-import gfdlvitals
-
-import matplotlib.pyplot as plt
-plt.switch_backend("Agg")
+from .projects import *
+from .experiments import *
+from .scalar import *
 
 # App modules
 from app import app
 
-# Global 
+# Global
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", None)
 GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
@@ -64,55 +56,81 @@ GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configura
 login_manager = LoginManager()
 login_manager.init_app(app)
 
-model_types = sorted(['CM4', 'OM4', 'AM4', 'CM4p5', 'ESM4p5', 'ESM4', 'ESM2G', 
-               'OM4p5', 'CM3', 'LM3', 'SPEAR', 'SM4', 'CMIP6-CM4', 'LM4', 
-               'OM4p125', 'CMIP6-ESM4', 'C4MIP-ESM4'])
+model_types = sorted(
+    [
+        "CM4",
+        "OM4",
+        "AM4",
+        "CM4p5",
+        "ESM4p5",
+        "ESM4",
+        "ESM2G",
+        "OM4p5",
+        "CM3",
+        "LM3",
+        "SPEAR",
+        "SM4",
+        "CMIP6-CM4",
+        "LM4",
+        "OM4p125",
+        "CMIP6-ESM4",
+        "C4MIP-ESM4",
+    ]
+)
 
-cmip6_mips = sorted(['AerChemMIP','CDRMIP','C4MIP','CFMIP','DECK','DAMIP',
-                     'FAFMIP','GMMIP','LUMIP','OMIP','RFMIP','SIMIP','ScenarioMIP'])
-
-#try:
-#    init_db_command()
-#except sqlite3.OperationalError:
-#    pass
+cmip6_mips = sorted(
+    [
+        "AerChemMIP",
+        "CDRMIP",
+        "C4MIP",
+        "CFMIP",
+        "DECK",
+        "DAMIP",
+        "FAFMIP",
+        "GMMIP",
+        "LUMIP",
+        "OMIP",
+        "RFMIP",
+        "SIMIP",
+        "ScenarioMIP",
+    ]
+)
 
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
+
 
 @login_manager.user_loader
 def load_user(user_id):
     return User.get(user_id)
 
-def stream_template(template_name, **context):
-    ## possibly needed, broke with login:
-    ##     app.update_template_context(context)
-    t = app.jinja_env.get_template(template_name)
-    rv = t.stream(context)
-    rv.enable_buffering(5)
-    return rv
 
 @app.context_processor
 def get_global_vars():
-    return {"model_types":model_types,
-            "cmip6_mips":cmip6_mips,
-            "projects":list_projects()
+    return {
+        "model_types": model_types,
+        "cmip6_mips": cmip6_mips,
+        "projects": list_projects(),
     }
 
+
 # App main route + generic routing
-@app.route('/', defaults={'path': 'index.html'}, methods=["GET"])
-@app.route('/<path>', methods=['GET'])
+@app.route("/", defaults={"path": "index.html"}, methods=["GET"])
+@app.route("/<path>", methods=["GET"])
 def index(path):
     try:
         # Serve the file (if exists) from app/templates/FILE.html
         if current_user.is_authenticated:
-            user_params = {"username":current_user.name, 
-                "userpic":current_user.profile_pic,
+            user_params = {
+                "username": current_user.name,
+                "userpic": current_user.profile_pic,
             }
         else:
-            user_params = {"username":"","userpic":""}
-        return render_template( path , **user_params)
-    
+            user_params = {"username": "", "userpic": ""}
+        return render_template(path, **user_params)
+
     except TemplateNotFound:
-        return render_template('page-404.html'), 404
+        return render_template("page-404.html"), 404
+
 
 @app.route("/protected.html")
 def protected():
@@ -122,14 +140,16 @@ def protected():
             "<div><p>Google Profile Picture:</p>"
             '<img src="{}" alt="Google profile pic"></img>'
             '<a class="button" href="/logout">Logout</a>'.format(
-            current_user.name, current_user.email, current_user.profile_pic
+                current_user.name, current_user.email, current_user.profile_pic
             )
         )
     else:
         return '<a class="button" href="/login">Google Login</a>'
 
+
 def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
+
 
 @app.route("/login")
 def login():
@@ -139,10 +159,11 @@ def login():
     request_uri = client.prepare_request_uri(
         authorization_endpoint,
         redirect_uri=request.base_url + "/callback",
-        scope=["openid", "email", 'profile']
+        scope=["openid", "email", "profile"],
     )
 
     return redirect(request_uri)
+
 
 @app.route("/login/callback")
 def callback():
@@ -155,14 +176,14 @@ def callback():
         token_endpoint,
         authorization_response=request.url,
         redirect_url=request.base_url,
-        code=code
+        code=code,
     )
 
     token_response = requests.post(
         token_url,
         headers=headers,
         data=body,
-        auth=(GOOGLE_CLIENT_ID,GOOGLE_CLIENT_SECRET)
+        auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
     )
 
     client.parse_request_body_response(json.dumps(token_response.json()))
@@ -176,28 +197,46 @@ def callback():
         users_email = userinfo_response.json()["email"]
         picture = userinfo_response.json()["picture"]
         users_name = userinfo_response.json()["name"]
-        if request.environ.get('HTTP_X_FORWARDED_FOR') is None:
-            remote_addr = request.environ['REMOTE_ADDR']
+        if request.environ.get("HTTP_X_FORWARDED_FOR") is None:
+            remote_addr = request.environ["REMOTE_ADDR"]
         else:
-            remote_addr = request.environ['HTTP_X_FORWARDED_FOR']
-        print("Remote address: ",remote_addr)
+            remote_addr = request.environ["HTTP_X_FORWARDED_FOR"]
+        print("Remote address: ", remote_addr)
         login_date = str(datetime.now().isoformat())
     else:
         return "User email not available or not verified", 400
 
     user = User(
-        id_=unique_id, name=users_name, email=users_email, profile_pic=picture, remote_addr=remote_addr, login_date=login_date
+        id_=unique_id,
+        name=users_name,
+        email=users_email,
+        profile_pic=picture,
+        remote_addr=remote_addr,
+        login_date=login_date,
     )
 
     if not User.get(unique_id):
-        print("params: ",unique_id, users_name, users_email, picture, remote_addr, login_date)
-        User.create(unique_id, users_name, users_email, picture, remote_addr, login_date)
+        print(
+            "params: ",
+            unique_id,
+            users_name,
+            users_email,
+            picture,
+            remote_addr,
+            login_date,
+        )
+        User.create(
+            unique_id, users_name, users_email, picture, remote_addr, login_date
+        )
     else:
-        User.update(unique_id, users_name, users_email, picture, remote_addr, login_date)
+        User.update(
+            unique_id, users_name, users_email, picture, remote_addr, login_date
+        )
 
     login_user(user)
 
     return redirect(url_for("index"))
+
 
 @app.route("/logout")
 @login_required
@@ -205,280 +244,29 @@ def logout():
     logout_user()
     return redirect(url_for("index"))
 
+
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
 
-@app.route("/projects/<project_name>")
-def display_project(project_name):
-    db = get_db()
-    cursor = db.cursor()
-    sql = f"SELECT project_id,project_config,project_description from projects where project_name='{project_name}'"
-    cursor.execute(sql)
-    config_result = cursor.fetchone()
-    if config_result["project_config"] != "":
-        config = yaml.load(config_result["project_config"])
-    else:
-        config = {'All Experiments': {'remap_sql': ''}}
-    tables = []
-    for k in list(config.keys()):
-        table_data = {}
-        table_data["title"] = k
-        if "remap_sql" in list(config[k].keys()):
-            #sql_ = f"SELECT A.*,B.experiment_id from master A join project_map B on A.id = B.master_id " + \
-            #       f"where A.id in (select B.master_id from project_map where B.project_id=(" + \
-            #       f"select project_id from projects where project_name='{project_name}')) " + \
-            #       f"{config[k]['remap_sql']} order by id DESC;"
-
-            sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id order by B.experiment_id DESC"
-            cursor.execute(sql_)
-            table_data["experiments"] = cursor.fetchall()
-            for x in table_data["experiments"]:
-                x["id"] = f"{project_name}-{x['experiment_id']}"
-        elif "mod_sql" in list(config[k].keys()):
-            cursor.execute(config[k]["mod_sql"])
-            table_data["experiments"] = cursor.fetchall()
-        elif "sql" in list(config[k].keys()):
-            cursor.execute(config[k]["sql"])
-            table_data["experiments"] = cursor.fetchall()
-        else:
-            return render_template('page-500.html',msg="Malformed SQL query in project config.")
-        tables.append(table_data)
-    cursor.close
-    return render_template("view-table.html", 
-        tables=tables, 
-        project_name=project_name,
-        project_description=config_result["project_description"],
-    )
 
 @app.route("/cvdp/<project_id>")
 def view_cvdp_root(project_id):
     path = "/cvdp_path"
-    return redirect(f"/cvdp/{project_id}/index.html",302)
+    return redirect(f"/cvdp/{project_id}/index.html", 302)
+
 
 @app.route("/cvdp/<project_id>/<path:filename>")
-def view_cvdp(project_id,filename):
+def view_cvdp(project_id, filename):
     path = "/cvdp_path"
-    if not os.path.exists(path+filename):
-        return render_template('page-404.html'), 404
+    if not os.path.exists(path + filename):
+        return render_template("page-404.html"), 404
     else:
-        return send_from_directory(path,filename)
+        return send_from_directory(path, filename)
 
-@app.route("/experiment/<experiment_id>")
-def view_experiment(experiment_id):
-    experiment = Experiment(experiment_id)
-    return render_template("experiment_view.html",experiment=experiment,experiment_id=experiment_id)
-
-@app.route("/admin/experiment/<experiment_id>", methods=["GET","POST"])
-def expadmin(experiment_id=None):
-    if experiment_id == "new":
-        args = dict(request.form)
-        if "xmlfile" not in list(args.keys()):
-            return render_template("experiment-add-splash.html")
-        else:
-            exps, platforms, paths = parse_xml(args["xmlfile"],user=args["user"])
-            exps = sorted(exps)
-            platforms = sorted([x for x in platforms if "gfdl" not in x])
-            targets = ["prod","repro","debug"]
-            targets = sorted(targets + [f"{x}-openmp" for x in targets])
-            if not all(item in list(args.keys()) for item in ["experiment","platform","target","user"]):
-                return render_template("experiment-add-options.html",xmlfile=args["xmlfile"],exps=exps,targets=targets,platforms=platforms,user=args["user"])
-            else:
-                platform_target = f"{args['platform']}-{args['target']}"
-                gfdlplatform = "gfdl." + platform_target.replace(".","-")
-                directories = paths[args["experiment"]][platform_target]
-                gfdldirectories = paths[args["experiment"]][gfdlplatform]
-                projects = list_projects()
-                expdict = {}
-                expdict["id"] = "new"
-                expdict["userName"] = args["user"]
-                expdict["pathXML"] = args["xmlfile"]
-                expdict["pathScript"] = directories["scripts"]+args["experiment"]
-                expdict["expName"] = args["experiment"]
-                expdict["pathPP"] = gfdldirectories["postProcess"]
-                expdict["pathAnalysis"] = gfdldirectories["analysis"]
-                expdict["pathDB"] = gfdldirectories["scripts"].replace("/scripts","/db")
-                expobj = Experiment(expdict)
-                _ = [expobj.remove_key(x) for x in expobj.list_keys() if expobj.value(x) is None]
-                print(expobj)
-                return render_template("experiment-review.html",
-                    expobj=expobj)
-    else:
-        expobj = Experiment(experiment_id)
-        projects = list_projects()
-        print(expobj)
-        return render_template("experiment-review.html",
-            expobj=expobj)
-
-def list_projects():
-    db = get_db()
-    cursor = db.cursor()
-    sql = "SELECT project_id,project_name from projects;"
-    cursor.execute(sql)
-    projects = cursor.fetchall()
-    return [tuple(x.values()) for x in projects]
-
-
-@app.route("/admin/projects/<project_id>")
-def project(project_id,params={"project_description":"","project_name":"","project_config":""}):
-    params["project_id"] = project_id
-    if project_id != "new":
-        db = get_db()
-        cursor = db.cursor()
-        if not project_id[0].isdigit():
-            sql = f"SELECT * from projects where project_name='{project_id}'"
-        else:
-            sql = f"select * from projects where project_id={project_id}"
-        cursor.execute(sql)
-        result = cursor.fetchone()
-        cursor.close()
-        params = result if isinstance(result,dict) else params
-        project_id = result["project_id"]
-        #print(yaml.load(params["project_config"]))
-    #D = {"main":{"label":"Main table of experiments","sql":"SELECT * from experiments where ID=890"}}
-    #print(yaml.dump(D))
-    #content['project_config'] = yaml.dump(D)
-    content = {}
-    content['project_id'] = params["project_id"]
-    content['project_name'] = params["project_name"]
-    content['project_description'] = params["project_description"]
-    content['project_config'] = params["project_config"]
-    return render_template("project.html", **content)
-
-@app.route("/admin/experiment_update.html", methods=["POST"])
-def experiment_update():
-    args = dict(request.form)
-    projects = request.form.getlist("projects")
-    experiment = Experiment(args)
-    db = get_db()
-    if experiment.id == "new":
-        _id = experiment.insert(db)
-        for project in projects:
-            create_project_map(project)
-            associate_with_project(_id,project)
-        return render_template("success.html", msg=f"New experiment added as ID#: {_id}")
-    else:
-        experiment.update(db)
-        return render_template("success.html", msg=f"Updated experiment {experiment.id}")
-
-def associate_with_project(idnum,project):
-    sql = f"INSERT INTO {project}_map (master_id) SELECT '{idnum}' "+\
-          f"WHERE NOT EXISTS (SELECT * FROM {project}_map "+\
-          f"WHERE master_id='{idnum}')"
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    db.commit()
-    cursor.close()
-
-@app.route("/admin/project_update.html", methods=["POST"])
-def project_update():
-    args = dict(request.form)
-
-    db = get_db()
-    cursor = db.cursor()
-    sql = 'select AUTO_INCREMENT from information_schema.TABLES where TABLE_SCHEMA = "mdt_tracker" and TABLE_NAME = "projects"'
-    cursor.execute(sql)
-    nextid = cursor.fetchone()['AUTO_INCREMENT']
-
-    if args["project_id"] == "new":
-        args["project_id"] = nextid
-    
-    if int(args["project_id"]) >  int(nextid):
-        return render_template('page-500.html',msg="Project ID is too high.")
-    keys = str(",").join([f"{x}" for x in list(args.keys())])
-    keys = f"({keys})"
-    vals = str(",").join([f"'{x}'" for x in list(args.values())])
-    vals = f"({vals})"
-    update = str(",").join([f"{k}='{v}'" for (k,v) in args.items()])
-    sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
-    cursor.execute(sql)
-    db.commit()
-    cursor.close()
-
-    create_project_map(args['project_name'])
-
-    return render_template("success.html", msg="Updated project successfully.")
-
-def create_project_map(project_name):
-    db = get_db()
-    cursor = db.cursor()
-    sql = f"CREATE TABLE IF NOT EXISTS `{project_name}_map` "+\
-           "(`experiment_id` int(11) NOT NULL AUTO_INCREMENT COMMENT "+\
-           "'Local project id', `master_id` int(11) NOT NULL "+\
-           "COMMENT 'Master project id', PRIMARY KEY (`experiment_id`), "+\
-           "UNIQUE KEY `experiment_id` (`experiment_id`), UNIQUE KEY `master_id` (`master_id`)) "+\
-           "ENGINE=InnoDB DEFAULT CHARSET=latin1"
-    cursor.execute(sql)
-    db.commit()
-    cursor.close()
-
-@app.route("/scalar-diags.html")
-def scalardiags():
-
-    idnum = request.args.getlist("id")
-    idnum = None if len(idnum) == 0 else idnum
-
-    region = request.args.get("region") 
-    realm = request.args.get("realm")
-    smooth = request.args.get("smooth")
-    nyears = request.args.get("nyears")
-    trend = request.args.get("trend")
-    align = request.args.get("align")
-
-    trend = True if trend is not None else False
-    align = True if align is not None else False
-
-    smooth = None if (smooth == "" or smooth is None) else int(smooth)
-    nyears = None if (nyears == "" or nyears is None) else int(nyears)
-
-    if (region is None) or (realm is None):
-        return render_template( "scalar-menu.html" )
-
-    fname = f"/Users/krasting/dbverif5/new/{region}Ave{realm}.db" 
-
-    if os.path.exists(fname):
-        dset = gfdlvitals.open_db(fname)
-    else:
-        msg = f"Unable to load SQLite file: {fname}"
-        return render_template('page-500.html',msg=msg)
-
-    def plot_gen():
-        for x in sorted(list(dset.columns)):
-            fig = gfdlvitals.plot_timeseries(dset,trend=trend,smooth=smooth,var=x,\
-                  nyears=nyears,align_times=align,labels="Test")
-            fig = fig[0]
-            imgbuf = io.BytesIO()
-            fig.savefig(imgbuf, format="png", bbox_inches="tight",dpi=72)
-            plt.close(fig)
-            imgbuf.seek(0)
-            uri = 'data:image/png;base64,' + base64.b64encode(imgbuf.getvalue()).decode('utf-8').replace('\n', '')
-            yield uri
-
-    content = {"rows":plot_gen(),"region":region.capitalize(),"realm":realm.capitalize()}
-    return Response(stream_template("scalar-diags.html", **content ))
 
 @app.teardown_appcontext
 def teardown_db(exception):
-    db = g.pop('db', None)
+    db = g.pop("db", None)
 
     if db is not None:
         db.close()
-
-# Some sample database code below
-#    conn = pymysql.connect(host=dbhost,
-#                           port=dbport,
-#                           user="mdtadmin",
-#                           password="adminpassword",
-#                           db="mdt_tracker",
-#                           cursorclass=pymysql.cursors.DictCursor)
-#
-#    cursor = conn.cursor()
-#    sql = "SELECT * from master where id=890;"
-#    _ = cursor.execute(sql)
-#    result = cursor.fetchone()
-#
-#    print(sql)
-#    print(result)
-#
-#    cursor.close()
-#    conn.close()
