@@ -18,6 +18,7 @@ def open_db():
 
 class Experiment:
     expected_keys = [
+        "id",
         "expName",
         "displayName",
         "userName",
@@ -51,7 +52,6 @@ class Experiment:
             return result
 
         if isinstance(input, dict):
-            self.id = None
             self.source = "sql"
             dict_items = {k: v for (k, v) in input.items() if k in self.expected_keys}
             self.__dict__ = {**self.__dict__, **dict_items}
@@ -109,12 +109,12 @@ class Experiment:
             result = _fetch_from_master(master_id, db=db)
             self.__dict__ = {**self.__dict__, **result}
 
-        else:
-            raise ValueError(
-                "You have supplied an invalid type for id.  Expecting either "
-                + "an integer corresponding to an experiment on the MDT Tracker, "
-                + "Curator tripleID, or a filesystem path."
-            )
+        #else:
+        #    raise ValueError(
+        #        "You have supplied an invalid type for id.  Expecting either "
+        #        + "an integer corresponding to an experiment on the MDT Tracker, "
+        #        + "Curator tripleID, or a filesystem path."
+        #    )
 
     def modify(self, **kwargs):
         if "id" in list(dict(**kwargs).keys()):
@@ -166,6 +166,15 @@ class Experiment:
         cursor.execute(sql)
         db.commit()
         cursor.close()
+
+    def remove_key(self,key):
+        del self.__dict__[key]
+
+    def list_keys(self):
+        return list(self.__dict__.keys())
+
+    def value(self,key):
+        return self.__dict__[key]
 
     def to_dict(self):
         return self.__dict__

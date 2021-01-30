@@ -61,24 +61,14 @@
               </p>
             </a>
             <ul class="nav nav-treeview">
+              {% for project in projects %}
               <li class="nav-item">
-                <a href="/index.html" class="nav-link">
+                <a href="/projects/{{project[1]}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v1</p>
+                  <p>{{project[1]}}</p>
                 </a>
               </li>
-              <li class="nav-item">
-                <a href="/index2.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v2</p>
-                </a>
-              </li>
-              <li class="nav-item">
-                <a href="/index3.html" class="nav-link">
-                  <i class="far fa-circle nav-icon"></i>
-                  <p>Dashboard v3</p>
-                </a>
-              </li>
+              {% endfor %}
             </ul>
           </li>
 
@@ -110,21 +100,14 @@
             </a>
           </li>
 
+
+          {% if current_user.is_authenticated %}
           <li class="nav-header">ADMIN</li>
           <li class="nav-item">
             <a href="/admin/experiments/new" class="nav-link">
               <i class="nav-icon far fa-plus-square"></i>
               <p>
                 Add Experiment
-              </p>
-            </a>
-          </li>
-
-          <li class="nav-item">
-            <a href="/gallery.html" class="nav-link">
-              <i class="nav-icon far fa-edit"></i>
-              <p>
-                Edit Experiment
               </p>
             </a>
           </li>
@@ -137,17 +120,11 @@
               </p>
             </a>
           </li>
+          {% endif %}
 
           <li class="nav-header">USER SESSION</li>
-          <li class="nav-item">
-            <a href="/login.html" class="nav-link">
-              <i class="nav-icon fas fa-sign-in-alt"></i>
-              <p>
-                Login
-              </p>
-            </a>
-          </li>
 
+          {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a href="/logout" class="nav-link">
               <i class="nav-icon fas fa-sign-out-alt"></i>
@@ -156,6 +133,17 @@
               </p>
             </a>
           </li>
+
+          {% else %}
+          <li class="nav-item">
+            <a href="/login.html" class="nav-link">
+              <i class="nav-icon fas fa-sign-in-alt"></i>
+              <p>
+                Login
+              </p>
+            </a>
+          </li>
+          {% endif %}
 
           <li class="nav-header">MISCELLANEOUS</li>
           <li class="nav-item">
