@@ -27,7 +27,7 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Blank Page</h1>
+            <h1>ID: {{experiment_id}}</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
@@ -45,7 +45,7 @@
       <!-- Default box -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Title</h3>
+          <h3 class="card-title">{{experiment["expName"]}}</h3>
 
           <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -57,11 +57,47 @@
           </div>
         </div>
         <div class="card-body">
-          {{experiment}}
+
+          <div class="col-sm-10">
+
+                <dl class="row">
+                  <dt class="col-sm-4">User Name</dt>
+                  <dd class="col-sm-8">{{experiment["userName"]}}</dd>
+                  <dt class="col-sm-4">Master ID</dt>
+                  <dd class="col-sm-8">{{experiment["id"]}}</dd>
+                  <dt class="col-sm-4">Model</dt>
+                  <dd class="col-sm-8">{{experiment["modelType"]}}</dd>
+                  <dt class="col-sm-4">Experiment</dt>
+                  <dd class="col-sm-8">{{experiment["expType"]}}</dd>
+                  <dt class="col-sm-4">CMIP MIP</dt>
+                  <dd class="col-sm-8">{{experiment["expMIP"]}}</dd>
+                  <dt class="col-sm-4">Post-processing Path</dt>
+                  <dd class="col-sm-8">{{experiment["pathPP"]}}</dd>
+                  <dt class="col-sm-4">SQLite Files</dt>
+                  <dd class="col-sm-8">{{experiment["pathDB"]}}</dd>
+                  <dt class="col-sm-4">XML File</dt>
+                  <dd class="col-sm-8">{{experiment["pathXML"]}}</dd>
+                  <dt class="col-sm-4">Run Script</dt>
+                  <dd class="col-sm-8">{{experiment["pathScript"]}}</dd>
+                  <dt class="col-sm-4">Log File</dt>
+                  <dd class="col-sm-8">{{experiment["pathLog"]}}</dd>
+                  <dt class="col-sm-4">Curator ID</dt>
+                  <dd class="col-sm-8">{{experiment["urlCurator"]}}</dd>
+
+
+                </dl>
+            </div>
         </div>
         <!-- /.card-body -->
         <div class="card-footer">
-          Footer
+          <form>
+              <input type="hidden" name="id" value="{{experiment_id}}">
+              <button type="submit" formaction="/scalar-diags.html" method="GET" class="btn btn-primary">Scalar Plots</button>
+              <button type="submit" formaction="/om4labs.html" class="btn btn-primary">OM4Labs</button>
+              <button type="submit" formaction="/cvdp/{{experiment_id}}" class="btn btn-primary">CVDP</button>
+              <button type="submit" class="btn btn-primary">Edit Experiment</button>
+
+          </form>
         </div>
         <!-- /.card-footer-->
       </div>
