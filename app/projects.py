@@ -1,48 +1,10 @@
 import yaml
 
+from .project_util import *
+
 from app import app
-from .db import get_db
 from flask import request
 from flask import render_template
-
-
-def associate_with_project(idnum, project):
-    sql = (
-        f"INSERT INTO {project}_map (master_id) SELECT '{idnum}' "
-        + f"WHERE NOT EXISTS (SELECT * FROM {project}_map "
-        + f"WHERE master_id='{idnum}')"
-    )
-    db = get_db()
-    cursor = db.cursor()
-    cursor.execute(sql)
-    db.commit()
-    cursor.close()
-
-
-def create_project_map(project_name):
-    db = get_db()
-    cursor = db.cursor()
-    sql = (
-        f"CREATE TABLE IF NOT EXISTS `{project_name}_map` "
-        + "(`experiment_id` int(11) NOT NULL AUTO_INCREMENT COMMENT "
-        + "'Local project id', `master_id` int(11) NOT NULL "
-        + "COMMENT 'Master project id', PRIMARY KEY (`experiment_id`), "
-        + "UNIQUE KEY `experiment_id` (`experiment_id`), "
-        + "UNIQUE KEY `master_id` (`master_id`)) "
-        + "ENGINE=InnoDB DEFAULT CHARSET=latin1"
-    )
-    cursor.execute(sql)
-    db.commit()
-    cursor.close()
-
-
-def list_projects():
-    db = get_db()
-    cursor = db.cursor()
-    sql = "SELECT project_id,project_name from projects;"
-    cursor.execute(sql)
-    projs = cursor.fetchall()
-    return [tuple(x.values()) for x in projs]
 
 
 @app.route("/admin/project_update.html", methods=["POST"])

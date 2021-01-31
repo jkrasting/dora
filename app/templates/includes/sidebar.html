@@ -10,15 +10,18 @@
     <div class="sidebar">
       <!-- Sidebar user panel (optional) -->
       <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+
+        {% if current_user.is_authenticated %}
         <div class="image">
-          <img src="{{userpic}}" class="img-circle elevation-2" alt="{{username}}">
+          <img src="{{current_user.profile_pic}}" class="img-circle elevation-2" alt="{{current_user.name}}">
         </div>
         <div class="info">
-          <a href="#" class="d-block">{{username}}</a>
+          <a href="profile/" class="d-block">{{current_user.name}}</a>
         </div>
+        {% endif %}
       </div>
 
-      <!-- SidebarSearch Form -->
+      <!-- SidebarSearch Form
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
           <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
@@ -28,7 +31,7 @@
             </button>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
@@ -104,7 +107,7 @@
           {% if current_user.is_authenticated %}
           <li class="nav-header">ADMIN</li>
           <li class="nav-item">
-            <a href="/admin/experiments/new" class="nav-link">
+            <a href="/admin/experiment/new" class="nav-link">
               <i class="nav-icon far fa-plus-square"></i>
               <p>
                 Add Experiment
@@ -112,6 +115,7 @@
             </a>
           </li>
 
+          {% if current_user.admin %}
           <li class="nav-item">
             <a href="/admin/projects/new" class="nav-link">
               <i class="nav-icon fas fa-project-diagram"></i>
@@ -120,6 +124,7 @@
               </p>
             </a>
           </li>
+          {% endif %}
           {% endif %}
 
           <li class="nav-header">USER SESSION</li>
