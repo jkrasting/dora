@@ -17,9 +17,9 @@ plt.switch_backend("Agg")
 
 
 def stream_template(template_name, **context):
-    if not current_user.is_authenticated:
-        ## possibly needed, broke with login:
-        app.update_template_context(context)
+    # if not current_user.is_authenticated:
+    #    ## possibly needed, broke with login:
+    app.update_template_context(context)
     t = app.jinja_env.get_template(template_name)
     rv = t.stream(context)
     rv.enable_buffering(5)

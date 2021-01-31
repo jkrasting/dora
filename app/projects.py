@@ -6,6 +6,8 @@ from app import app
 from flask import request
 from flask import render_template
 
+from flask_login import current_user
+
 
 @app.route("/admin/project_update.html", methods=["POST"])
 def project_update():
@@ -39,6 +41,9 @@ def project_update():
 
 @app.route("/projects/<project_name>")
 def display_project(project_name):
+    auth_proj = ["mdt", "cmip6", "blubber"]
+    if current_user.is_authenticated:
+        auth_proj = auth_proj + current_user.perm_view
     db = get_db()
     cursor = db.cursor()
     sql = f"SELECT project_id,project_config,project_description from projects where project_name='{project_name}'"
@@ -70,12 +75,17 @@ def display_project(project_name):
             )
         tables.append(table_data)
     cursor.close
-    return render_template(
-        "view-table.html",
-        tables=tables,
-        project_name=project_name,
-        project_description=config_result["project_description"],
-    )
+    if project_name in auth_proj:
+        return render_template(
+            "view-table.html",
+            tables=tables,
+            project_name=project_name,
+            project_description=config_result["project_description"],
+        )
+    else:
+        return render_template(
+            "page-500.html", msg=f"You are not authorized to view {project_name}"
+        )
 
 
 @app.route("/admin/projects/<project_id>")

@@ -65,6 +65,11 @@ class User(UserMixin):
             else []
         )
 
+        firstlast = user["email"].split("@")[0].lower().split(".")
+        firstlast = [firstlast] if not isinstance(firstlast, list) else firstlast
+        firstlast = [x.capitalize() for x in firstlast]
+        firstlast = str(".").join(firstlast)
+
         user = User(
             id_=user["id"],
             name=user["name"],
@@ -77,7 +82,7 @@ class User(UserMixin):
             perm_del=perm_del,
             perm_modify=perm_modify,
             perm_view=perm_view,
-            firstlast=user["email"].split("@")[0].lower(),
+            firstlast=firstlast,
         )
 
         return user
