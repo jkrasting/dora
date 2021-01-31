@@ -56,7 +56,6 @@ def index(path):
                 "username": current_user.name,
                 "userpic": current_user.profile_pic,
             }
-            print(current_user.admin)
         else:
             user_params = {"username": "", "userpic": ""}
         return render_template(path, **user_params)
@@ -67,8 +66,17 @@ def index(path):
 
 @app.route("/profile/")
 def show_user():
-    numexp = user_experiment_count(current_user.firstlast)
-    return render_template("profile.html", numexp=numexp)
+    username = current_user.firstlast
+    numexp = user_experiment_count(username)
+    db = get_db()
+    cursor = db.cursor()
+    sql = f"SELECT id,expName from master where userName='{username}' or owner='{username}'"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    print(current_user.firstlast)
+    return render_template(
+        "profile.html", numexp=numexp, tables=["aaa"], experiments=result
+    )
 
 
 @app.teardown_appcontext

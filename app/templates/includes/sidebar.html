@@ -16,28 +16,30 @@
           <img src="{{current_user.profile_pic}}" class="img-circle elevation-2" alt="{{current_user.name}}">
         </div>
         <div class="info">
-          <a href="profile/" class="d-block">{{current_user.name}}</a>
+          <a href="/profile" class="d-block">{{current_user.name}}</a>
         </div>
         {% endif %}
       </div>
 
-      <!-- SidebarSearch Form
+      <!-- SidebarSearch Form -->
       <div class="form-inline">
         <div class="input-group" data-widget="sidebar-search">
-          <input class="form-control form-control-sidebar" type="search" placeholder="Search" aria-label="Search">
+          <input class="form-control form-control-sidebar" type="hidden" placeholder="Search" aria-label="Search">
           <div class="input-group-append">
+            <!--
             <button class="btn btn-sidebar">
               <i class="fas fa-search fa-fw"></i>
             </button>
+            -->
           </div>
         </div>
-      </div> -->
+      </div>
 
       <!-- Sidebar Menu -->
       <nav class="mt-2">
         <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
           <li class="nav-item">
-            <a href="/scalar-diags.html" class="nav-link">
+            <a href="/projects/mdt" class="nav-link">
               <i class="nav-icon fas fa-layer-group"></i>
               <p>
                 MDT Experiments
@@ -46,13 +48,16 @@
           </li>
 
           <li class="nav-item">
-            <a href="/scalar-diags.html" class="nav-link">
+            <a href="/projects/cmip6" class="nav-link">
               <i class="nav-icon fas fa-globe-americas"></i>
               <p>
                 CMIP6 Experiments
               </p>
             </a>
           </li>
+
+ 
+          {% if current_user.is_authenticated %}
           <!-- Add icons to the links using the .nav-icon class
                with font-awesome or any other icon font library -->
           <li class="nav-item has-treeview">
@@ -65,15 +70,18 @@
             </a>
             <ul class="nav nav-treeview">
               {% for project in projects %}
+              {% if project[1] is in current_user.perm_view %}
               <li class="nav-item">
                 <a href="/projects/{{project[1]}}" class="nav-link">
                   <i class="far fa-circle nav-icon"></i>
                   <p>{{project[1]}}</p>
                 </a>
               </li>
+              {% endif %}
               {% endfor %}
             </ul>
           </li>
+          {% endif %}
 
           <li class="nav-header">ANALYSIS</li>
           <li class="nav-item">
