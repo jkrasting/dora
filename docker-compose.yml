@@ -5,20 +5,36 @@ services:
     env_file: .dbenv
     build: mariadb
     hostname: "dbserver"
-    #volumes:
-    #  - ./persist:/var/lib/mysql
+    expose:
+      - "3306"
     networks:
       - db_network
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    environment:
+     - PMA_ARBITRARY=1
+    restart: always
+    ports:
+     - 8080:80
+    volumes:
+     - /sessions
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
   appseed-app:
     restart: always
     env_file: .env
     build: .
     hostname: "dashboard"
     volumes:
-      - /Users/krasting/dbverif5:/Users/krasting/dbverif5
+      - /gfdlhome:/home:ro
+      - /nbhome:/nbhome:ro
+      - /archive:/archive:ro
       - ./certs:/etc/certificates
     ports:
-      - "5005:5005"
+      - "5000:5000"
     networks:
       - db_network
     depends_on: 
