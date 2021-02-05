@@ -1,5 +1,6 @@
 flask
 gunicorn
+lxml
 pymysql
 Flask-Login
 oauthlib
