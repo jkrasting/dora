@@ -89,6 +89,25 @@ class User(UserMixin):
 
     @staticmethod
     def create(id_, name, email, profile_pic, remote_addr, login_date):
+        """ Adds a new user to the database
+
+        Parameters
+        ----------
+        id_ : str
+            openidc user id
+        name : str
+            real name
+        email : str, email-like
+            email address
+        profile_pic : str, url-like
+            url of profile pic
+        remote_addr : str
+            ip address of login
+        login_date : str
+            login time
+        """
+
+        # open the database and insert user into the database
         db = get_db()
         cursor = db.cursor()
         cursor.execute(
@@ -96,6 +115,16 @@ class User(UserMixin):
             + f"VALUES ('{id_}', '{name}', '{email}', '{profile_pic}', '{remote_addr}', '{login_date}')"
         )
         db.commit()
+
+        # If this is the first user, make them admin by default
+        cursor.execute("SELECT @@IDENTITY")
+        result = cursor.fetchone()
+        userid = result["@@IDENTITY"]
+        if userid == 1:
+            sql = f"UPDATE users set admin='1' where userid='{userid}'"
+            cursor.execute(sql)
+            db.commit()
+
         cursor.close()
 
     @staticmethod
