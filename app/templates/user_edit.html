@@ -182,6 +182,20 @@
               </div>
             </div>
 
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">Project Delete Permissions</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% for project in project_list %}
+                    <input type="checkbox" name="perm_del" value="{{project}}" 
+                    {% if project in userprofile.perm_del %} checked {% endif %}>
+                    {{project}}<br>
+                {% endfor %}
+              </div>
+            </div>
+
               <div class="form-group">
                 <div class="custom-control custom-switch">
                   <input type="checkbox" class="custom-control-input" id="customSwitch1" name="admin" value="1" {% if userprofile.admin %} checked {% endif %}>
