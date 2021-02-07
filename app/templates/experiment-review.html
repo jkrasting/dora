@@ -179,10 +179,12 @@
                     <div class="col-sm-8">
                       <div class="form-group">
                         {% for proj in projects %}
+                        {% if proj[1] in current_user.perm_add %}
                         <div class="custom-control custom-checkbox">
                           <input class="custom-control-input" type="checkbox" id="customCheckbox{{loop.index}}" name="projects" value="{{proj[1]}}">
                           <label for="customCheckbox{{loop.index}}" class="custom-control-label">{{proj[1]}}</label>
                         </div>
+                        {% endif %}
                         {% endfor %}
                       </div>
                     </div>

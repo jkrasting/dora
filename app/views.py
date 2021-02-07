@@ -41,6 +41,7 @@ from .projects import *
 from .experiments import *
 from .scalar import *
 from .user import user_experiment_count
+from .usertools import *
 
 # App modules
 from app import app

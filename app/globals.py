@@ -48,4 +48,5 @@ def get_global_vars():
         "model_types": model_types,
         "cmip6_mips": cmip6_mips,
         "projects": list_projects(),
+        "project_list": [project[1] for project in list_projects()]
     }

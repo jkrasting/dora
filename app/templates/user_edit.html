@@ -1,0 +1,237 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Profile {% endblock %} 
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+  <!-- DataTables -->
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}  
+
+  <!-- Content Wrapper. Contains page content -->
+  <div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+      <div class="container-fluid">
+        <div class="row mb-2">
+          <div class="col-sm-6">
+            <h1>Profile</h1>
+          </div>
+          <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+              <li class="breadcrumb-item"><a href="#">Home</a></li>
+              <li class="breadcrumb-item active">User Profile</li>
+            </ol>
+          </div>
+        </div>
+      </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-3">
+
+            <!-- Profile Image -->
+            <div class="card card-primary card-outline">
+              <div class="card-body box-profile">
+                <div class="text-center">
+                  <img class="profile-user-img img-fluid img-circle"
+                       src="{{userprofile.profile_pic}}"
+                       alt="User profile picture">
+                </div>
+
+                <h3 class="profile-username text-center">{{userprofile.name}}</h3>
+
+                <p class="text-muted text-center">{{userprofile.email}}</p>
+
+                <ul class="list-group list-group-unbordered mb-3">
+                  <li class="list-group-item">
+                    <b>Experiments</b> <a class="float-right">{{numexp}}</a>
+                  </li>
+                </ul>
+
+                Last logged in on {{userprofile.login_date}} from {{userprofile.hostname}} ({{userprofile.remote_addr}})
+
+
+
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+            <!-- About Me Box -->
+            <!--
+            <div class="card card-primary">
+              <div class="card-header">
+                <h3 class="card-title">Projects</h3>
+              </div>
+              <div class="card-body">
+                <strong><i class="fas fa-book mr-1"></i> View Permissions </strong>
+
+                <p class="text-muted">
+                  B.S. in Computer Science from the University of Tennessee at Knoxville
+                </p>
+
+                <hr>
+
+                <strong><i class="fas fa-map-marker-alt mr-1"></i> Location</strong>
+
+                <p class="text-muted">Malibu, California</p>
+
+                <hr>
+
+                <strong><i class="fas fa-pencil-alt mr-1"></i> Skills</strong>
+
+                <p class="text-muted">
+                  <span class="tag tag-danger">UI Design</span>
+                  <span class="tag tag-success">Coding</span>
+                  <span class="tag tag-info">Javascript</span>
+                  <span class="tag tag-warning">PHP</span>
+                  <span class="tag tag-primary">Node.js</span>
+                </p>
+
+                <hr>
+
+                <strong><i class="far fa-file-alt mr-1"></i> Notes</strong>
+
+                <p class="text-muted">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam fermentum enim neque.</p>
+              </div>
+            </div>-->
+          </div>
+          <!-- /.col -->
+          <form id="form_exp">
+          <div class="col-md-14">
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">Experiments</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                <table id="example1" class="hover table-striped" width="100%">
+                <!-- <table id="1" class="table" width="100%"> -->
+                <!-- <table id="example1" class="compact table table-bordered table-striped"> -->
+                  <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th><center>Compare</center></th>
+                    <th>Experiment Name</th>
+                  </tr>
+                  </thead>
+                  <tbody>
+                  {% for experiment in experiments %}
+                  <tr>
+                    <td>{{experiment["id"]}}</td>
+                    <td><center><input type="checkbox" id="id" name="id" value="{{experiment['id']}}"></center></td>
+                    <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a></td>
+                  </tr>
+                  {% endfor %}
+                  </tbody>
+                </table>
+
+              </div>
+              <div class="col-12">
+                <button type="submit" class="btn btn-success" formaction="/scalar-diags.html">Scalar Diags</button></p>
+              </div>
+              </form>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+
+          <form id="form_users" method="POST">
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">Project Add Permissions</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% for project in project_list %}
+                    <input type="checkbox" name="perm_add" value="{{project}}" 
+                    {% if project in userprofile.perm_add %} checked {% endif %}>
+                    {{project}}<br>
+                {% endfor %}
+              </div>
+            </div>
+
+            <div class="card card-primary card-outline">
+              <div class="card-header">
+                <h3 class="card-title">Project View Permissions</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body">
+                {% for project in project_list %}
+                    <input type="checkbox" name="perm_view" value="{{project}}" 
+                    {% if project in userprofile.perm_view %} checked {% endif %}>
+                    {{project}}<br>
+                {% endfor %}
+              </div>
+            </div>
+
+              <div class="form-group">
+                <div class="custom-control custom-switch">
+                  <input type="checkbox" class="custom-control-input" id="customSwitch1" name="admin" value="1" {% if userprofile.admin %} checked {% endif %}>
+                  <label class="custom-control-label" for="customSwitch1">Admin Status</label>
+                </div>
+              </div>
+
+              <input type="hidden" name="id" value="{{userprofile.id}}">
+
+              <div class="col-12">
+                <button type="submit" class="btn btn-success" formaction="/admin/users/update">Update Permissions</button></p>
+              </div>
+            </form>
+
+          </div>
+          <!-- /.col -->
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </section>
+    <!-- /.content -->
+  </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+  <!-- jQuery -->
+  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+  <!-- Bootstrap 4 -->
+  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+  <!-- DataTables -->
+  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+  <!-- AdminLTE App -->
+  <script src="/static/assets/js/adminlte.min.js"></script>
+  <!-- AdminLTE for demo purposes -->
+  <script src="/static/assets/js/demo.js"></script>
+  <!-- page script -->
+  <script>
+    $(function () {
+      $("#example1").DataTable({
+        "responsive": true,
+        "autoWidth": false,
+        "order": [[ 0, "desc"]],
+      });
+    });
+  </script>
+
+{% endblock javascripts %}  
