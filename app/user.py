@@ -2,6 +2,7 @@ from flask_login import UserMixin
 from app.db import get_db
 from .project_util import *
 
+import socket
 
 class User(UserMixin):
     def __init__(
@@ -18,6 +19,7 @@ class User(UserMixin):
         perm_modify=[],
         perm_del=[],
         firstlast="",
+        hostname="",
     ):
         self.id = id_
         self.name = name
@@ -31,6 +33,7 @@ class User(UserMixin):
         self.perm_modify = perm_modify
         self.perm_view = perm_view
         self.firstlast = firstlast
+        self.hostname = hostname
 
     @staticmethod
     def get(user_id):
@@ -70,6 +73,8 @@ class User(UserMixin):
         firstlast = [x.capitalize() for x in firstlast]
         firstlast = str(".").join(firstlast)
 
+        hostname = socket.gethostbyaddr(user["remote_addr"])[0]
+
         user = User(
             id_=user["id"],
             name=user["name"],
@@ -83,9 +88,21 @@ class User(UserMixin):
             perm_modify=perm_modify,
             perm_view=perm_view,
             firstlast=firstlast,
+            hostname=hostname
         )
 
         return user
+
+    def update_permission(self, key, value):
+        db = get_db()
+        cursor = db.cursor()
+        sql = (
+            f"UPDATE users SET {key}='{value}' WHERE id='{self.id}'"
+        )
+        print(sql)
+        cursor.execute(sql)
+        db.commit()
+        cursor.close()
 
     @staticmethod
     def create(id_, name, email, profile_pic, remote_addr, login_date):
