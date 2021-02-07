@@ -73,7 +73,8 @@ class User(UserMixin):
         firstlast = [x.capitalize() for x in firstlast]
         firstlast = str(".").join(firstlast)
 
-        hostname = socket.gethostbyaddr(user["remote_addr"])[0]
+        #hostname = socket.gethostbyaddr(user["remote_addr"])[0]
+        hostname = ""
 
         user = User(
             id_=user["id"],
