@@ -4,7 +4,7 @@ Copyright (c) 2019 - present AppSeed.us
 """
 
 bind = "0.0.0.0:5000"
-workers = 1
+workers = 17
 accesslog = "-"
 loglevel = "debug"
 capture_output = True

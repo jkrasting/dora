@@ -20,7 +20,7 @@ DROP TABLE IF EXISTS `master`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `master` (
-  `id` int(11) NOT NULL COMMENT 'Numerical ID for experiment',
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Numerical ID for experiment',
   `owner` varchar(50) DEFAULT NULL,
   `userName` varchar(30) DEFAULT '' COMMENT 'Username of experiment owner',
   `modelType` varchar(30) NOT NULL DEFAULT 'CM4' COMMENT 'Type of model',
@@ -70,15 +70,6 @@ CREATE TABLE `master` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `master`
---
-
-LOCK TABLES `master` WRITE;
-/*!40000 ALTER TABLE `master` DISABLE KEYS */;
-/*!40000 ALTER TABLE `master` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `parameters`
 --
 
@@ -93,40 +84,6 @@ CREATE TABLE `parameters` (
   PRIMARY KEY (`hexkey`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `parameters`
---
-
-LOCK TABLES `parameters` WRITE;
-/*!40000 ALTER TABLE `parameters` DISABLE KEYS */;
-/*!40000 ALTER TABLE `parameters` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `project_map`
---
-
-DROP TABLE IF EXISTS `project_map`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `project_map` (
-  `primary_key` varchar(32) NOT NULL COMMENT 'Unique primary key',
-  `project_id` int(11) NOT NULL COMMENT 'Project ID',
-  `experiment_id` int(11) NOT NULL COMMENT 'Numerical ID specific to the project',
-  `master_id` int(11) NOT NULL COMMENT 'Experiment ID from the master table ',
-  PRIMARY KEY (`primary_key`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `project_map`
---
-
-LOCK TABLES `project_map` WRITE;
-/*!40000 ALTER TABLE `project_map` DISABLE KEYS */;
-/*!40000 ALTER TABLE `project_map` ENABLE KEYS */;
-UNLOCK TABLES;
 
 --
 -- Table structure for table `projects`
@@ -148,41 +105,6 @@ CREATE TABLE `projects` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `projects`
---
-
-LOCK TABLES `projects` WRITE;
-/*!40000 ALTER TABLE `projects` DISABLE KEYS */;
-/*!40000 ALTER TABLE `projects` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `sessions`
---
-
-DROP TABLE IF EXISTS `sessions`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `sessions` (
-  `uid` int(6) NOT NULL,
-  `session_id` varchar(36) NOT NULL,
-  `remote_addr` varchar(40) DEFAULT NULL,
-  `creation_date` datetime DEFAULT NULL,
-  `expiration_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`uid`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `sessions`
---
-
-LOCK TABLES `sessions` WRITE;
-/*!40000 ALTER TABLE `sessions` DISABLE KEYS */;
-/*!40000 ALTER TABLE `sessions` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `users`
 --
 
@@ -190,6 +112,7 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
+  `userid` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Local user id number',
   `id` varchar(100) DEFAULT NULL COMMENT 'OpenID Remote User',
   `name` varchar(100) DEFAULT NULL COMMENT 'Full name',
   `email` varchar(100) NOT NULL COMMENT 'Email address',
@@ -200,21 +123,13 @@ CREATE TABLE `users` (
   `perm_add` varchar(150) DEFAULT '1' COMMENT 'CSV list of project IDs that user can add entries',
   `perm_modify` varchar(150) DEFAULT NULL COMMENT 'CSV list of project IDs that user can modify entries',
   `perm_del` varchar(150) DEFAULT NULL COMMENT 'CSV list of project IDs that user can delete entries',
-  PRIMARY KEY (`id`),
+  `admin` int(1) DEFAULT '0' COMMENT 'Administrator status',
+  PRIMARY KEY (`userid`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 /*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `users`
---
-
-LOCK TABLES `users` WRITE;
-/*!40000 ALTER TABLE `users` DISABLE KEYS */;
-/*!40000 ALTER TABLE `users` ENABLE KEYS */;
-UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -222,5 +137,3 @@ UNLOCK TABLES;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2020-12-30 12:00:04

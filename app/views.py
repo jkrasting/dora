@@ -13,6 +13,7 @@ import pymysql
 import requests
 import sqlite3
 import yaml
+import subprocess
 
 from flask import (
     g,
@@ -79,6 +80,12 @@ def show_user():
         "profile.html", numexp=numexp, tables=["aaa"], experiments=result
     )
 
+@app.route("/backup")
+def dump_database():
+    cmd = f"mysqldump --column-statistics=0 {os.environ['DB_DATABASE']} -h {os.environ['DB_HOSTNAME']} -u {os.environ['DB_USERNAME']} --password={os.environ['DB_PASSWORD']}"
+    output = subprocess.check_output(cmd.split(" "))
+    output = output.decode()
+    return Response(output, mimetype="text/plain")
 
 @app.teardown_appcontext
 def teardown_db(exception):
