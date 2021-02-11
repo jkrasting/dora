@@ -187,7 +187,5 @@ if __name__ == "__main__":
 
     A = Experiment(int(sys.argv[1]), db=db)
     print(A)
-    # A.modify(userName="Da Joker")
-    # A.update(db)
 
     db.close()
