@@ -35,6 +35,7 @@ from app.user import User
 
 from .xml import parse_xml
 
+from .om4 import *
 from .auth import *
 from .cvdp import *
 from .globals import *
@@ -93,7 +94,6 @@ def teardown_db(exception):
 
     if db is not None:
         db.close()
-
 
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")
