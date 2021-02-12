@@ -78,11 +78,12 @@ def om4labs_start():
         print(avail_diags)
         return render_template("om4labs-start.html", avail_diags=avail_diags, idnum=idnum)
 
-    files = request.args.getlist("files")
+    files = request.args.get("files")
     if len(files) == 0:
         jsondir = jsonify_dirtree(experiment.pathPP)
         return render_template("file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum)
-    files = [f"{experiment.pathPP}/{x}" for x in files]
+    files = files.split(",")
+    files = [f"{experiment.pathPP}/{x}" for x in files if not x.startswith("j1")]
 
     dict_args = om4labs.diags.__dict__[analysis].parse(template=True)
     dict_args["platform"] = "testing"
