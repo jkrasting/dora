@@ -29,6 +29,7 @@ dependencies:
   - pyOpenSSL
   - pyshp
   - pytest
+  - python-dotenv
   - pyyaml
   - regionmask
   - requests
