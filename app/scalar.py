@@ -26,7 +26,7 @@ def stream_template(template_name, **context):
     return rv
 
 
-@app.route("/scalar-diags.html")
+@app.route("/analysis/scalar")
 def scalardiags():
 
     idnum = request.args.getlist("id")
