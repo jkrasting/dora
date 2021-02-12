@@ -92,8 +92,8 @@
         <div class="card-footer">
           <form>
               <input type="hidden" name="id" value="{{experiment_id}}">
-              <button type="submit" formaction="/scalar-diags.html" method="GET" class="btn btn-primary">Scalar Plots</button>
-              <button type="submit" formaction="/om4labs.html" class="btn btn-primary">OM4Labs</button>
+              <button type="submit" formaction="/analysis/scalar" method="GET" class="btn btn-primary">Scalar Plots</button>
+              <button type="submit" formaction="/analysis/om4labs" class="btn btn-primary">OM4Labs</button>
               <button type="submit" formaction="/cvdp/{{experiment_id}}" class="btn btn-primary">CVDP</button>
               {% if current_user.firstlast|lower == experiment["userName"]|lower or current_user.firstlast|lower == experiment["owner"]|lower or current_user.admin %}
               <button type="submit" formaction="/admin/experiment/{{experiment_id}}"class="btn btn-primary">Edit Experiment</button>
