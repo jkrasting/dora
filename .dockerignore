@@ -1,0 +1,3 @@
+# ignore .git and env folders
+.git
+env
