@@ -1,0 +1,41 @@
+name: env
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - black
+  - cartopy
+  - dask
+  - esmf=8.0.0
+  - esmpy=8.0.0
+  - Flask-Login
+  - flask
+  - gunicorn
+  - intake-xarray
+  - lxml
+  - matplotlib
+  - netcdf4
+  - numpy
+  - numba
+  - oauthlib
+  - palettable
+  - pip
+  - pip:
+    - git+https://github.com/jkrasting/cmip_basins.git
+    - git+https://github.com/raphaeldussin/static_downsampler.git
+    - git+https://github.com/jkrasting/gfdlvitals.git
+    - git+https://github.com/raphaeldussin/om4labs.git
+  - pymysql
+  - pyOpenSSL
+  - pyshp
+  - pytest
+  - pyyaml
+  - regionmask
+  - requests
+  - scipy
+  - shapely
+  - six
+  - xarray
+  - xesmf=0.4.0
+  - xgcm
+
