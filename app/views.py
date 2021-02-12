@@ -3,8 +3,6 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-dbhost = "127.0.0.1"
-dbport = 3306
 
 import json
 import lxml
