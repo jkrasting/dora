@@ -16,8 +16,6 @@
   <link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
   <!-- adminlte-->
   <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
-  <!-- jstree -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
 
 {% endblock stylesheets %}
 
@@ -29,16 +27,13 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Directory Listing for OM4labs</h1>
+            <h1>OM4Labs - Start</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="#">Home</a></li>
               <li class="breadcrumb-item active">Start</li>
             </ol>
-          </div>
-          <div class="col-sm-12">
-            <h6><i>{{pathpp}}</i></h6>
           </div>
         </div>
       </div><!-- /.container-fluid -->
@@ -50,7 +45,7 @@
       <!-- Default box -->
       <div class="card">
         <div class="card-header">
-          <h3 class="card-title">Select Post-Processing Files</h3>
+          <h3 class="card-title">Select OM4Labs Analysis</h3>
 
           <div class="card-tools">
             <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -61,19 +56,23 @@
             </button>
           </div>
         </div>
-        <form action="/analysis/om4labs" method="GET">
         <div class="card-body">
-          <div id="jstree">
-
-
-          </div>
+          <!--<img halign="right" width="50%" height="50%" src="/static/assets/img/beaker.png">-->
+          <p>Welcome to OM4Labs!</p>
+                 <form method="/om4labs/analysis" method="GET">
+                      <div class="form-group">
+                         {% for diag in avail_diags %}
+                         <div class="custom-control custom-radio">
+                          <input class="custom-control-input" type="radio" id="analysis{{loop.index}}" name="analysis" value="{{diag[0]}}">
+                          <label for="analysis{{loop.index}}" class="custom-control-label">{{diag[0]}} <p class="text-muted"><i>{{diag[1]}}</i></p></label>
+                        </div>
+                        {% endfor %}
+                      </div>
+                      <input type="hidden" name="id" value="{{idnum}}">
         </div>
-        <input type="hidden" id="files" name="files">
-        <input type="hidden" id="idnum" name="id" value="{{idnum}}">
-        <input type="hidden" id="analysis" name="analysis" value="{{analysis}}">
         <!-- /.card-body -->
         <div class="card-footer">
-        <button id="submitter" type="submit" class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
         </form>
         </div>
         <!-- /.card-footer-->
@@ -99,38 +98,5 @@
   <script src="/static/assets/js/adminlte.min.js"></script>
   <!-- AdminLTE for demo purposes -->
   <script src="/static/assets/js/demo.js"></script>
-  <!-- jstree -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>:content-wrapper
-
-  <script>
-    $(function () {
-      // ajax demo
-      $('#jstree').jstree({
-        "plugins" : [ "wholerow", "checkbox" ],
-        'core' : {
-    'data' : [
-    JSON.parse('{{ jsondir | tojson | safe}}')
-    ]
-} });
-      // // 6 create an instance when the DOM is ready
-      // $('#jstree').jstree({
-      //   "plugins" : [ "wholerow", "checkbox" ]
-      // });
-      // 7 bind to events triggered on the tree
-      $('#jstree').on("changed.jstree", function (e, data) {
-        console.log(data.selected);
-      });
-      // 8 interact with the tree - either way is OK
-      $('button').on('click', function () {
-        $('#jstree').jstree(true).select_node('child_node_1');
-        $('#jstree').jstree('select_node', 'child_node_1');
-        $.jstree.reference('#jstree').select_node('child_node_1');
-      });
-    });
-
-    document.getElementById("submitter").onclick = function() {
-      document.getElementById('files').value = $('#jstree').jstree('get_selected'); 
-    };
-    </script>
 
 {% endblock javascripts %}
