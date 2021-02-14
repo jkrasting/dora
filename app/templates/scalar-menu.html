@@ -1,157 +1,162 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Forms General {% endblock %} 
+{% block title %} Forms General {% endblock %}
 
 <!-- Element injected in the BODY element -->
-{% block body_class %} sidebar-mini {% endblock body_class %} 
+{% block body_class %} sidebar-mini {% endblock body_class %}
 
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
-  <!-- Theme style -->
-  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
 
 {% endblock stylesheets %}
 
-{% block content %}    
+{% block content %}
 
-  <div class="content-wrapper">
+<div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>Scalar Diagnostic Options</h1>
-          </div>
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Scalar Diagnostic Options</h1>
+                </div>
 
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">General Form</li>
-            </ol>
-          </div>
-        </div>
-      </div><!-- /.container-fluid -->
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">General Form</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
     </section>
 
     <!-- Main content -->
 
 
-
     <section class="content">
-      <div class="container-fluid">
-        <div class="row">
-          <!-- left column -->
-          <div class="col-md-6">
-            <!-- general form elements -->
-            <div class="card card-primary">
-              <div class="card-header">
-                <h3 class="card-title">Options Menu</h3>
-              </div>
-              <!-- /.card-header -->
-              <!-- form start -->
-              <form action="/analysis/scalar" method="GET">
-                <div class="card-body">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- left column -->
+                <div class="col-md-6">
+                    <!-- general form elements -->
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Options Menu</h3>
+                        </div>
+                        <!-- /.card-header -->
+                        <!-- form start -->
+                        <form action="/analysis/scalar" method="GET">
+                            <div class="card-body">
 
-                      <div class="form-group">
-                        <label>Select a region</label>
-                        <select class="form-control" id="region" name="region">
-                          <option value="global">Global (90S - 90N)</option>
-                          <option value="nh">Northern Hemisphere (30N - 90N)</option>
-                          <option value="sh">Southern Hemisphere (90S - 30S)</option>
-                          <option value="tropics">Tropics (30S - 30N)</option>
-                        </select>
-                      </div>
+                                <div class="form-group">
+                                    <label>Select a region</label>
+                                    <select class="form-control" id="region" name="region">
+                                        <option value="global">Global (90S - 90N)</option>
+                                        <option value="nh">Northern Hemisphere (30N - 90N)</option>
+                                        <option value="sh">Southern Hemisphere (90S - 30S)</option>
+                                        <option value="tropics">Tropics (30S - 30N)</option>
+                                    </select>
+                                </div>
 
-                      <div class="form-group">
-                        <label>Select a model component</label>
-                        <select class="form-control" id="realm" name="realm">
-                          <option value="Atmos">Atmosphere</option>
-                          <option value="AtmosAer">Atmospheric Aerosols</option>
-                          <option value="AeroCMIP">Atmospheric Aerosols (CMIP)</option>
-                          <option value="Ice">Ice</option>
-                          <option value="Land">Land</option>
-                          <option value="OBGC">Ocean Biogeochemistry</option>
-                          <option value="Ocean">Physical Ocean</option>
-                        </select>
-                      </div>
+                                <div class="form-group">
+                                    <label>Select a model component</label>
+                                    <select class="form-control" id="realm" name="realm">
+                                        <option value="Atmos">Atmosphere</option>
+                                        <option value="AtmosAer">Atmospheric Aerosols</option>
+                                        <option value="AeroCMIP">Atmospheric Aerosols (CMIP)</option>
+                                        <option value="Ice">Ice</option>
+                                        <option value="Land">Land</option>
+                                        <option value="OBGC">Ocean Biogeochemistry</option>
+                                        <option value="Ocean">Physical Ocean</option>
+                                    </select>
+                                </div>
 
-                  <div class="form-group">
-                    <div class="custom-control custom-switch">
-                      <input type="checkbox" class="custom-control-input" id="trend" name="trend" value="1">
-                      <label class="custom-control-label" for="trend">Display trend line</label>
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="trend" name="trend"
+                                               value="1">
+                                        <label class="custom-control-label" for="trend">Display trend line</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="align" name="align"
+                                               value="1">
+                                        <label class="custom-control-label" for="align">Align different time
+                                            axes</label>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="smoothingYears">Apply a smoother</label>
+                                    <div class="col-3">
+                                        <input type="text" class="form-control" id="smooth" name="smooth"
+                                               placeholder="# years">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="limitYears">Limit to a fixed number of years</label>
+                                    <div class="col-3">
+                                        <input type="text" class="form-control" id="nyears" name="nyears"
+                                               placeholder="# years">
+                                    </div>
+                                </div>
+
+
+                                <!-- /.card-body -->
+
+                                <div class="card-footer">
+                                    {% for idnum in id %}
+                                    <input type="hidden" name="id" value="{{idnum}}">
+                                    {% endfor %}
+                                    <button type="submit" class="btn btn-primary">Submit</button>
+                                </div>
+                        </form>
+                        <!-- /.card -->
+
                     </div>
-                  </div>
-
-                  <div class="form-group">
-                    <div class="custom-control custom-switch">
-                      <input type="checkbox" class="custom-control-input" id="align" name="align" value="1">
-                      <label class="custom-control-label" for="align">Align different time axes</label>
+                    <!--/.col (left) -->
+                    <!-- right column -->
+                    <div class="col-md-6">
                     </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="smoothingYears">Apply a smoother</label>
-                    <div class="col-3">
-                      <input type="text" class="form-control" id="smooth" name="smooth" placeholder="# years">
-                    </div>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="limitYears">Limit to a fixed number of years</label>
-                    <div class="col-3">
-                      <input type="text" class="form-control" id="nyears" name="nyears" placeholder="# years">
-                    </div>
-                  </div>
-
-
-                <!-- /.card-body -->
-
-                <div class="card-footer">
-                  {% for idnum in id %}
-                      <input type="hidden" name="id" value="{{idnum}}">
-                  {% endfor %}
-                  <button type="submit" class="btn btn-primary">Submit</button>
+                    <!--/.col (right) -->
                 </div>
-              </form>
-            <!-- /.card -->
-
-          </div>
-          <!--/.col (left) -->
-          <!-- right column -->
-          <div class="col-md-6">
-          </div>
-          <!--/.col (right) -->
-        </div>
-        <!-- /.row -->
-      </div><!-- /.container-fluid -->
+                <!-- /.row -->
+            </div><!-- /.container-fluid -->
     </section>
     <!-- /.content -->
-  </div>
+</div>
 
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-  <!-- jQuery -->
-  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- bs-custom-file-input -->
-  <script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
-  <!-- AdminLTE App -->
-  <script src="/static/assets/js/adminlte.min.js"></script>
-  <!-- AdminLTE for demo purposes -->
-  <script src="/static/assets/js/demo.js"></script>
-  <script>
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- bs-custom-file-input -->
+<script src="/static/assets/plugins/bs-custom-file-input/bs-custom-file-input.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<script>
   $(function () {
     bsCustomFileInput.init();
   });
-  </script>
+
+</script>
 
 {% endblock javascripts %}
