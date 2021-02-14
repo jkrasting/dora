@@ -1,17 +1,11 @@
-FROM continuumio/miniconda3 as conda_sql
+FROM krasting/dorabase as server
 
-RUN apt-get install -y libmariadb-dev
+RUN pip install git+https://github.com/raphaeldussin/static_downsampler
+RUN pip install git+https://github.com/jkrasting/cmip_basins
+RUN pip install git+https://github.com/jkrasting/gfdlvitals
+RUN pip install git+https://github.com/raphaeldussin/om4labs
 
-FROM conda_sql as environment
-
-# Create the environment:
-COPY environment.yml .
-RUN conda env create -f environment.yml
-
-# Make RUN commands use the new environment:
-SHELL ["conda", "run", "-n", "env", "/bin/bash", "-c"]
-
-FROM environment
+FROM server
 
 # Make sure the environment is activated:
 RUN echo "Make sure flask is installed:"
@@ -22,7 +16,13 @@ RUN python -c "import flask"
 ENV FLASK_APP run.py
 
 COPY run.py gunicorn-cfg.py ./
+COPY certs /etc/certificates
 COPY app app
+COPY .env .env
+
+COPY run_gunicorn.sh run_gunicorn.sh
+RUN chmod +x run_gunicorn.sh
 
 EXPOSE 5000
-CMD ["gunicorn","--preload","--certfile", "/etc/certificates/cert.pem", "--keyfile", "/etc/certificates/key.pem", "--config", "gunicorn-cfg.py", "run:app"]
+
+CMD ["/bin/bash", "run_gunicorn.sh"]
