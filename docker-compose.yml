@@ -28,11 +28,11 @@ services:
     env_file: .env
     build: .
     hostname: "dashboard"
-    volumes:
-      - /gfdlhome:/home:ro
-      - /nbhome:/nbhome:ro
-      - /archive:/archive:ro
-      - ./certs:/etc/certificates
+    #volumes:
+    #  - /gfdlhome:/home:ro
+    #  - /nbhome:/nbhome:ro
+    #  - /archive:/archive:ro
+    #  - ./certs:/etc/certificates
     ports:
       - "5000:5000"
     networks:

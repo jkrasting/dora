@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Blank Page {% endblock %} 
+{% block title %} Blank Page {% endblock %}
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
@@ -8,121 +8,128 @@
 <!-- Specific Page CSS goes HERE  -->
 {% block stylesheets %}
 
-  <!-- Google Font: Source Sans Pro -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
-  <!-- DataTables -->
-  <link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
-  <link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.css">
-  <!-- pace-progress -->
-  <link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
-  <!-- adminlte-->
-  <link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- DataTables -->
+<link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
 
 {% endblock stylesheets %}
 
-{% block content %}  
+{% block content %}
 
-  <div class="content-wrapper">
+<div class="content-wrapper">
     <!-- Content Header (Page header) -->
     <section class="content-header">
-      <div class="container-fluid">
-        <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1>Update Project Membership</h1>
-          </div>
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Start</li>
-            </ol>
-          </div>
-        </div>
-      </div><!-- /.container-fluid -->
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Update Project Membership</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Start</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
     </section>
 
     <!-- Main content -->
     <section class="content">
 
-      <!-- Default box -->
-      <div class="card">
-        <div class="card-header">
-          <h3 class="card-title">Experiments in {{project_name}}</h3>
+        <!-- Default box -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Experiments in {{project_name}}</h3>
 
-          <div class="card-tools">
-            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-              <i class="fas fa-minus"></i>
-            </button>
-            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-             <form action="/admin/projects/membership_update" method="POST">
-                <table id="example1" class="hover table-striped" width="100%">
-                <!-- <table id="1" class="table" width="100%"> -->
-                <!-- <table id="example1" class="compact table table-bordered table-striped"> -->
-                  <thead>
-                  <tr>
-                    <th>ID</th>
-                    <th><center>Compare</center></th>
-                    <th>User Name</th>
-                    <!--<th>Model Type</th>-->
-                    <th>Experiment Name</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  {% for experiment in experiments %}
-                  <tr>
-                    <td>{{experiment["id"]}}</td>
-                    <td><center><input type="checkbox" id="id" name="id" value="{{experiment['id']}}" {% if experiment['id'] in project_members %} checked {% endif %}></center></td>
-                    <td>{{experiment["userName"]}}</td>
-                    <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a></td>
-                  </tr>
-                  {% endfor %}
-                  </tbody>
-                </table>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <form action="/admin/projects/membership_update" method="POST">
+                    <table id="example1" class="hover table-striped" width="100%">
+                        <!-- <table id="1" class="table" width="100%"> -->
+                        <!-- <table id="example1" class="compact table table-bordered table-striped"> -->
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>
+                                <center>Compare</center>
+                            </th>
+                            <th>User Name</th>
+                            <!--<th>Model Type</th>-->
+                            <th>Experiment Name</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for experiment in experiments %}
+                        <tr>
+                            <td>{{experiment["id"]}}</td>
+                            <td>
+                                <center><input type="checkbox" id="id" name="id" value="{{experiment['id']}}" {% if
+                                               experiment['id'] in project_members %} checked {% endif %}>
+                                </center>
+                            </td>
+                            <td>{{experiment["userName"]}}</td>
+                            <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a></td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
 
 
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <input type="hidden" name="project_name" value={{project_name}}>
+                <button type="submit" class="btn btn-success">Update Project Membership</button>
+                </p>
+            </div>
+            </form>
+            <!-- /.card-footer-->
         </div>
-        <!-- /.card-body -->
-        <div class="card-footer">
-            <input type="hidden" name="project_name" value={{project_name}}>
-            <button type="submit" class="btn btn-success">Update Project Membership</button></p>
-        </div>
-      </form>
-        <!-- /.card-footer-->
-      </div>
-      <!-- /.card -->
+        <!-- /.card -->
 
     </section>
     <!-- /.content -->
-  </div>
+</div>
 
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
-  <!-- jQuery -->
-  <script src="/static/assets/plugins/jquery/jquery.min.js"></script>
-  <!-- Bootstrap 4 -->
-  <script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <!-- DataTables -->
-  <script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
-  <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
-  <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-  <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-    <!-- pace-progress -->
-  <script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
-  <!-- AdminLTE App -->
-  <script src="/static/assets/js/adminlte.min.js"></script>
-  <!-- AdminLTE for demo purposes -->
-  <script src="/static/assets/js/demo.js"></script>
-  <!-- page script -->
-  <script>
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables -->
+<script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- page script -->
+<script>
     $(function () {
       $("#example1").DataTable({
         "responsive": true,
@@ -131,6 +138,7 @@
         "order": [[ 0, "desc"]],
       });
     });
-  </script>
+
+</script>
 
 {% endblock javascripts %}
