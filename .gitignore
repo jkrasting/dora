@@ -14,3 +14,10 @@ env/
 env__/
 .vscode/symbols.json
 app/db.sqlite3
+.env
+mariadb/Dockerfile
+mariadb/bootstrap_experiments.sql
+mariadb/bootstrap_parameters.sql
+mariadb/bootstrap_project_map.sql
+mariadb/bootstrap_projects.sql
+odiv-yaml-config
