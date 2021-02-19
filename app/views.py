@@ -37,6 +37,7 @@ from .om4 import *
 from .auth import *
 from .cvdp import *
 from .globals import *
+from .paramdiff import *
 from .projects import *
 from .experiments import *
 from .scalar import *
