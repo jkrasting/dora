@@ -138,6 +138,16 @@
    {% for table in tables %}
    var events = $('#events');
    var table = $("#example{{loop.index}}").DataTable({
+
+        columnDefs: [ {
+            orderable: false,
+            className: 'select-checkbox',
+            targets:   0
+        } ],
+        select: {
+            selector: 'td:first-child'
+        },
+
         "responsive": true,
         "autoWidth": false,
         "select": true,
