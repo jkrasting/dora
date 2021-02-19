@@ -4,6 +4,7 @@ RUN pip install git+https://github.com/raphaeldussin/static_downsampler
 RUN pip install git+https://github.com/jkrasting/cmip_basins
 RUN pip install git+https://github.com/jkrasting/gfdlvitals
 RUN pip install git+https://github.com/raphaeldussin/om4labs
+RUN pip install git+https://github.com/jkrasting/MOM6_parameter_scanner.git
 
 FROM server
 
