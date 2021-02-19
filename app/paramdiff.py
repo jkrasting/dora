@@ -33,24 +33,62 @@ def parameter_diff(params):
     return diff_vals
 
 
-@app.route("/paramscan")
+@app.route("/analysis/parameters")
 def paramscan():
 
-    dir1 = "/Users/krasting/doratest/archive/Raphael.Dussin/FMS2019.01.03_devgfdl_20201120/CM4_piControl_c96_OM4p25_kdadd/gfdl.ncrc4-intel18-prod-openmp/ascii"
-    dir2 = "/Users/krasting/doratest/archive/Raphael.Dussin/FMS2019.01.03_devgfdl_20201120/CM4_piControl_c192_OM4p125_MZtuning/gfdl.ncrc4-intel18-prod-openmp/ascii"
+    idnum = request.args.getlist("id")
+    if idnum is None:
+        return "You must specify an ID to run the parameter scanner"
+    idnum = [] if len(idnum) == 0 else idnum
 
-    dirs = [dir1, dir2]
+    exper = [Experiment(x) for x in idnum]
+    names = [x.expName for x in exper]
+    dirs = [x.pathPP.replace("/pp","/ascii") for x in exper]
+
+    header = list(zip(idnum,names))
 
     mom = [mom6_parameter_scanner.Parameters(x) for x in dirs]
+    mom = parameter_diff(mom)
+
     sis = [
         mom6_parameter_scanner.Parameters(
             x, parameter_files=["*SIS_parameter_doc.all", "*SIS_parameter_doc.short"]
         )
         for x in dirs
     ]
+    sis = parameter_diff(sis)
 
-    diffs = parameter_diff(sis)
+    log0 = [
+        mom6_parameter_scanner.Log(x, parameter_files=["*logfile.000000.out"])
+        for x in dirs
+    ]
+    log0 = parameter_diff(log0)
 
-    print(diffs)
+    log1 = [
+        mom6_parameter_scanner.Log(x, ignore_files=["*logfile.000000.out"])
+        for x in dirs
+    ]
+    log1 = parameter_diff(log1)
 
-    return ""
+    namelist0 = [
+        mom6_parameter_scanner.Namelists(x, parameter_files=["*logfile.000000.out"])
+        for x in dirs
+    ]
+    namelist0 = parameter_diff(namelist0)
+
+    namelist1 = [
+        mom6_parameter_scanner.Namelists(x, ignore_files=["*logfile.000000.out"])
+        for x in dirs
+    ]
+    namelist1 = parameter_diff(namelist1)
+
+    return render_template(
+        "parameter-diff.html",
+        header=header,
+        mom=mom,
+        sis=sis,
+        log0=log0,
+        log1=log1,
+        namelist0=namelist0,
+        namelist1=namelist1,
+    )
