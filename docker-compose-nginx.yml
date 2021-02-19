@@ -6,7 +6,9 @@ services:
     build: .
     hostname: "dashboard"
     volumes:
-      - /Users/krasting/dbverif5:/Users/krasting/dbverif5
+      - /home:/home
+      - /nbhome:/nbhome
+      - /archive:/archive
       - ./certs:/etc/nginx/certs
     ports:
       - "5005:5005"
@@ -17,8 +19,7 @@ services:
     restart: always
     image: "nginx:latest"
     ports:
-      - "80:80"
-      - "443:443"
+      - "5000:5000"
     volumes:
       - ./nginx:/etc/nginx/conf.d
       - ./certs:/etc/nginx/certs
@@ -31,8 +32,8 @@ services:
     env_file: .dbenv
     build: mariadb
     hostname: "dbserver"
-    volumes:
-      - ./persist:/var/lib/mysql
+    #volumes:
+    #  - ./persist:/var/lib/mysql
     ports:
       - "3306:3306"
     networks:
