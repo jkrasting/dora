@@ -1,0 +1,355 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Parameter Differences</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Start</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Default box -->
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">MOM Parameters</h3>
+
+                <div class="card-tools">
+                    {% if mom|length > 0 %}<span class="badge badge-danger">{{mom|length}}</span>{% endif %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in mom %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">SIS Parameters</h3>
+
+                <div class="card-tools">
+                    {% if sis|length > 0 %}<span class="badge badge-danger">{{sis|length}}</span>{% endif %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in sis %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">First FMS Log File</h3>
+
+                <div class="card-tools">
+                    {% if log0|length > 0 %}<span class="badge badge-danger">{{log0|length}}</span>{% endif %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in log0 %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">Second FMS Log File</h3>
+
+                <div class="card-tools">
+                    {% if log1|length > 0 %}<span class="badge badge-danger">{{log1|length}}</span>{% endif %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in log1 %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">First Namelist Group</h3>
+
+                <div class="card-tools">
+                    {% if namelist0|length > 0 %}<span class="badge badge-danger">{{namelist0|length}}</span>{% endif %}
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in namelist0 %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">Second Namelist Group</h3>
+
+                <div class="card-tools">
+                    <span class="badge badge-danger">{{mom|length}}</span>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+            
+                <table class="table table-hover text-nowrap">
+                    <thead>
+                    <tr>
+                    <th></th>
+                    {% for element in header %}
+                      <th halign="center">{{element[1]}}<br><a href="/experiment/{{element[0]}}">{{element[0]}}</a></th>
+                    {% endfor %}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for parameter in mom %}
+                    <tr>
+                    {% for element in parameter %}
+                      <td halign="center">{{element}}</td>
+                    {% endfor %}
+                    </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+            
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+
+
+
+
+
+
+    </section>
+    <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}
