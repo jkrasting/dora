@@ -77,7 +77,6 @@
                                     <!-- <table id="example1" class="compact table table-bordered table-striped"> -->
                                     <thead>
                                     <tr>
-                                        <th></th>
                                         <th>ID</th>
                                         <th>User Name</th>
                                         <!--<th>Model Type</th>-->
@@ -88,7 +87,6 @@
                                     <tbody>
                                     {% for experiment in table["experiments"] %}
                                     <tr>
-                                        <td></td>
                                         <td>{{experiment["id"]}}</td>
                                         <td>{{experiment["userName"]}}</td>
                                         <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a>
@@ -129,12 +127,14 @@
 <script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
 <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
-<script src="/static/assets/plugins/datatables-select/js/dataTables.select.min.js"></script>
+<script src="/static/assets/plugins/datatables-select/js/dataTables.select.js"></script>
 <!-- AdminLTE App -->
 <script src="/static/assets/js/adminlte.min.js"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="/static/assets/js/demo.js"></script>
 <!-- page script -->
+className: 'select-checkbox',
+selector: 'td:first-child',
 <script>
 
    {% for table in tables %}
@@ -143,18 +143,19 @@
 
         columnDefs: [ {
             orderable: false,
-            className: 'select-checkbox',
             targets:   0
         } ],
         select: {
-            selector: 'td:first-child'
+            style: 'none',
+            toggleable: true,
+            blurable: false
         },
 
         "responsive": true,
         "autoWidth": false,
-        "select": true,
         "order": [[ 0, "desc"]],
       });
+
     {% endfor %}
 
   function getids(action) {
@@ -163,7 +164,7 @@
       console.log(table);
       var rows = table.rows({ selected: true }).data();
       for (var i = 0; i < rows.length; i++) {
-          $('#selectionform').append('<input type="hidden" name="id" value="'+rows[i][1]+'" />');
+          $('#selectionform').append('<input type="hidden" name="id" value="'+rows[i][0]+'" />');
           document.getElementById('selectionform').action = action;
           $('#example{{loop.index}}_length').remove();
           document.getElementById("selectionform").submit(); 
