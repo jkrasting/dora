@@ -37,8 +37,9 @@ def parameter_diff(params):
 def paramscan():
 
     idnum = request.args.getlist("id")
-    if idnum is None:
-        return "You must specify an ID to run the parameter scanner"
+    if len(idnum) == 0:
+        return render_template("parameter-splash.html")
+
     idnum = [] if len(idnum) == 0 else idnum
 
     exper = [Experiment(x) for x in idnum]
