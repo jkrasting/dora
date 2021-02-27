@@ -79,6 +79,9 @@ def om4labs_start():
         return render_template("om4labs-start.html", avail_diags=avail_diags, idnum=idnum)
 
     files = request.args.get("files")
+    if files is None:
+        jsondir = jsonify_dirtree(experiment.pathPP)
+        return render_template("file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum)
     if len(files) == 0:
         jsondir = jsonify_dirtree(experiment.pathPP)
         return render_template("file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum)
@@ -86,10 +89,10 @@ def om4labs_start():
     files = [f"{experiment.pathPP}/{x}" for x in files if not x.startswith("j1")]
 
     dict_args = om4labs.diags.__dict__[analysis].parse(template=True)
-    dict_args["platform"] = "testing"
+    dict_args["platform"] = "gfdl"
     dict_args["format"] = "stream"
     dict_args["infile"] = files
-    dict_args["obsfile"] = "/Users/krasting/pkgs/om4labs/testing/test_data/obs/WOA13_ptemp+salinity_annual_35levels.nc"
+    #dict_args["obsfile"] = "/Users/krasting/pkgs/om4labs/testing/test_data/obs/WOA13_ptemp+salinity_annual_35levels.nc"
     imgbufs = om4labs.diags.__dict__[analysis].run(dict_args)
     figures = [base64it(x) for x in imgbufs]
     print(files)
