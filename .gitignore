@@ -22,3 +22,4 @@ mariadb/bootstrap_project_map.sql
 mariadb/bootstrap_projects.sql
 odiv-yaml-config
 setup_env.sh
+.idea
