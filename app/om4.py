@@ -13,6 +13,7 @@ import io
 import base64
 import om4labs
 
+
 def jsonify_dirtree(dirpath):
     """Function to return json of directory tree"""
 
@@ -43,7 +44,13 @@ def jsonify_dirtree(dirpath):
                 "text": directory,
                 "icon": "jstree-folder",
                 "children": [
-                    {"id": x, "text": x.replace(f"{directory}/",""), "icon":"jstree-file"} for x in filelist if x.startswith(directory)
+                    {
+                        "id": x,
+                        "text": x.replace(f"{directory}/", ""),
+                        "icon": "jstree-file",
+                    }
+                    for x in filelist
+                    if x.startswith(directory)
                 ],
             }
             for directory in dirs
@@ -51,40 +58,55 @@ def jsonify_dirtree(dirpath):
     }
     return filedict
 
+
 def base64it(imgbuf):
     imgbuf.seek(0)
-    uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode("utf-8").replace("\n", "")
+    uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode(
+        "utf-8"
+    ).replace("\n", "")
     return uri
+
 
 @app.route("/testmenu")
 def browser():
     pathpp = "/Users/krasting/doratest/archive/Raphael.Dussin/FMS2019.01.03_devgfdl_20201120/CM4_piControl_c192_OM4p125_MZtuning/gfdl.ncrc4-intel18-prod-openmp/pp"
     jsondir = jsonify_dirtree(pathpp)
-    return render_template("file-browser.html",pathpp=pathpp,jsondir=jsondir)
+    return render_template("file-browser.html", pathpp=pathpp, jsondir=jsondir)
+
 
 @app.route("/analysis/om4labs", methods=["GET"])
 def om4labs_start():
     idnum = request.args.get("id")
     if idnum is None:
-        return "You must specify an ID to run om4labs"
+        return render_template("om4labs-splash.html")
+
     experiment = Experiment(idnum)
 
     analysis = request.args.get("analysis")
     if analysis is None:
         avail_diags = [x for x in dir(om4labs.diags) if not x.startswith("__")]
-        exclude = ["avail","generic"]
+        exclude = ["avail", "generic"]
         avail_diags = [x for x in avail_diags if not any(diag in x for diag in exclude)]
-        avail_diags = [(diag,eval(f"om4labs.diags.{diag}.__description__")) for diag in avail_diags]
+        avail_diags = [
+            (diag, eval(f"om4labs.diags.{diag}.__description__"))
+            for diag in avail_diags
+        ]
         print(avail_diags)
-        return render_template("om4labs-start.html", avail_diags=avail_diags, idnum=idnum)
+        return render_template(
+            "om4labs-start.html", avail_diags=avail_diags, idnum=idnum
+        )
 
     files = request.args.get("files")
     if files is None:
         jsondir = jsonify_dirtree(experiment.pathPP)
-        return render_template("file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum)
+        return render_template(
+            "file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum
+        )
     if len(files) == 0:
         jsondir = jsonify_dirtree(experiment.pathPP)
-        return render_template("file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum)
+        return render_template(
+            "file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum
+        )
     files = files.split(",")
     files = [f"{experiment.pathPP}/{x}" for x in files if not x.startswith("j1")]
 
@@ -92,8 +114,10 @@ def om4labs_start():
     dict_args["platform"] = "gfdl"
     dict_args["format"] = "stream"
     dict_args["infile"] = files
-    #dict_args["obsfile"] = "/Users/krasting/pkgs/om4labs/testing/test_data/obs/WOA13_ptemp+salinity_annual_35levels.nc"
+    # dict_args["obsfile"] = "/Users/krasting/pkgs/om4labs/testing/test_data/obs/WOA13_ptemp+salinity_annual_35levels.nc"
     imgbufs = om4labs.diags.__dict__[analysis].run(dict_args)
     figures = [base64it(x) for x in imgbufs]
     print(files)
-    return render_template("om4labs-results.html",figures=figures,experiment=experiment)
+    return render_template(
+        "om4labs-results.html", figures=figures, experiment=experiment
+    )
