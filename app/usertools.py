@@ -18,7 +18,8 @@ def list_users():
     cursor.execute(sql)
     users = cursor.fetchall()
     cursor.close()
-    return render_template("user_list.html",users=users)
+    return render_template("user_list.html", users=users)
+
 
 @app.route("/admin/users/edit/<id>")
 def show_user_props(id):
@@ -30,7 +31,13 @@ def show_user_props(id):
     sql = f"SELECT id,expName from master where userName='{username}' or owner='{username}'"
     cursor.execute(sql)
     experiments = cursor.fetchall()
-    return render_template("user_edit.html",userprofile=userprofile,numexp=numexp,experiments=experiments)
+    return render_template(
+        "user_edit.html",
+        userprofile=userprofile,
+        numexp=numexp,
+        experiments=experiments,
+    )
+
 
 @app.route("/admin/users/update", methods=["POST"])
 def update_user_perms():
@@ -38,14 +45,14 @@ def update_user_perms():
     id = args["id"]
     userprofile = User.get(id)
     project_list = [project[1] for project in list_projects()]
-    for perm in ["perm_add","perm_del","perm_modify","perm_view"]:
+    for perm in ["perm_add", "perm_del", "perm_modify", "perm_view"]:
         if perm in list(args.keys()):
             _perm = request.form.getlist(perm)
-            _perm = [_perm] if not isinstance(_perm,list) else _perm
+            _perm = [_perm] if not isinstance(_perm, list) else _perm
             _perm = [x for x in _perm if x in project_list]
             _perm = [str(lookup_project_from_name(x)) for x in _perm]
             _perm = str(",").join(_perm)
-            userprofile.update_permission(perm,_perm)
+            userprofile.update_permission(perm, _perm)
     admin = "1" if "admin" in list(args.keys()) else "0"
-    userprofile.update_permission("admin",admin)
+    userprofile.update_permission("admin", admin)
     return render_template("success.html", msg="Updated user permissions successfully.")

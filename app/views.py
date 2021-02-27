@@ -80,6 +80,7 @@ def show_user():
         "profile.html", numexp=numexp, tables=["aaa"], experiments=result
     )
 
+
 @app.route("/backup")
 def dump_database():
     cmd = f"mysqldump --column-statistics=0 {os.environ['DB_DATABASE']} -h {os.environ['DB_HOSTNAME']} -u {os.environ['DB_USERNAME']} --password={os.environ['DB_PASSWORD']}"
@@ -87,12 +88,14 @@ def dump_database():
     output = output.decode()
     return Response(output, mimetype="text/plain")
 
+
 @app.teardown_appcontext
 def teardown_db(exception):
     db = g.pop("db", None)
 
     if db is not None:
         db.close()
+
 
 if __name__ == "__main__":
     app.run(ssl_context="adhoc")

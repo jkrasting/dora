@@ -43,9 +43,9 @@ def paramscan():
 
     exper = [Experiment(x) for x in idnum]
     names = [x.expName for x in exper]
-    dirs = [x.pathPP.replace("/pp","/ascii") for x in exper]
+    dirs = [x.pathPP.replace("/pp", "/ascii") for x in exper]
 
-    header = list(zip(idnum,names))
+    header = list(zip(idnum, names))
 
     mom = [mom6_parameter_scanner.Parameters(x) for x in dirs]
     mom = parameter_diff(mom)

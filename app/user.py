@@ -4,6 +4,7 @@ from .project_util import *
 
 import socket
 
+
 class User(UserMixin):
     def __init__(
         self,
@@ -73,7 +74,7 @@ class User(UserMixin):
         firstlast = [x.capitalize() for x in firstlast]
         firstlast = str(".").join(firstlast)
 
-        #hostname = socket.gethostbyaddr(user["remote_addr"])[0]
+        # hostname = socket.gethostbyaddr(user["remote_addr"])[0]
         hostname = ""
 
         user = User(
@@ -89,7 +90,7 @@ class User(UserMixin):
             perm_modify=perm_modify,
             perm_view=perm_view,
             firstlast=firstlast,
-            hostname=hostname
+            hostname=hostname,
         )
 
         return user
@@ -97,9 +98,7 @@ class User(UserMixin):
     def update_permission(self, key, value):
         db = get_db()
         cursor = db.cursor()
-        sql = (
-            f"UPDATE users SET {key}='{value}' WHERE id='{self.id}'"
-        )
+        sql = f"UPDATE users SET {key}='{value}' WHERE id='{self.id}'"
         print(sql)
         cursor.execute(sql)
         db.commit()
@@ -107,7 +106,7 @@ class User(UserMixin):
 
     @staticmethod
     def create(id_, name, email, profile_pic, remote_addr, login_date):
-        """ Adds a new user to the database
+        """Adds a new user to the database
 
         Parameters
         ----------

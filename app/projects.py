@@ -113,10 +113,12 @@ def project(
     content["project_config"] = params["project_config"]
     return render_template("project.html", **content)
 
+
 @app.route("/admin/projects")
 def project_list_view():
     projects = [project[1] for project in list_projects()]
-    return render_template("project_list.html",projects=projects)
+    return render_template("project_list.html", projects=projects)
+
 
 @app.route("/admin/projects/membership/<project_name>")
 def project_membership(project_name):
@@ -129,26 +131,32 @@ def project_membership(project_name):
     sql = f"select master_id from {project_name}_map"
     cursor.execute(sql)
     project_members = cursor.fetchall()
-    project_members = [exper['master_id'] for exper in project_members]
+    project_members = [exper["master_id"] for exper in project_members]
     cursor.close()
-    return render_template("project_membership.html",experiments=experiments,project_members=project_members,project_name=project_name)
+    return render_template(
+        "project_membership.html",
+        experiments=experiments,
+        project_members=project_members,
+        project_name=project_name,
+    )
+
 
 @app.route("/admin/projects/membership_update", methods=["POST"])
 def project_membership_update():
     # process form input
     args = dict(request.form)
     project_name = args["project_name"]
-    
+
     # open database and obtain cursor
     db = get_db()
     cursor = db.cursor()
-    
+
     # get current project membershoip
     sql = f"select master_id from {project_name}_map"
     cursor.execute(sql)
     current_members = cursor.fetchall()
-    current_members = [str(exper['master_id']) for exper in current_members]
-    
+    current_members = [str(exper["master_id"]) for exper in current_members]
+
     # list of ids that the project membership should now become
     new_members = request.form.getlist("id")
 
@@ -159,23 +167,26 @@ def project_membership_update():
     permission_add = True if project_name in current_user.perm_add else False
     permission_del = True if project_name in current_user.perm_del else False
 
-    # determine if user had permission to make changes 
-    add_list = list(set(new_members)-set(current_members))
-    remove_list = list(set(current_members)-set(new_members))
+    # determine if user had permission to make changes
+    add_list = list(set(new_members) - set(current_members))
+    remove_list = list(set(current_members) - set(new_members))
 
-    if (len(add_list) > 0 and not permission_add) or (len(remove_list) > 0 and not permission_del):
+    if (len(add_list) > 0 and not permission_add) or (
+        len(remove_list) > 0 and not permission_del
+    ):
         cursor.close()
         return render_template(
-            "page-500.html", msg=f"You are not authorized to make this project modifcation. Please check your permissions."
+            "page-500.html",
+            msg=f"You are not authorized to make this project modifcation. Please check your permissions.",
         )
     else:
         if len(add_list) > 0:
             if project_name in current_user.perm_add:
                 for exper in add_list:
-                    associate_with_project(exper,project_name)
+                    associate_with_project(exper, project_name)
 
         if len(remove_list) > 0:
-            if project_name in current_user.perm_del: 
+            if project_name in current_user.perm_del:
                 remove_list = f"({str(',').join(remove_list)})"
                 sql = f"DELETE from {project_name}_map WHERE master_id IN {remove_list}"
                 cursor.execute(sql)
@@ -183,4 +194,6 @@ def project_membership_update():
 
         cursor.close()
 
-        return render_template("success.html", msg="Updated project membership successfully.")
+        return render_template(
+            "success.html", msg="Updated project membership successfully."
+        )
