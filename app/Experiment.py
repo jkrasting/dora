@@ -3,7 +3,11 @@
 import os
 import pymysql
 import sys
-from .db import get_db, close_db
+
+try:
+    from db import get_db, close_db
+except:
+    from .db import get_db, close_db
 
 
 def open_db():
