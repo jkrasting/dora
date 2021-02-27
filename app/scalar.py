@@ -32,6 +32,9 @@ def scalardiags():
     idnum = request.args.getlist("id")
     idnum = [] if len(idnum) == 0 else idnum
 
+    if len(idnum) == 0:
+        return render_template("scalar-splash.html")
+
     region = request.args.get("region")
     realm = request.args.get("realm")
     smooth = request.args.get("smooth")
