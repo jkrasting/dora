@@ -85,17 +85,14 @@ class Experiment:
             self.source = "sqlite"
 
         elif input[0] == "/":
-            id = fixDirPath(id)
-            self.source = "sqlite"
-            self.expName = id
-            self.displayName = id
-            self.userName = ""
-            self.pathPP = id
-            self.pathDB = id
-            self.expLabels = ""
-            self.pathAnalysis = id
-            self.urlCurator = ""
-            self.pathDB = self.pathDB.replace("/home/", "/gfdlhome/")
+            path = f"{input}/" if input[-1] != "/" else input
+            self.source = "path"
+            self.pathPP = path
+            self.pathAnalysis = path
+            self.pathDB = path
+            path = path.split("/")
+            if len(path) > 4:
+                self.expName = path[-4]
 
         elif len(input.split("-")) == 2:
             split_input = input.split("-")
@@ -128,6 +125,9 @@ class Experiment:
         self.__dict__ = {**self.__dict__, **modifications}
 
     def insert(self, db):
+        if self.source == "path":
+            raise ValueError("Experiments derived from paths cannot be added")
+
         attrs = self.__dict__
         attrs = {k: v for (k, v) in attrs.items() if v is not None}
         attrs = {k: v for (k, v) in attrs.items() if v != ""}
@@ -153,6 +153,9 @@ class Experiment:
         return result["@@IDENTITY"]
 
     def update(self, db):
+        if self.source == "path":
+            raise ValueError("Experiments derived from paths cannot be updated")
+
         attrs = self.__dict__
         idnum = attrs["id"]
         attrs = {k: v for (k, v) in attrs.items() if v is not None}
@@ -189,7 +192,8 @@ class Experiment:
 if __name__ == "__main__":
     db = open_db()
 
-    A = Experiment(int(sys.argv[1]), db=db)
+    A = Experiment(sys.argv[1], db=db)
+    print(A.source)
     print(A)
 
     db.close()
