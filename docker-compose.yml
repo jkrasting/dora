@@ -32,7 +32,7 @@ services:
       - /gfdlhome:/home:ro
       - /nbhome:/nbhome:ro
       - /archive:/archive:ro
-      - ./testcert:/etc/certificates
+      - ./certs:/etc/certificates
       - /archa:/archa:ro
       - /arch0:/arch0:ro
       - /arch1:/arch1:ro
