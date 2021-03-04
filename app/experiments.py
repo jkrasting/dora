@@ -1,3 +1,5 @@
+import os
+
 from app import app
 from .db import get_db
 from .xml import parse_xml
@@ -24,6 +26,13 @@ def expadmin(experiment_id=None):
         if "xmlfile" not in list(args.keys()):
             return render_template("experiment-add-splash.html")
         else:
+            if os.path.exists(args["xmlfile"]):
+                if os.path.isdir(args["xmlfile"]):
+                    expobj = Experiment(args["xmlfile"])
+                    expobj.id = "new"
+                    print(expobj)
+                    return render_template("experiment-review.html", expobj=expobj)
+
             exps, platforms, paths = parse_xml(args["xmlfile"], user=args["user"])
             exps = sorted(exps)
             platforms = sorted([x for x in platforms if "gfdl" not in x])
