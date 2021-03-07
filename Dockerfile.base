@@ -1,0 +1,17 @@
+FROM continuumio/miniconda3:4.9.2-alpine
+
+RUN apk update
+RUN apk add git
+RUN apk add bash
+
+# Include mysql client
+RUN apk add --no-cache mysql-client
+
+# Create the environment:
+COPY env.yml .
+RUN conda env create -f env.yml
+RUN conda clean -a 
+
+RUN echo "conda activate env" >> ~/.bashrc
+ENV PATH /opt/conda/envs/env/bin:$PATH
+
