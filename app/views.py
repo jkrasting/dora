@@ -83,7 +83,7 @@ def show_user():
 
 @app.route("/backup")
 def dump_database():
-    cmd = f"mysqldump --column-statistics=0 {os.environ['DB_DATABASE']} -h {os.environ['DB_HOSTNAME']} -u {os.environ['DB_USERNAME']} --password={os.environ['DB_PASSWORD']}"
+    cmd = f"mysqldump {os.environ['DB_DATABASE']} -h {os.environ['DB_HOSTNAME']} -u {os.environ['DB_USERNAME']} --password={os.environ['DB_PASSWORD']}"
     output = subprocess.check_output(cmd.split(" "))
     output = output.decode()
     return Response(output, mimetype="text/plain")
