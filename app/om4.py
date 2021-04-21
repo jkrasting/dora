@@ -48,6 +48,7 @@ def jsonify_dirtree(dirpath, pptype="av"):
 
     elif pptype == "ts":
         for component in os.scandir(dirpath):
+            print(component)
             if (
                 component.name.startswith("ocean") or component.name.startswith("ice")
             ) and component.is_dir():
@@ -93,7 +94,7 @@ def jsonify_dirtree(dirpath, pptype="av"):
 
 
 def base64it(imgbuf):
-    """ Converts in-memory PNG image to inlined ASCII format
+    """Converts in-memory PNG image to inlined ASCII format
 
     Parameters
     ----------
@@ -121,7 +122,7 @@ def om4labs_start():
     Jinja template name and variables for rendering
     """
 
-    # Get the experiment ID number from the URL or provide user with 
+    # Get the experiment ID number from the URL or provide user with
     # a form to enter a post-processing path directly
     idnum = request.args.get("id")
     if idnum is None:
@@ -152,17 +153,18 @@ def om4labs_start():
     files = request.args.get("files")
 
     # The "section transports" diagnostic accepts a top-level pp dir
-    if analysis not in ["section_transports"]:
+    if analysis in ["section_transports"]:
+        files = []
+    else:
+        pptype = "ts" if analysis == "seaice" else "av"
         files = "" if files is None else files
         if len(files) == 0:
-            jsondir = jsonify_dirtree(experiment.pathPP)
+            jsondir = jsonify_dirtree(experiment.pathPP, pptype=pptype)
             return render_template(
                 "file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum
             )
         files = files.split(",")
-    else:
-        files = []
-        
+
     # infer static file from frepp structure
     if len(files) > 0:
         static = files[0].split("/")[0]
@@ -182,6 +184,8 @@ def om4labs_start():
     # the experiment metadata
     dict_args["label"] = experiment.expName
     dict_args["ppdir"] = [experiment.pathPP]
+
+    dict_args["dataset"] = "NSIDC_NH_monthly"
 
     # Tell OM4Labs where to find the observational data
     dict_args["platform"] = os.environ["OM4LABS_PLATFORM"]
