@@ -58,7 +58,7 @@
             </div>
             <div class="card-body">
                 <!--<img halign="right" width="50%" height="50%" src="/static/assets/img/beaker.png">-->
-                <p>Welcome to OM4Labs!</p>
+                <p>Experiment: {{experiment.expName}}</p>
                 <form method="/om4labs/analysis" method="GET">
                     <div class="form-group">
                         {% for diag in avail_diags %}

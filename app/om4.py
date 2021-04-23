@@ -145,7 +145,7 @@ def om4labs_start():
         ]
         print(avail_diags)
         return render_template(
-            "om4labs-start.html", avail_diags=avail_diags, idnum=idnum
+            "om4labs-start.html", avail_diags=avail_diags, idnum=idnum, experiment=experiment
         )
 
     # Get the list of files to analyse from the URL or provide user with
