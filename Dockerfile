@@ -1,4 +1,4 @@
-FROM krasting/dorabase as server
+FROM krasting/dorabase:dev as server
 
 RUN pip install git+https://github.com/raphaeldussin/static_downsampler
 RUN pip install git+https://github.com/jkrasting/cmip_basins
