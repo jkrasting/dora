@@ -185,10 +185,12 @@ def om4labs_start():
     dict_args["label"] = experiment.expName
     dict_args["ppdir"] = [experiment.pathPP]
 
-    dict_args["dataset"] = "NSIDC_NH_monthly"
-
     # Tell OM4Labs where to find the observational data
     dict_args["platform"] = os.environ["OM4LABS_PLATFORM"]
+
+    # Remove any cases where a diagnostic defines a default model
+    # configuration and rely solely on the experiment's static file
+    dict_args["config"] = None
 
     # Pass in the paths to the selected files and the inferred
     # static / topog file
