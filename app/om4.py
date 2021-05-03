@@ -1,17 +1,14 @@
+import base64
+import io
 import os
-import json
 
-from app import app
-
+import om4labs
 from flask import render_template
 from flask import request
-from flask import Response
-from flask_login import current_user
+from flask import send_file
 
+from app import app
 from .Experiment import Experiment
-import io
-import base64
-import om4labs
 
 
 def jsonify_dirtree(dirpath, pptype="av"):
@@ -145,7 +142,10 @@ def om4labs_start():
         ]
         print(avail_diags)
         return render_template(
-            "om4labs-start.html", avail_diags=avail_diags, idnum=idnum, experiment=experiment
+            "om4labs-start.html",
+            avail_diags=avail_diags,
+            idnum=idnum,
+            experiment=experiment,
         )
 
     # Get the list of files to analyse from the URL or provide user with
@@ -201,9 +201,30 @@ def om4labs_start():
     # *** Run OM4Labs ***
     imgbufs = om4labs.diags.__dict__[analysis].run(dict_args)
 
-    # Convert image buffers to in-lined images
-    figures = [base64it(x) for x in imgbufs]
+    # some diagnostics may return images and a file, separate them here
+    if isinstance(imgbufs, tuple):
+        bytebuffer = imgbufs[1]
+        imgbufs = imgbufs[0]
+        download_flag = True
+    else:
+        download_flag = False
 
-    return render_template(
-        "om4labs-results.html", figures=figures, experiment=experiment
-    )
+    # Download file if "savefile" CGI variable is present
+    if request.args.get("savefile") is not None:
+        bytebuffer = io.BytesIO(bytebuffer)
+        return send_file(
+            bytebuffer,
+            as_attachment=True,
+            attachment_filename=f"{experiment.expName}.passages.nc",
+            mimetype="application/netcdf",
+        )
+
+    else:
+        # Convert image buffers to in-lined images
+        figures = [base64it(x) for x in imgbufs]
+        return render_template(
+            "om4labs-results.html",
+            figures=figures,
+            experiment=experiment,
+            download_flag=download_flag,
+        )

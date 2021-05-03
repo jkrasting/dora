@@ -60,6 +60,10 @@
                 {% for fig in figures %}
                 <img src="{{ fig | safe }}"/><br>
                 {% endfor %}
+
+                {% if download_flag %}
+                <a href="{{ request.url }}&savefile=True">Download this data in NetCDF format</a>
+                {% endif %}
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
