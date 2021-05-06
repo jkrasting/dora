@@ -41,6 +41,7 @@ from .paramdiff import *
 from .projects import *
 from .experiments import *
 from .scalar import *
+from .stats import *
 from .user import user_experiment_count
 from .usertools import *
 
