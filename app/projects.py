@@ -58,7 +58,9 @@ def display_project(project_name):
         table_data = {}
         table_data["title"] = k
         if "remap_sql" in list(config[k].keys()):
-            sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id order by B.experiment_id DESC"
+            _remap_sql = config[k]['remap_sql']
+            _remap_sql = f"where {_remap_sql}" if (len(_remap_sql) > 0) else ""
+            sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id {_remap_sql} order by B.experiment_id DESC"
             cursor.execute(sql_)
             table_data["experiments"] = cursor.fetchall()
             for x in table_data["experiments"]:
