@@ -74,6 +74,7 @@ def index(path):
 
 
 @app.route("/profile/")
+@login_required
 def show_user():
     username = current_user.firstlast
     numexp = user_experiment_count(username)
