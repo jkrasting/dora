@@ -61,7 +61,13 @@ def index(path):
             }
         else:
             user_params = {"username": "", "userpic": ""}
-        return render_template(path, **user_params)
+
+        try:
+            result = render_template(path, **user_params)
+        except Exception as e:
+            return "Site is under maintenance. "+str(e)
+
+        return result
 
     except TemplateNotFound:
         return render_template("page-404.html"), 404
