@@ -66,7 +66,7 @@
                 <div class="row">
                     <div class="col-12">
                         {% for table in tables %}
-                        <div class="card card-primary">
+                        <div class="card card-secondary">
                             <div class="card-header">
                                 <h3 class="card-title">{{table["title"]}}</h3>
                             </div>
@@ -128,6 +128,7 @@
 <script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
 <script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
 <script src="/static/assets/plugins/datatables-select/js/dataTables.select.js"></script>
+<script src="/static/assets/plugins/datatables-natural/js/natural.js"></script>
 <!-- AdminLTE App -->
 <script src="/static/assets/js/adminlte.min.js"></script>
 <!-- AdminLTE for demo purposes -->
@@ -142,7 +143,7 @@ selector: 'td:first-child',
    var table = $("#example{{loop.index}}").DataTable({
 
         columnDefs: [ {
-            orderable: false,
+            type: 'natural',
             targets:   0
         } ],
         select: {
