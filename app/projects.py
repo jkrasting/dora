@@ -3,7 +3,7 @@
 import yaml
 from flask import request
 from flask import render_template
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app import app
 
 from .db import get_db
@@ -115,6 +115,7 @@ def display_project(project_name):
 
 
 @app.route("/admin/projects/<project_id>")
+@login_required
 def project(
     project_id,
     params={"project_description": "", "project_name": "", "project_config": ""},
@@ -149,9 +150,9 @@ def project(
         # check to see if project exists
         proj_list = list_projects()
         if not project_id[0].isdigit():
-            proj_is_known = (project_id in [x[1] for x in proj_list])
+            proj_is_known = project_id in [x[1] for x in proj_list]
         else:
-            proj_is_known = (project_id in [x[0] for x in proj_list])
+            proj_is_known = project_id in [x[0] for x in proj_list]
         if not proj_is_known:
             return render_template(
                 "page-500.html", msg=f"{project_id} is not a recognized project"
@@ -185,12 +186,14 @@ def project(
 
 
 @app.route("/admin/projects")
+@login_required
 def project_list_view():
     projects = [project[1] for project in list_projects()]
     return render_template("project_list.html", projects=projects)
 
 
 @app.route("/admin/projects/membership/<project_name>")
+@login_required
 def project_membership(project_name):
     db = get_db()
     cursor = db.cursor()
@@ -211,6 +214,7 @@ def project_membership(project_name):
 
 
 @app.route("/admin/projects/membership_update", methods=["POST"])
+@login_required
 def project_membership_update():
     # process form input
     args = dict(request.form)
@@ -272,6 +276,7 @@ def project_membership_update():
 
 
 @app.route("/admin/project_update.html", methods=["POST"])
+@login_required
 def project_update():
     """Updates SQL database with new project metadata
 
