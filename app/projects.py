@@ -1,3 +1,5 @@
+""" Module for project-related pages """
+
 import yaml
 
 from .project_util import *
@@ -11,29 +13,50 @@ from flask_login import current_user
 
 @app.route("/admin/project_update.html", methods=["POST"])
 def project_update():
+    """Updates SQL database with new project metadata
+
+    Returns
+    -------
+    flask.render_template
+        Renders a template from the template folder with the given context
+    """
+    # get URL variables
     args = dict(request.form)
 
+    # open database connection (rely on flask tear-down to close)
     db = get_db()
+
+    # obtain the next available project ID number
     cursor = db.cursor()
-    sql = 'select AUTO_INCREMENT from information_schema.TABLES where TABLE_SCHEMA = "mdt_tracker" and TABLE_NAME = "projects"'
+    sql = (
+        "select AUTO_INCREMENT from information_schema.TABLES where "
+        + 'TABLE_SCHEMA = "mdt_tracker" and TABLE_NAME = "projects"'
+    )
     cursor.execute(sql)
     nextid = cursor.fetchone()["AUTO_INCREMENT"]
 
+    # assign next available id if a new project is being entered
     if args["project_id"] == "new":
         args["project_id"] = nextid
 
+    # prevent user from adding a new project number out of sequence
     if int(args["project_id"]) > int(nextid):
         return render_template("page-500.html", msg="Project ID is too high.")
+
+    # loop over keys and values to construct a SQL call
     keys = str(",").join([f"{x}" for x in list(args.keys())])
     keys = f"({keys})"
     vals = str(",").join([f"'{x}'" for x in list(args.values())])
     vals = f"({vals})"
     update = str(",").join([f"{k}='{v}'" for (k, v) in args.items()])
     sql = f"INSERT into projects {keys} VALUES {vals} ON DUPLICATE KEY UPDATE {update}"
+
+    # execute command, flush the database, and close the cursor
     cursor.execute(sql)
     db.commit()
     cursor.close()
 
+    # create a project id map table in the database if it doesn't exist
     create_project_map(args["project_name"])
 
     return render_template("success.html", msg="Updated project successfully.")
@@ -58,7 +81,7 @@ def display_project(project_name):
         table_data = {}
         table_data["title"] = k
         if "remap_sql" in list(config[k].keys()):
-            _remap_sql = config[k]['remap_sql']
+            _remap_sql = config[k]["remap_sql"]
             _remap_sql = f"where {_remap_sql}" if (len(_remap_sql) > 0) else ""
             sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id {_remap_sql} order by B.experiment_id DESC"
             cursor.execute(sql_)
