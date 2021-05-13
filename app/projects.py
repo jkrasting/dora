@@ -1,14 +1,17 @@
 """ Module for project-related pages """
 
 import yaml
-
-from .project_util import *
-
-from app import app
 from flask import request
 from flask import render_template
-
 from flask_login import current_user
+from app import app
+
+from .db import get_db
+from .project_util import (
+    associate_with_project,
+    create_project_map,
+    list_projects,
+)
 
 
 @app.route("/admin/project_update.html", methods=["POST"])
@@ -69,7 +72,10 @@ def display_project(project_name):
         auth_proj = auth_proj + current_user.perm_view
     db = get_db()
     cursor = db.cursor()
-    sql = f"SELECT project_id,project_config,project_description from projects where project_name='{project_name}'"
+    sql = (
+        "SELECT project_id,project_config,project_description "
+        + f"from projects where project_name='{project_name}'"
+    )
     cursor.execute(sql)
     config_result = cursor.fetchone()
     if config_result["project_config"] != "":
@@ -83,7 +89,10 @@ def display_project(project_name):
         if "remap_sql" in list(config[k].keys()):
             _remap_sql = config[k]["remap_sql"]
             _remap_sql = f"where {_remap_sql}" if (len(_remap_sql) > 0) else ""
-            sql_ = f"SELECT A.*,B.* from master A join {project_name}_map B on A.id = B.master_id {_remap_sql} order by B.experiment_id DESC"
+            sql_ = (
+                f"SELECT A.*,B.* from master A join {project_name}_map "
+                + f"B on A.id = B.master_id {_remap_sql} order by B.experiment_id DESC"
+            )
             cursor.execute(sql_)
             table_data["experiments"] = cursor.fetchall()
             for x in table_data["experiments"]:
@@ -99,18 +108,20 @@ def display_project(project_name):
                 "page-500.html", msg="Malformed SQL query in project config."
             )
         tables.append(table_data)
-    cursor.close
+    cursor.close()
     if project_name in auth_proj:
-        return render_template(
+        result = render_template(
             "view-table.html",
             tables=tables,
             project_name=project_name,
             project_description=config_result["project_description"],
         )
     else:
-        return render_template(
+        result = render_template(
             "page-500.html", msg=f"You are not authorized to view {project_name}"
         )
+
+    return result
 
 
 @app.route("/admin/projects/<project_id>")
@@ -147,7 +158,6 @@ def project_list_view():
 
 @app.route("/admin/projects/membership/<project_name>")
 def project_membership(project_name):
-    projects = [project[1] for project in list_projects()]
     db = get_db()
     cursor = db.cursor()
     sql = "select id,userName,expName from master"
@@ -189,8 +199,8 @@ def project_membership_update():
     print(new_members)
 
     # logical for permission error
-    permission_add = True if project_name in current_user.perm_add else False
-    permission_del = True if project_name in current_user.perm_del else False
+    permission_add = project_name in current_user.perm_add
+    permission_del = project_name in current_user.perm_del
 
     # determine if user had permission to make changes
     add_list = list(set(new_members) - set(current_members))
@@ -200,9 +210,10 @@ def project_membership_update():
         len(remove_list) > 0 and not permission_del
     ):
         cursor.close()
-        return render_template(
+        result = render_template(
             "page-500.html",
-            msg=f"You are not authorized to make this project modifcation. Please check your permissions.",
+            msg="You are not authorized to make this project modifcation. "
+            + "Please check your permissions.",
         )
     else:
         if len(add_list) > 0:
@@ -219,6 +230,8 @@ def project_membership_update():
 
         cursor.close()
 
-        return render_template(
+        result = render_template(
             "success.html", msg="Updated project membership successfully."
         )
+
+    return result
