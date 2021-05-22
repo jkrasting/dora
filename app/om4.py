@@ -1,6 +1,10 @@
 import base64
+import glob
 import io
+from operator import itemgetter
+from operator import attrgetter
 import os
+import traceback
 
 import om4labs
 from flask import render_template
@@ -45,7 +49,6 @@ def jsonify_dirtree(dirpath, pptype="av"):
 
     elif pptype == "ts":
         for component in os.scandir(dirpath):
-            print(component)
             if (
                 component.name.startswith("ocean") or component.name.startswith("ice")
             ) and component.is_dir():
@@ -131,8 +134,8 @@ def om4labs_start():
 
     # Get the requested analysis from the URL or provide user with
     # a menu of available diagnostics in OM4Labs
-    analysis = request.args.get("analysis")
-    if analysis is None:
+    analysis = request.args.getlist("analysis")
+    if analysis == []:
         avail_diags = [x for x in dir(om4labs.diags) if not x.startswith("__")]
         exclude = ["avail", "generic"]
         avail_diags = [x for x in avail_diags if not any(diag in x for diag in exclude)]
@@ -140,7 +143,6 @@ def om4labs_start():
             (diag, eval(f"om4labs.diags.{diag}.__description__"))
             for diag in avail_diags
         ]
-        print(avail_diags)
         return render_template(
             "om4labs-start.html",
             avail_diags=avail_diags,
@@ -148,83 +150,182 @@ def om4labs_start():
             experiment=experiment,
         )
 
-    # Get the list of files to analyse from the URL or provide user with
-    # a clickable menu to browse for files to analyse
-    files = request.args.get("files")
+    # get the start and end years for the analysis
+    # (rely on browser to make sure user enters values)
+    startyr = int(request.args.get("startyr"))
+    endyr = int(request.args.get("endyr"))
 
-    # The "section transports" diagnostic accepts a top-level pp dir
-    if analysis in ["section_transports"]:
-        files = []
-    else:
-        pptype = "ts" if analysis == "seaice" else "av"
-        files = "" if files is None else files
-        if len(files) == 0:
-            jsondir = jsonify_dirtree(experiment.pathPP, pptype=pptype)
-            return render_template(
-                "file-browser.html", jsondir=jsondir, analysis=analysis, idnum=idnum
+    # default directories
+    default_dirs = {
+        "heat_transport": "ocean_monthly",
+        "moc": "ocean_annual_z",
+        "seaice": "ice_1x1deg",
+        "section_transports": None,
+        "so_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
+        "sss_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
+        "sst_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
+        "thetao_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
+    }
+
+    def daterange(fname):
+        fname = fname.split(".")[1]
+        return tuple([int(x) for x in fname.split("-")])
+
+    def in_daterange(fname, startyr, endyr):
+        try:
+            fname = daterange(os.path.basename(fname))
+            if (fname[1] < int(startyr)) or (fname[0] > int(endyr)):
+                result = False
+            else:
+                result = True
+        except:
+            result = False
+        return result
+
+    class Filegroup:
+        def __init__(self, rootpath, filelist):
+
+            assert isinstance(filelist, list), "A list must be provided"
+
+            # setup pp directory path and get number of files
+            self.rootpath = rootpath
+            self.filelist = filelist
+            self.nfiles = len(filelist)
+            self.paths = sorted([f"{rootpath}/{x}" for x in filelist])
+
+            # determine the range of years in the file group
+            ranges = [daterange(x) for x in self.filelist]
+            ranges = [x for sublist in ranges for x in sublist]
+            self.range = (min(ranges), max(ranges))
+
+        def compare(self, startyr, endyr):
+            local_set = set(range(self.range[0], self.range[1]))
+            expected_set = set(range(int(startyr), int(endyr)))
+            self.mismatched = max(
+                len(local_set - expected_set), len(expected_set - local_set)
             )
-        files = files.split(",")
+            return self
 
-    # infer static file from frepp structure
-    if len(files) > 0:
-        static = files[0].split("/")[0]
-        static = f"{experiment.pathPP}/{static}/{static}.static.nc"
-        files = [f"{experiment.pathPP}/{x}" for x in files if not x.startswith("j1")]
-    else:
-        static = None
+        def __len__(self):
+            return len(self.filelist)
 
-    # Intialize and empty dictionary of options pertaining to the
-    # requested diagnostic
-    dict_args = om4labs.diags.__dict__[analysis].parse(template=True)
+    def optimize_selection(ncfiles, startyr, endyr):
+        ncfiles = [tuple(os.path.split(x)) for x in ncfiles]
+        groups = {}
+        for x in ncfiles:
+            if x[0] not in groups.keys():
+                groups[x[0]] = [x[1]]
+            else:
+                groups[x[0]].append(x[1])
 
-    # Tell OM4Labs we want streaming image buffers back
-    dict_args["format"] = "stream"
+        groups = [Filegroup(k, v) for k, v in groups.items()]
+        groups = [x.compare(startyr, endyr) for x in groups]
+        minval = min(groups, key=attrgetter("mismatched")).mismatched
+        groups = [x for x in groups if x.mismatched == minval]
 
-    # Populate various options for running the diagnostic from
-    # the experiment metadata
-    dict_args["label"] = experiment.expName
-    dict_args["ppdir"] = [experiment.pathPP]
+        if len(groups) >= 1:
+            groups = min(groups, key=attrgetter("nfiles"))
+        else:
+            raise ValueError("Unable to find suitable date range")
 
-    # Tell OM4Labs where to find the observational data
-    dict_args["platform"] = os.environ["OM4LABS_PLATFORM"]
+        return groups.paths
 
-    # Remove any cases where a diagnostic defines a default model
-    # configuration and rely solely on the experiment's static file
-    dict_args["config"] = None
+    class Diagnostic:
+        """Container class for an OM4labs diagnostic"""
 
-    # Pass in the paths to the selected files and the inferred
-    # static / topog file
-    dict_args["infile"] = files
-    dict_args["static"] = static
-    dict_args["topog"] = static
+        def __init__(self, name, component, pptype="av"):
+            self.name = name
+            # Intialize and empty dictionary of options pertaining to the
+            # requested diagnostic
+            self.args = om4labs.diags.__dict__[name].parse(template=True)
+            # Tell OM4Labs where to find the observational data
+            self.args["platform"] = os.environ["OM4LABS_PLATFORM"]
+            # Tell OM4Labs we want streaming image buffers back
+            self.args["format"] = "stream"
+            # Remove any cases where a diagnostic defines a default model
+            # configuration and rely solely on the experiment's static file
+            self.args["config"] = None
+            # Assign component
+            self.component = component
+            # Assign pp type
+            self.pptype = pptype
 
-    # *** Run OM4Labs ***
-    imgbufs = om4labs.diags.__dict__[analysis].run(dict_args)
+        def _find_files(self):
+            ppdir = self.args["ppdir"][0] + self.component
+            ppdir = f"{ppdir}/{self.pptype}"
+            ncfiles = glob.glob(f"{ppdir}/**/*.nc", recursive=True)
+            assert len(ncfiles) > 0, f"No files found in {ppdir}."
+            ncfiles = [x for x in ncfiles if in_daterange(x, self.startyr, self.endyr)]
+            ncfiles = optimize_selection(ncfiles, self.startyr, self.endyr)
+            return ncfiles
 
-    # some diagnostics may return images and a file, separate them here
-    if isinstance(imgbufs, tuple):
-        bytebuffer = imgbufs[1]
-        imgbufs = imgbufs[0]
-        download_flag = True
-    else:
-        download_flag = False
+        def update_component(self):
+            ppdir = self.args["ppdir"][0]
+            _component1 = self.component + "_d2"
+            _component2 = self.component.replace("_1x1deg", "_d2_1x1deg")
+            if os.path.exists(ppdir + _component1):
+                self.component = _component1
+            elif os.path.exists(ppdir + _component2):
+                self.component = _component2
 
-    # Download file if "savefile" CGI variable is present
-    if request.args.get("savefile") is not None:
-        bytebuffer = io.BytesIO(bytebuffer)
-        return send_file(
-            bytebuffer,
-            as_attachment=True,
-            attachment_filename=f"{experiment.expName}.passages.nc",
-            mimetype="application/netcdf",
-        )
+        def run(self, ppdir, label, startyr, endyr):
 
-    else:
-        # Convert image buffers to in-lined images
-        figures = [base64it(x) for x in imgbufs]
-        return render_template(
-            "om4labs-results.html",
-            figures=figures,
-            experiment=experiment,
-            download_flag=download_flag,
-        )
+            try:
+                # set name and post-processing dir
+                self.args["label"] = label
+                self.args["ppdir"] = [ppdir]
+
+                # determine input files
+                exclude_list = ["section_transports"]
+                if self.name not in exclude_list:
+                    # look for _d2 files
+                    self.update_component()
+                    # determine the input files
+                    self.startyr = startyr
+                    self.endyr = endyr
+                    self.args["infile"] = self._find_files()
+                    # get the static file
+                    self.args[
+                        "static"
+                    ] = f"{ppdir}/{self.component}/{self.component}.static.nc"
+                    self.args["topog"] = self.args["static"]
+
+                # run the diagnostic
+                results = om4labs.diags.__dict__[self.name].run(self.args)
+
+                # some diagnostics may return images and a file, separate them here
+                if isinstance(results, tuple):
+                    self.files = results[1]
+                    self.figures = results[0]
+                else:
+                    self.files = []
+                    self.figures = results
+
+                self.figures = [base64it(x) for x in self.figures]
+                self.success = True
+
+            except Exception as e:
+                self.error = traceback.format_exc()
+                self.files = []
+                self.figures = []
+                self.success = False
+
+            return self
+
+    diags = [Diagnostic(x, default_dirs[x]) for x in analysis]
+    diags = [
+        x.run(experiment.pathPP, experiment.expName, startyr, endyr) for x in diags
+    ]
+
+    passed = [x for x in diags if x.success is True]
+    failed = [x for x in diags if x.success is False]
+
+    # Convert image buffers to in-lined images
+    download_flag = False
+    return render_template(
+        "om4labs-results.html",
+        experiment=experiment,
+        download_flag=download_flag,
+        passed=passed,
+        failed=failed,
+    )

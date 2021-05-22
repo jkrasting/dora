@@ -1,6 +1,6 @@
 {% extends "layouts/base.html" %}
 
-{% block title %} Blank Page {% endblock %}
+{% block title %} OM4Labs Results {% endblock %}
 
 <!-- Element injected in the BODY element -->
 {% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
@@ -32,7 +32,7 @@
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
                         <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active">Start</li>
+                        <li class="breadcrumb-item active">OM4Labs Results</li>
                     </ol>
                 </div>
             </div>
@@ -43,13 +43,15 @@
     <section class="content">
 
         <!-- Default box -->
-        <div class="card">
+        {% for diag in passed %}
+
+        <div class="card collapsed-card">
             <div class="card-header">
-                <h3 class="card-title">{{experiment.expName}}</h3>
+                <h3 class="card-title">{{diag.name}}</h3>
 
                 <div class="card-tools">
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                        <i class="fas fa-minus"></i>
+                        <i class="fas fa-plus"></i>
                     </button>
                     <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
                         <i class="fas fa-times"></i>
@@ -57,7 +59,7 @@
                 </div>
             </div>
             <div class="card-body">
-                {% for fig in figures %}
+                {% for fig in diag.figures %}
                 <img src="{{ fig | safe }}"/><br>
                 {% endfor %}
 
@@ -67,11 +69,42 @@
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
-                Footer
             </div>
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endfor %}
+
+
+        {% for diag in failed %}
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">{{diag.name}}</h3>
+
+                <div class="card-tools">
+                    <span class="badge badge-danger">ERROR</span>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <pre>{{ diag.error | safe }}</pre>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+        {% endfor %}
+
+
+
 
     </section>
     <!-- /.content -->

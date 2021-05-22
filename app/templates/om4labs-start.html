@@ -62,8 +62,8 @@
                 <form method="/om4labs/analysis" method="GET">
                     <div class="form-group">
                         {% for diag in avail_diags %}
-                        <div class="custom-control custom-radio">
-                            <input class="custom-control-input" type="radio" id="analysis{{loop.index}}" name="analysis"
+                        <div class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" id="analysis{{loop.index}}" name="analysis"
                                    value="{{diag[0]}}">
                             <label for="analysis{{loop.index}}" class="custom-control-label">{{diag[0]}} <p
                                     class="text-muted"><i>{{diag[1]}}</i></p></label>
@@ -71,6 +71,27 @@
                         {% endfor %}
                     </div>
                     <input type="hidden" name="id" value="{{idnum}}">
+                <div>
+                    Specify a year range for analysis:
+                <div class="row">
+                  <div class="col-2">
+                    <div class="input-group mb-3">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                      </div>
+                      <input type="text" class="form-control" name="startyr" placeholder="Start Year" required>
+                    </div>
+                    </div>
+                  <div class="col-2">
+                    <div class="input-group mb-3">
+                      <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="fas fa-clock"></i></span>
+                      </div>
+                      <input type="text" class="form-control" name="endyr" placeholder="End Year" required>
+                    </div>
+                    </div>
+                </div>
+                </div>
             </div>
             <!-- /.card-body -->
             <div class="card-footer">
