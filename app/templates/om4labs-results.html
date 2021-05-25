@@ -42,6 +42,37 @@
     <!-- Main content -->
     <section class="content">
 
+        {% if infiles|length > 0 %}
+
+        <div class="callout callout-warning">
+
+            The following files are needed to perform this analysis. To speed up the the analysis,
+            or in the event of a server timeout, consider recalling these files first from tape:
+
+            <pre>cd {{experiment.pathPP}} {{"\n"|safe}}dmget {{infiles|join(", ")}} </pre>
+
+            <form method="/om4labs/analysis" method="GET">
+
+                {% for key, value in args.items() %}
+                {% if key != "analysis" %}
+                <input type="hidden" name="{{key}}" value="{{value}}">
+                {% endif %}
+                {% endfor %}
+
+                {% for x in analysis %}
+                <input type="hidden" name="analysis" value="{{x}}">
+                {% endfor %}
+                <input type="hidden" name="validated" value="True">
+
+                <button type="submit" class="btn btn-primary">Continue with Analysis</button>
+            </form>
+        </div>
+        <!-- /.card -->
+
+
+        {% else %}
+
+
         <!-- Default box -->
         {% for diag in passed %}
 
@@ -75,6 +106,7 @@
         <!-- /.card -->
         {% endfor %}
 
+        {% endif %}
 
         {% for diag in failed %}
 
@@ -102,8 +134,6 @@
         </div>
         <!-- /.card -->
         {% endfor %}
-
-
 
 
     </section>

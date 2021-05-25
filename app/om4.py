@@ -158,7 +158,7 @@ def om4labs_start():
     # default directories
     default_dirs = {
         "heat_transport": "ocean_monthly",
-        "moc": "ocean_annual_z",
+        "moc": "ocean_annual_z23",
         "seaice": "ice_1x1deg",
         "section_transports": None,
         "so_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
@@ -268,7 +268,7 @@ def om4labs_start():
             elif os.path.exists(ppdir + _component2):
                 self.component = _component2
 
-        def run(self, ppdir, label, startyr, endyr):
+        def resolve_files(self, ppdir, label, startyr, endyr):
 
             try:
                 # set name and post-processing dir
@@ -289,7 +289,22 @@ def om4labs_start():
                         "static"
                     ] = f"{ppdir}/{self.component}/{self.component}.static.nc"
                     self.args["topog"] = self.args["static"]
+                else:
+                    self.args["infile"] = []
 
+                self.success = True
+
+            except Exception as e:
+                self.error = traceback.format_exc()
+                self.files = []
+                self.figures = []
+                self.success = False
+
+            return self
+
+        def run(self):
+
+            try:
                 # run the diagnostic
                 results = om4labs.diags.__dict__[self.name].run(self.args)
 
@@ -302,7 +317,6 @@ def om4labs_start():
                     self.figures = results
 
                 self.figures = [base64it(x) for x in self.figures]
-                self.success = True
 
             except Exception as e:
                 self.error = traceback.format_exc()
@@ -313,17 +327,40 @@ def om4labs_start():
             return self
 
     diags = [Diagnostic(x, default_dirs[x]) for x in analysis]
-    diags = [
-        x.run(experiment.pathPP, experiment.expName, startyr, endyr) for x in diags
-    ]
 
+    diags = [
+        x.resolve_files(experiment.pathPP, experiment.expName, startyr, endyr)
+        for x in diags
+    ]
     passed = [x for x in diags if x.success is True]
     failed = [x for x in diags if x.success is False]
+
+    validated = request.args.get("validated")
+
+    if validated is None:
+        infiles = [x.args["infile"] for x in passed]
+        infiles = [x for sublist in infiles for x in sublist]
+        infiles = [x.replace(experiment.pathPP, "") for x in infiles]
+    elif validated == "True":
+        infiles = []
+
+        failed_resolve = failed
+
+        diags = [x.run() for x in diags if x.success is True]
+
+        print(diags)
+
+        passed = [x for x in diags if x.success is True]
+        failed = [x for x in diags if x.success is False]
+        failed = failed + failed_resolve
 
     # Convert image buffers to in-lined images
     download_flag = False
     return render_template(
         "om4labs-results.html",
+        args=request.args,
+        analysis=analysis,
+        infiles=infiles,
         experiment=experiment,
         download_flag=download_flag,
         passed=passed,
