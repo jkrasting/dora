@@ -158,7 +158,7 @@ def om4labs_start():
     # default directories
     default_dirs = {
         "heat_transport": "ocean_monthly",
-        "moc": "ocean_annual_z23",
+        "moc": "ocean_annual_z",
         "seaice": "ice_1x1deg",
         "section_transports": None,
         "so_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
