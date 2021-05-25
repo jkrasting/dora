@@ -46,6 +46,14 @@ class Experiment:
     def __init__(self, input, db=None):
         self.__dict__ = {k: None for k in self.expected_keys}
 
+        def fix_dir_paths(dict_items):
+            for k in dict_items.keys():
+                value = dict_items[k]
+                if isinstance(value, str):
+                    if "path" in k.lower():
+                        dict_items[k] = value + "/" if value[-1] != "/" else value
+            return dict_items
+
         def _fetch_from_master(master_id, db=None):
             db = get_db() if db is None else db
             cursor = db.cursor()
@@ -64,6 +72,7 @@ class Experiment:
             self.id = str(input)
             self.source = "sql"
             result = _fetch_from_master(self.id, db=db)
+            result = fix_dir_paths(result)
             self.__dict__ = {**self.__dict__, **result}
 
         elif input[0:5] == "exper":
@@ -107,6 +116,7 @@ class Experiment:
             self.id = str(input)
             self.source = "sql"
             result = _fetch_from_master(master_id, db=db)
+            result = fix_dir_paths(result)
             self.__dict__ = {**self.__dict__, **result}
 
         # else:
