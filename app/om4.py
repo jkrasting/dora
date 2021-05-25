@@ -195,8 +195,12 @@ def om4labs_start():
 
             # determine the range of years in the file group
             ranges = [daterange(x) for x in self.filelist]
+            span = [list(range(x[0], x[1] + 1)) for x in ranges]
             ranges = [x for sublist in ranges for x in sublist]
+            self.span = sorted([x for sublist in span for x in sublist])
             self.range = (min(ranges), max(ranges))
+            gap_len = len(set(range(self.range[0], self.range[1])) - set(self.span))
+            self.monotonic = True if (gap_len == 0) else False
 
         def compare(self, startyr, endyr):
             local_set = set(range(self.range[0], self.range[1]))
@@ -204,6 +208,7 @@ def om4labs_start():
             self.mismatched = max(
                 len(local_set - expected_set), len(expected_set - local_set)
             )
+
             return self
 
         def __len__(self):
@@ -225,6 +230,10 @@ def om4labs_start():
 
         if len(groups) >= 1:
             groups = min(groups, key=attrgetter("nfiles"))
+            assert groups.monotonic, (
+                "Non-monotonic file group encountered. "
+                + "There are likely gaps in the post-processing that need to be fixed."
+            )
         else:
             raise ValueError("Unable to find suitable date range")
 
@@ -347,8 +356,6 @@ def om4labs_start():
         failed_resolve = failed
 
         diags = [x.run() for x in diags if x.success is True]
-
-        print(diags)
 
         passed = [x for x in diags if x.success is True]
         failed = [x for x in diags if x.success is False]
