@@ -1,0 +1,241 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Model-Model Comparisons {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+<!-- Bootstrap4 Duallistbox -->
+<link rel="stylesheet" href="/static/assets/plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Model-Model Comparison Start Page</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Model-Model Comparison</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form action="/analysis/diffmaps" method="GET">
+            {% for id in idnum %}
+            <input type="hidden" name="id" value="{{id}}">
+            {% endfor %}
+
+
+            <!-- Default box -->
+            <div style="width:80%;">
+
+                {% if component is none %}
+                <div class="card card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">Select a Component</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p>The following components are common to both experiments. Select one component to analyze:</p>
+
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Component</label>
+                                <select class="form-control" id="component" name="component">
+                                    {% for comp in components %}
+                                    <option value="{{comp}}">{{comp}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+
+                            <div class="form-group">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="common" name="common"
+                                           value="1" checked="checked">
+                                    <label class="custom-control-label" for="common">Show times common to both
+                                        experiments</label>
+                                </div>
+                            </div>
+
+
+                        </div>
+
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                    <!-- /.card-footer-->
+                </div>
+                <!-- /.card -->
+
+                {% else %}
+
+                <input type="hidden" name="component" value="{{component}}">
+                <input type="hidden" name="common" value="{{common}}">
+
+
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        {% if common == true %}
+                        <h3 class="card-title">Files Common to Both Experiments</h3>
+                        {% else %}
+                        <h3 class="card-title">{{groups[0].experiment.expName}}</h3>
+                        {% endif %}
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                {% for grp in groups[0].filegroups %}
+                                <div class="form-group">
+                                    <label>{{grp.rootpath}}</label>
+                                    <select class="duallistbox" multiple="multiple" name="file1">
+                                        {% for file in grp.filelist %}
+                                        <option>{{file}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endfor %}
+                                <!-- /.form-group -->
+                            </div>
+                            <!-- /.col -->
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        {% if common %}
+                        <button type="submit" class="btn btn-primary">Submit</button>
+
+                        {% endif %}
+                    </div>
+                </div>
+                <!-- /.card -->
+
+
+                {% if not common %}
+
+                <div class="card card-secondary">
+                    <div class="card-header">
+                        <h3 class="card-title">{{groups[1].experiment.expName}}</h3>
+
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12">
+                                {% for grp in groups[1].filegroups %}
+                                <div class="form-group">
+                                    <label>{{grp.rootpath}}</label>
+                                    <select class="duallistbox" multiple="multiple" name="file2">
+                                        {% for file in grp.filelist %}
+                                        <option>{{file}}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                {% endfor %}
+                                <!-- /.form-group -->
+                            </div>
+                            <!-- /.col -->
+                        </div>
+                        <!-- /.row -->
+                    </div>
+                    <!-- /.card-body -->
+                    <div class="card-footer">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </div>
+                <!-- /.card -->
+
+
+                {% endif %}
+
+
+                {% endif %}
+
+            </div>
+
+    </section>
+    <!-- /.content -->
+</div>
+
+</form>
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- Bootstrap4 Duallistbox -->
+<script src="/static/assets/plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+
+<!-- Page script -->
+<script>
+    $(function () {
+      //Bootstrap Duallistbox
+      $('.duallistbox').bootstrapDualListbox()
+    })
+
+</script>
+
+{% endblock javascripts %}

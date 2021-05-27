@@ -34,6 +34,7 @@ from app.user import User
 from .xml import parse_xml
 
 from .om4 import *
+from .diffmaps import *
 from .auth import *
 from .cvdp import *
 from .globals import *
@@ -65,7 +66,7 @@ def index(path):
         try:
             result = render_template(path, **user_params)
         except Exception as e:
-            return "Site is under maintenance. "+str(e)
+            return "Site is under maintenance. " + str(e)
 
         return result
 
