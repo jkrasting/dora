@@ -2,7 +2,6 @@ import base64
 import glob
 import io
 from operator import itemgetter
-from operator import attrgetter
 import os
 import traceback
 
@@ -14,83 +13,7 @@ from flask import send_file
 from app import app
 from .Experiment import Experiment
 
-
-def jsonify_dirtree(dirpath, pptype="av"):
-    """Returns a post-processing directory tree
-
-    Parameters
-    ----------
-    dirpath : str, path-like
-        Path to top-level "pp" directory
-    pptype : str, optional
-        Type of post-processed files to return
-        either "av" or "ts", by default "av"
-
-    Returns
-    -------
-    dict
-        Dictionary of files and options to pass to file browser
-    """
-
-    filelist = []
-    if pptype == "av":
-        for component in os.scandir(dirpath):
-            if (
-                component.name.startswith("ocean") or component.name.startswith("ice")
-            ) and component.is_dir():
-                for pptype in os.scandir(component):
-                    if pptype.name.startswith("av"):
-                        for timechunk in os.scandir(pptype):
-                            if timechunk.is_dir():
-                                for filename in os.scandir(timechunk):
-                                    filelist.append(
-                                        f"{component.name}/{pptype.name}/{timechunk.name}/{filename.name}"
-                                    )
-
-    elif pptype == "ts":
-        for component in os.scandir(dirpath):
-            if (
-                component.name.startswith("ocean") or component.name.startswith("ice")
-            ) and component.is_dir():
-                for pptype in os.scandir(component):
-                    if pptype.name.startswith("ts"):
-                        for freq in os.scandir(pptype):
-                            if freq.is_dir():
-                                for timechunk in os.scandir(freq):
-                                    if timechunk.is_dir():
-                                        for filename in os.scandir(timechunk):
-                                            filelist.append(
-                                                f"{component.name}/{pptype.name}/{freq.name}/{timechunk.name}/{filename.name}"
-                                            )
-
-    filelist = sorted(filelist)
-    filesplit = sorted([x.split("/") for x in filelist])
-    dirs = sorted(list(set([str("/").join(x[0:3]) for x in filesplit])))
-
-    filedict = {
-        "id": "",
-        "text": "pp",
-        "icon": "jstree-folder",
-        "state": {"opened": "true"},
-        "children": [
-            {
-                "id": "",
-                "text": directory,
-                "icon": "jstree-folder",
-                "children": [
-                    {
-                        "id": x,
-                        "text": x.replace(f"{directory}/", ""),
-                        "icon": "jstree-file",
-                    }
-                    for x in filelist
-                    if x.startswith(directory)
-                ],
-            }
-            for directory in dirs
-        ],
-    }
-    return filedict
+from .frepptools import Filegroup, in_daterange, optimize_filegroup_selection
 
 
 def base64it(imgbuf):
@@ -111,6 +34,146 @@ def base64it(imgbuf):
         "utf-8"
     ).replace("\n", "")
     return uri
+
+
+class Diagnostic:
+    """Container class for an OM4labs diagnostic"""
+
+    def __init__(self, name, component, pptype="av"):
+        """Initalize an OM4Labs diagnostic
+
+        Parameters
+        ----------
+        name : str
+            Diagnostic name
+        component : str
+            Post-processing component
+        pptype : str, optional
+            Post-processing stream to use, by default "av"
+        """
+        self.name = name
+        # Intialize and empty dictionary of options pertaining to the
+        # requested diagnostic
+        self.args = om4labs.diags.__dict__[name].parse(template=True)
+        # Tell OM4Labs where to find the observational data
+        self.args["platform"] = os.environ["OM4LABS_PLATFORM"]
+        # Tell OM4Labs we want streaming image buffers back
+        self.args["format"] = "stream"
+        # Remove any cases where a diagnostic defines a default model
+        # configuration and rely solely on the experiment's static file
+        self.args["config"] = None
+        # Assign component
+        self.component = component
+        # Assign pp type
+        self.pptype = pptype
+
+    def _find_files(self):
+        """Resolves paths to post-processing files
+
+        Returns
+        -------
+        list
+            List of files
+        """
+        ppdir = self.args["ppdir"][0] + self.component
+        ppdir = f"{ppdir}/{self.pptype}"
+        ncfiles = glob.glob(f"{ppdir}/**/*.nc", recursive=True)
+        assert len(ncfiles) > 0, f"No files found in {ppdir}."
+        ncfiles = [x for x in ncfiles if in_daterange(x, self.startyr, self.endyr)]
+        ncfiles = optimize_filegroup_selection(ncfiles, self.startyr, self.endyr)
+        return ncfiles
+
+    def update_component(self):
+        """Use downsampled `_d2` output if available"""
+        ppdir = self.args["ppdir"][0]
+        _component1 = self.component + "_d2"
+        _component2 = self.component.replace("_1x1deg", "_d2_1x1deg")
+        if os.path.exists(ppdir + _component1):
+            self.component = _component1
+        elif os.path.exists(ppdir + _component2):
+            self.component = _component2
+
+    def resolve_files(self, ppdir, label, startyr, endyr):
+        """Resolves what post-processing files to use
+
+        Parameters
+        ----------
+        ppdir : str, path-like
+            Path to post-processing directory
+        label : str
+            Experiment name
+        startyr : int
+            Start year
+        endyr : int
+            End year
+
+        Returns
+        -------
+        Diagnostic
+            Updated Diagnostic object with paths
+        """
+
+        try:
+            # set name and post-processing dir
+            self.args["label"] = label
+            self.args["ppdir"] = [ppdir]
+
+            # determine input files
+            exclude_list = ["section_transports"]
+            if self.name not in exclude_list:
+                # look for _d2 files
+                self.update_component()
+                # determine the input files
+                self.startyr = startyr
+                self.endyr = endyr
+                self.args["infile"] = self._find_files()
+                # get the static file
+                self.args[
+                    "static"
+                ] = f"{ppdir}/{self.component}/{self.component}.static.nc"
+                self.args["topog"] = self.args["static"]
+            else:
+                self.args["infile"] = []
+
+            self.success = True
+
+        except Exception as e:
+            self.error = traceback.format_exc()
+            self.files = []
+            self.figures = []
+            self.success = False
+
+        return self
+
+    def run(self):
+        """Runs the OM4Labs diagnostic
+
+        Returns
+        -------
+        Diagnostic
+            Updated diagnostic object with results
+        """
+        try:
+            # run the diagnostic
+            results = om4labs.diags.__dict__[self.name].run(self.args)
+
+            # some diagnostics may return images and a file, separate them here
+            if isinstance(results, tuple):
+                self.files = results[1]
+                self.figures = results[0]
+            else:
+                self.files = []
+                self.figures = results
+
+            self.figures = [base64it(x) for x in self.figures]
+
+        except Exception as e:
+            self.error = traceback.format_exc()
+            self.files = []
+            self.figures = []
+            self.success = False
+
+        return self
 
 
 @app.route("/analysis/om4labs", methods=["GET"])
@@ -167,201 +230,46 @@ def om4labs_start():
         "thetao_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
     }
 
-    def daterange(fname):
-        fname = fname.split(".")[1]
-        return tuple([int(x) for x in fname.split("-")])
-
-    def in_daterange(fname, startyr, endyr):
-        try:
-            fname = daterange(os.path.basename(fname))
-            if (fname[1] < int(startyr)) or (fname[0] > int(endyr)):
-                result = False
-            else:
-                result = True
-        except:
-            result = False
-        return result
-
-    class Filegroup:
-        def __init__(self, rootpath, filelist):
-
-            assert isinstance(filelist, list), "A list must be provided"
-
-            # setup pp directory path and get number of files
-            self.rootpath = rootpath
-            self.filelist = filelist
-            self.nfiles = len(filelist)
-            self.paths = sorted([f"{rootpath}/{x}" for x in filelist])
-
-            # determine the range of years in the file group
-            ranges = [daterange(x) for x in self.filelist]
-            span = [list(range(x[0], x[1] + 1)) for x in ranges]
-            ranges = [x for sublist in ranges for x in sublist]
-            self.span = sorted([x for sublist in span for x in sublist])
-            self.range = (min(ranges), max(ranges))
-            gap_len = len(set(range(self.range[0], self.range[1])) - set(self.span))
-            self.monotonic = True if (gap_len == 0) else False
-
-        def compare(self, startyr, endyr):
-            local_set = set(range(self.range[0], self.range[1]))
-            expected_set = set(range(int(startyr), int(endyr)))
-            self.mismatched = max(
-                len(local_set - expected_set), len(expected_set - local_set)
-            )
-
-            return self
-
-        def __len__(self):
-            return len(self.filelist)
-
-    def optimize_selection(ncfiles, startyr, endyr):
-        ncfiles = [tuple(os.path.split(x)) for x in ncfiles]
-        groups = {}
-        for x in ncfiles:
-            if x[0] not in groups.keys():
-                groups[x[0]] = [x[1]]
-            else:
-                groups[x[0]].append(x[1])
-
-        groups = [Filegroup(k, v) for k, v in groups.items()]
-        groups = [x.compare(startyr, endyr) for x in groups]
-        minval = min(groups, key=attrgetter("mismatched")).mismatched
-        groups = [x for x in groups if x.mismatched == minval]
-
-        if len(groups) >= 1:
-            groups = min(groups, key=attrgetter("nfiles"))
-            assert groups.monotonic, (
-                "Non-monotonic file group encountered. "
-                + "There are likely gaps in the post-processing that need to be fixed."
-            )
-        else:
-            raise ValueError("Unable to find suitable date range")
-
-        return groups.paths
-
-    class Diagnostic:
-        """Container class for an OM4labs diagnostic"""
-
-        def __init__(self, name, component, pptype="av"):
-            self.name = name
-            # Intialize and empty dictionary of options pertaining to the
-            # requested diagnostic
-            self.args = om4labs.diags.__dict__[name].parse(template=True)
-            # Tell OM4Labs where to find the observational data
-            self.args["platform"] = os.environ["OM4LABS_PLATFORM"]
-            # Tell OM4Labs we want streaming image buffers back
-            self.args["format"] = "stream"
-            # Remove any cases where a diagnostic defines a default model
-            # configuration and rely solely on the experiment's static file
-            self.args["config"] = None
-            # Assign component
-            self.component = component
-            # Assign pp type
-            self.pptype = pptype
-
-        def _find_files(self):
-            ppdir = self.args["ppdir"][0] + self.component
-            ppdir = f"{ppdir}/{self.pptype}"
-            ncfiles = glob.glob(f"{ppdir}/**/*.nc", recursive=True)
-            assert len(ncfiles) > 0, f"No files found in {ppdir}."
-            ncfiles = [x for x in ncfiles if in_daterange(x, self.startyr, self.endyr)]
-            ncfiles = optimize_selection(ncfiles, self.startyr, self.endyr)
-            return ncfiles
-
-        def update_component(self):
-            ppdir = self.args["ppdir"][0]
-            _component1 = self.component + "_d2"
-            _component2 = self.component.replace("_1x1deg", "_d2_1x1deg")
-            if os.path.exists(ppdir + _component1):
-                self.component = _component1
-            elif os.path.exists(ppdir + _component2):
-                self.component = _component2
-
-        def resolve_files(self, ppdir, label, startyr, endyr):
-
-            try:
-                # set name and post-processing dir
-                self.args["label"] = label
-                self.args["ppdir"] = [ppdir]
-
-                # determine input files
-                exclude_list = ["section_transports"]
-                if self.name not in exclude_list:
-                    # look for _d2 files
-                    self.update_component()
-                    # determine the input files
-                    self.startyr = startyr
-                    self.endyr = endyr
-                    self.args["infile"] = self._find_files()
-                    # get the static file
-                    self.args[
-                        "static"
-                    ] = f"{ppdir}/{self.component}/{self.component}.static.nc"
-                    self.args["topog"] = self.args["static"]
-                else:
-                    self.args["infile"] = []
-
-                self.success = True
-
-            except Exception as e:
-                self.error = traceback.format_exc()
-                self.files = []
-                self.figures = []
-                self.success = False
-
-            return self
-
-        def run(self):
-
-            try:
-                # run the diagnostic
-                results = om4labs.diags.__dict__[self.name].run(self.args)
-
-                # some diagnostics may return images and a file, separate them here
-                if isinstance(results, tuple):
-                    self.files = results[1]
-                    self.figures = results[0]
-                else:
-                    self.files = []
-                    self.figures = results
-
-                self.figures = [base64it(x) for x in self.figures]
-
-            except Exception as e:
-                self.error = traceback.format_exc()
-                self.files = []
-                self.figures = []
-                self.success = False
-
-            return self
-
+    # Create a Diagnostic object for each requested analysis
     diags = [Diagnostic(x, default_dirs[x]) for x in analysis]
 
+    # Resolve the needed files for each diagostic
     diags = [
         x.resolve_files(experiment.pathPP, experiment.expName, startyr, endyr)
         for x in diags
     ]
+
+    # Separate into those that passed and failed file resolution
     passed = [x for x in diags if x.success is True]
     failed = [x for x in diags if x.success is False]
 
+    # See if the user acknowleged the need to pre-dmget the files
     validated = request.args.get("validated")
 
+    # If the user has *not* validated the files, display a list
+    # of files that the user should dmget on their own
     if validated is None:
         infiles = [x.args["infile"] for x in passed]
         infiles = [x for sublist in infiles for x in sublist]
         infiles = [x.replace(experiment.pathPP, "") for x in infiles]
+
     elif validated == "True":
+        # set infiles to an empty list - Jinja template will see this
+        # and not display the dmget card
         infiles = []
 
+        # carry over diagnostics that failed the file resolution,
+        # do not attempt to run them
         failed_resolve = failed
 
+        # *** run the diagnostics ****
         diags = [x.run() for x in diags if x.success is True]
 
+        # separate into those that passed and those that failed
         passed = [x for x in diags if x.success is True]
         failed = [x for x in diags if x.success is False]
         failed = failed + failed_resolve
 
-    # Convert image buffers to in-lined images
     download_flag = False
     return render_template(
         "om4labs-results.html",
