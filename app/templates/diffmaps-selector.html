@@ -48,9 +48,35 @@
             <input type="hidden" name="id" value="{{id}}">
             {% endfor %}
 
-
             <!-- Default box -->
             <div style="width:80%;">
+
+
+                {% if infiles is not none %}
+
+            {% for f in file1 %}
+            <input type="hidden" name="file1" value="{{f}}">
+            {% endfor %}
+                
+            {% for f in file2 %}
+            <input type="hidden" name="file2" value="{{f}}">
+            {% endfor %}
+                
+            <input type="hidden" name="component" value="{{component}}">
+            <input type="hidden" name="common" value="{{common}}">
+            <input type="hidden" name="validated" value="True">
+        <div class="callout callout-warning">
+
+            The following files are needed to perform this analysis. To speed up the the analysis,
+            or in the event of a server timeout, consider recalling these files first from tape:
+
+            <pre>dmget {{infiles|join(" ")}} </pre>
+                <button type="submit" class="btn btn-primary">Continue with Analysis</button>
+            </form>
+        </div>
+
+                {% else %}
+
 
                 {% if component is none %}
                 <div class="card card-primary">
@@ -201,6 +227,8 @@
 
                 {% endif %}
 
+
+                {% endif %}
 
                 {% endif %}
 

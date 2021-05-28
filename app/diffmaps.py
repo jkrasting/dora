@@ -52,6 +52,9 @@ def diffmaps_start():
             component=component,
             components=components,
             idnum=idnum,
+            infiles=None,
+            file1=None,
+            file2=None,
         )
 
     # Determine if overlapping files is requested
@@ -77,10 +80,38 @@ def diffmaps_start():
             common=common,
             groups=groups,
             idnum=idnum,
+            infiles=None,
+            file1=None,
+            file2=None,
         )
 
     # if common times requested, use the same filelist for both
     if common:
         file2 = file1
+
+    # weed out files that are not requested
+    groups[0] = groups[0].exclude_files(file1)
+    groups[1] = groups[1].exclude_files(file2)
+
+    # resolve paths
+    infiles = [x.reconstitute_files() for x in groups]
+    infiles = [x for sublist in infiles for x in sublist]
+
+    # See if the user acknowleged the need to pre-dmget the files
+    validated = request.args.get("validated")
+
+    # If the user has *not* validated the files, display a list
+    # of files that the user should dmget on their own
+    if validated is None:
+        return render_template(
+            "diffmaps-selector.html",
+            component=component,
+            common=common,
+            groups=groups,
+            idnum=idnum,
+            file1=file1,
+            file2=file2,
+            infiles=infiles,
+        )
 
     return ""

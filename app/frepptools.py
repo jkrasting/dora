@@ -196,7 +196,7 @@ def optimize_filegroup_selection(ncfiles, startyr, endyr):
     else:
         raise ValueError("Unable to find suitable date range")
 
-    return groups.paths
+    return groups.paths()
 
 
 class Filegroup:
@@ -219,7 +219,6 @@ class Filegroup:
         self.rootpath = rootpath
         self.filelist = filelist
         self.nfiles = len(filelist)
-        self.paths = sorted([f"{rootpath}/{x}" for x in filelist])
 
         # determine the range of years in the file group
         ranges = [daterange(x) for x in self.filelist]
@@ -253,6 +252,10 @@ class Filegroup:
 
         return self
 
+    def paths(self):
+        """Returns a list of resolved paths"""
+        return sorted([f"{self.rootpath}/{x}" for x in self.filelist])
+
 
 class Componentgroup:
     """ Object describing a frepp-generated post-processing component directory """
@@ -276,6 +279,14 @@ class Componentgroup:
         self.pptype = pptype
         self.experiment = experiment
 
+    def reconstitute_files(self):
+        result = []
+        for grp in self.filegroups:
+            _ = grp.paths()
+            result = result + _ if _ is not None else result
+        result = [f"{self.ppdir}{x}" for x in result]
+        return result
+
     def resolve_files(self):
         """Updates the Componentgroup object with Filegroup objects
 
@@ -297,6 +308,11 @@ class Componentgroup:
         self.filegroups = [
             Filegroup(k.replace(self.ppdir, ""), v) for k, v in groups.items()
         ]
+        return self
+
+    def exclude_files(self, filelist):
+        for grp in self.filegroups:
+            grp.filelist = [x for x in grp.filelist if x in filelist]
         return self
 
 
