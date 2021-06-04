@@ -1,11 +1,16 @@
+from flask.globals import g
 from app.project_util import list_projects
 import base64
+import xcompare
 import glob
 import io
+import cartopy.crs as ccrs
+
 from operator import itemgetter
 from operator import attrgetter
 import os
 import traceback
+import xarray as xr
 
 import om4labs
 from flask import render_template
@@ -16,6 +21,59 @@ from app import app
 from .Experiment import Experiment
 
 from .frepptools import list_components, Componentgroup, compare_compgroups
+
+import matplotlib.pyplot as plt
+
+
+def base64it(imgbuf):
+    """Converts in-memory PNG image to inlined ASCII format
+
+    Parameters
+    ----------
+    imgbuf : io.BytesIO
+        Binary memory buffer cotaining PNG image
+
+    Returns
+    -------
+    str
+        Base64 representation of the image
+    """
+    imgbuf.seek(0)
+    uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode(
+        "utf-8"
+    ).replace("\n", "")
+    return uri
+
+
+def get_vertical_coord(dset):
+    varlist = list(dset.variables)
+
+    # get coord-names
+    varcoords = [list(dset[x].coords) for x in varlist]
+    varcoords = [x for sublist in varcoords for x in sublist]
+    varcoords = list(set(varcoords))
+    varcoords = ["plev"] + varcoords
+
+    # known vertical coordinates
+    known_vert_coords = ["z_l", "z_i", "depth", "lev", "plev", "level"]
+    varcoords = [x for x in varcoords if x in known_vert_coords]
+
+    # sort the coords in the file in order of preference and
+    # and take the first one
+    if len(varcoords) > 0:
+        varcoords = sorted(varcoords, key=known_vert_coords.index)
+        zdim = varcoords[0]
+        zdim = (varcoords[0], [str(x) for x in dset[zdim].values])
+    else:
+        zdim = None
+
+    return zdim
+
+
+def io_save(fig):
+    imgbuf = io.BytesIO()
+    fig.savefig(imgbuf, format="png", bbox_inches="tight")
+    return imgbuf
 
 
 @app.route("/analysis/diffmaps", methods=["GET"])
@@ -55,6 +113,7 @@ def diffmaps_start():
             infiles=None,
             file1=None,
             file2=None,
+            varlist=None,
         )
 
     # Determine if overlapping files is requested
@@ -83,6 +142,7 @@ def diffmaps_start():
             infiles=None,
             file1=None,
             file2=None,
+            varlist=None,
         )
 
     # if common times requested, use the same filelist for both
@@ -96,6 +156,9 @@ def diffmaps_start():
     # resolve paths
     infiles = [x.reconstitute_files() for x in groups]
     infiles = [x for sublist in infiles for x in sublist]
+
+    # infer static files
+    _ = [infiles.append(x.static) for x in groups]
 
     # See if the user acknowleged the need to pre-dmget the files
     validated = request.args.get("validated")
@@ -112,6 +175,129 @@ def diffmaps_start():
             file1=file1,
             file2=file2,
             infiles=infiles,
+            varlist=None,
         )
 
-    return ""
+    # get a list of variables to plot
+    variable = request.args.getlist("variable")
+
+    if len(variable) == 0:
+        ds1 = xr.open_dataset(groups[0].reconstitute_files()[0])
+        ds2 = xr.open_dataset(groups[1].reconstitute_files()[0])
+        stdname = lambda x: ds1[x].long_name if "long_name" in ds1[x].attrs else ""
+        varlist = set(ds1.variables).intersection(set(ds2.variables))
+        varlist = list(varlist - set(ds1.coords))
+        # remove bounds
+        varlist = [x for x in varlist if not x.endswith("_bnds")]
+        # remove frepp time avaerage vars
+        varlist = [x for x in varlist if not x.startswith("average_")]
+        # identify the vertical coordinate
+        zdim = get_vertical_coord(ds1)
+        # add in variable long names
+        varlist = [(x, stdname(x)) for x in sorted(varlist)]
+        # get a list of cartopy projections
+        proj = ccrs.__dict__.keys()
+        proj = [x for x in proj if x[0].isupper() and x[1].islower()]
+        exclude_list = ["Globe", "Projection"]
+        proj = sorted([x for x in proj if x not in exclude_list])
+        # get a list of colormaps
+        cmaps = plt.colormaps()
+
+        return render_template(
+            "diffmaps-selector.html",
+            component=component,
+            common=common,
+            groups=groups,
+            idnum=idnum,
+            file1=file1,
+            file2=file2,
+            infiles=infiles,
+            varlist=varlist,
+            zdim=zdim,
+            proj=proj,
+            cmaps=cmaps,
+        )
+
+    # open datasets
+    ds1 = xr.open_mfdataset(
+        [groups[0].reconstitute_files()] + [groups[0].static], use_cftime=True
+    )
+    ds2 = xr.open_mfdataset(
+        [groups[1].reconstitute_files()] + [groups[1].static], use_cftime=True
+    )
+
+    zlev = float(request.args.get("zlev"))
+    ds1 = ds1.sel({get_vertical_coord(ds1)[0]: zlev}, method="nearest")
+    ds2 = ds2.sel({get_vertical_coord(ds2)[0]: zlev}, method="nearest")
+
+    results = xcompare.compare_datasets(ds1, ds2, varlist=variable)
+
+    # get requested projection
+    projection = request.args.get("projection")
+    projection = ccrs.__dict__[projection]()
+
+    # get geographic bounds
+    lon_range = (request.args.get("lon0"), request.args.get("lon1"))
+    lat_range = (request.args.get("lat0"), request.args.get("lat1"))
+
+    lon_range = tuple(
+        None if ((x == "") or (x is None)) else float(x) for x in lon_range
+    )
+    lat_range = tuple(
+        None if ((x == "") or (x is None)) else float(x) for x in lat_range
+    )
+
+    lat_range = (
+        None if None in lat_range else (float(lat_range[0]), float(lat_range[1]))
+    )
+    lon_range = (
+        None if None in lon_range else (float(lon_range[0]), float(lon_range[1]))
+    )
+
+    coastlines = True if request.args.get("coastlines") == "1" else False
+    print(coastlines)
+
+    cmap = request.args.get("cmap")
+
+    vmin = None if request.args.get("vmin") == "" else float(request.args.get("vmin"))
+    vmax = None if request.args.get("vmax") == "" else float(request.args.get("vmax"))
+    diffvmin = (
+        None
+        if request.args.get("diffvmin") == ""
+        else float(request.args.get("diffvmin"))
+    )
+    diffvmax = (
+        None
+        if request.args.get("diffvmax") == ""
+        else float(request.args.get("diffvmax"))
+    )
+
+    figs = [
+        (
+            x,
+            xcompare.plot_three_panel(
+                results,
+                x,
+                projection=projection,
+                labels=[experiments[0].expName, experiments[1].expName],
+                cmap=cmap,
+                vmin=vmin,
+                vmax=vmax,
+                diffvmin=diffvmin,
+                diffvmax=diffvmax,
+                lat_range=lat_range,
+                lon_range=lon_range,
+                coastlines=coastlines,
+            ),
+        )
+        for x in variable
+    ]
+    figs = [(x[0], io_save(x[1])) for x in figs]
+    figs = [(x[0], base64it(x[1])) for x in figs]
+
+    xr.set_options(display_style="html")
+    html_text = results["diff"]._repr_html_()
+
+    return render_template(
+        "diffmaps-results.html", ds1=ds1, html_text=html_text, figs=figs
+    )

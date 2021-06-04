@@ -52,190 +52,378 @@
             <div style="width:80%;">
 
 
-                {% if infiles is not none %}
 
-            {% for f in file1 %}
-            <input type="hidden" name="file1" value="{{f}}">
-            {% endfor %}
-                
-            {% for f in file2 %}
-            <input type="hidden" name="file2" value="{{f}}">
-            {% endfor %}
-                
-            <input type="hidden" name="component" value="{{component}}">
-            <input type="hidden" name="common" value="{{common}}">
-            <input type="hidden" name="validated" value="True">
-        <div class="callout callout-warning">
 
-            The following files are needed to perform this analysis. To speed up the the analysis,
-            or in the event of a server timeout, consider recalling these files first from tape:
+{% if component is none %}
+<div class="card card-primary">
+    <div class="card-header">
+        <h3 class="card-title">Select a Component</h3>
 
-            <pre>dmget {{infiles|join(" ")}} </pre>
-                <button type="submit" class="btn btn-primary">Continue with Analysis</button>
-            </form>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <div class="card-body">
+        <p>The following components are common to both experiments. Select one component to analyze:</p>
+
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Component</label>
+                <select class="form-control" id="component" name="component">
+                    {% for comp in components %}
+                    <option value="{{comp}}">{{comp}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+
+            <div class="form-group">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="common" name="common"
+                           value="1" checked="checked">
+                    <label class="custom-control-label" for="common">Show times common to both
+                        experiments</label>
+                </div>
+            </div>
+
+
         </div>
 
-                {% else %}
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+    <!-- /.card-footer-->
+</div>
+<!-- /.card -->
 
+{% elif varlist is not none %}
 
-                {% if component is none %}
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">Select a Component</h3>
+                {% for f in file1 %}
+                <input type="hidden" name="file1" value="{{f}}">
+                {% endfor %}
 
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <p>The following components are common to both experiments. Select one component to analyze:</p>
-
-
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Component</label>
-                                <select class="form-control" id="component" name="component">
-                                    {% for comp in components %}
-                                    <option value="{{comp}}">{{comp}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-
-                            <div class="form-group">
-                                <div class="custom-control custom-switch">
-                                    <input type="checkbox" class="custom-control-input" id="common" name="common"
-                                           value="1" checked="checked">
-                                    <label class="custom-control-label" for="common">Show times common to both
-                                        experiments</label>
-                                </div>
-                            </div>
-
-
-                        </div>
-
-                    </div>
-                    <!-- /.card-body -->
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
-                    <!-- /.card-footer-->
-                </div>
-                <!-- /.card -->
-
-                {% else %}
+                {% for f in file2 %}
+                <input type="hidden" name="file2" value="{{f}}">
+                {% endfor %}
 
                 <input type="hidden" name="component" value="{{component}}">
                 <input type="hidden" name="common" value="{{common}}">
-
-
-                <div class="card card-secondary">
-                    <div class="card-header">
-                        {% if common == true %}
-                        <h3 class="card-title">Files Common to Both Experiments</h3>
-                        {% else %}
-                        <h3 class="card-title">{{groups[0].experiment.expName}}</h3>
-                        {% endif %}
-
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-12">
-                                {% for grp in groups[0].filegroups %}
-                                <div class="form-group">
-                                    <label>{{grp.rootpath}}</label>
-                                    <select class="duallistbox" multiple="multiple" name="file1">
-                                        {% for file in grp.filelist %}
-                                        <option>{{file}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                {% endfor %}
-                                <!-- /.form-group -->
-                            </div>
-                            <!-- /.col -->
-                        </div>
-                        <!-- /.row -->
-                    </div>
-                    <!-- /.card-body -->
-                    <div class="card-footer">
-                        {% if common %}
-                        <button type="submit" class="btn btn-primary">Submit</button>
-
-                        {% endif %}
-                    </div>
-                </div>
-                <!-- /.card -->
-
-
-                {% if not common %}
+                <input type="hidden" name="validated" value="True">
 
                 <div class="card card-secondary">
-                    <div class="card-header">
-                        <h3 class="card-title">{{groups[1].experiment.expName}}</h3>
+    <div class="card-header">
+        <h3 class="card-title">Select Variables</h3>
 
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="button" class="btn btn-tool" data-card-widget="remove">
-                                <i class="fas fa-times"></i>
-                            </button>
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+
+
+{% for var in varlist %}
+                        <div class="custom-control custom-checkbox">
+                            <input class="custom-control-input" type="checkbox" id="variable{{loop.index}}" name="variable"
+                                   value="{{var[0]}}">
+                            <label for="variable{{loop.index}}" class="custom-control-label">{{var[0]}} <p
+                                    class="text-muted"><i>{{var[1]}}</i></p></label>
                         </div>
-                    </div>
-                    <!-- /.card-header -->
-                    <div class="card-body">
-                        <div class="row">
-                            <div class="col-12">
-                                {% for grp in groups[1].filegroups %}
-                                <div class="form-group">
-                                    <label>{{grp.rootpath}}</label>
-                                    <select class="duallistbox" multiple="multiple" name="file2">
-                                        {% for file in grp.filelist %}
-                                        <option>{{file}}</option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                                {% endfor %}
-                                <!-- /.form-group -->
-                            </div>
-                            <!-- /.col -->
-                        </div>
-                        <!-- /.row -->
-                    </div>
-                    <!-- /.card-body -->
-                    <div class="card-footer">
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </div>
+{% endfor %}
+
+{% if zdim is not none %}
+
+                <div class="callout callout-warning">
+            <div class="form-group">
+                <label>Some of these variables include a vertical dimension. Select a level to plot</label>
+        <div class="col-md-3">
+                <select class="form-control" id="component" name="zlev">
+                    {% for lev in zdim[1] %}
+                    <option value="{{lev}}">{{zdim[0]}} = {{lev}}</option>
+                    {% endfor %}
+                </select>
                 </div>
-                <!-- /.card -->
-
-
-                {% endif %}
-
-
-                {% endif %}
-
-                {% endif %}
-
+            </div>
             </div>
 
-    </section>
-    <!-- /.content -->
+{% endif %}
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">
+        {% if common %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+        {% endif %}
+    </div>
+</div>
+<!-- /.card -->
+
+
+            <div class="card collapsed-card">
+                <div class="card-header">
+                    <h3 class="card-title">Plotting Options</h3>
+
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                        <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+
+                <div class="callout callout-warning">
+            <div class="form-group">
+                <label>Select a map projection</label>
+        <div class="col-md-3">
+                <select class="form-control" id="component" name="projection">
+                    {% for projection in proj %}
+                    <option value="{{projection}}" {% if projection == "PlateCarree" %}selected{%endif%}>{{projection}}</option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            </div>
+
+                <div class="callout callout-warning">
+            <div class="form-group">
+                <label>Select a color map (<a href="https://matplotlib.org/stable/gallery/color/colormap_reference.html" target="_blank">gallery</a>)</label>
+        <div class="col-md-3">
+                <select class="form-control" id="component" name="cmap">
+                    {% for cmap in cmaps %}
+                    <option value="{{cmap}}" {% if cmap == "viridis" %}selected{%endif%}>{{cmap}}</option>
+                    {% endfor %}
+                </select>
+                </div>
+            </div>
+            </div>
+
+
+
+                <div class="callout callout-warning">
+            <div class="form-group">
+                <label>Optional - provide geographic boundaries for plotting (default is global)</label>
+                <div class="row">
+                    Latitude:<br>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="lat0" placeholder="-90">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="lat1" placeholder="90">
+                  </div>
+                </div>
+                <p></p>
+                <div class="row">
+                    Longitude:<br>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="lon0" placeholder="0">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="lon1" placeholder="359">
+                  </div>
+                </div>
+            </div>
+            </div>
+
+                <div class="callout callout-warning">
+            <div class="form-group">
+                <label>Optional - provide colorbar ranges</label>
+                <div class="row">
+                    Primary Plot:<br>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="vmin" placeholder="min">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="vmax" placeholder="max">
+                  </div>
+                </div>
+                <p></p>
+                <div class="row">
+                    Difference Plot:<br>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="diffvmin" placeholder="min">
+                  </div>
+                  <div class="col-2">
+                    <input type="text" class="form-control" name="diffvmax" placeholder="max">
+                  </div>
+                </div>
+            </div>
+            </div>
+
+            <div class="form-group">
+                <div class="custom-control custom-switch">
+                    <input type="checkbox" class="custom-control-input" id="coastlines" name="coastlines"
+                           value="1" checked="checked">
+                    <label class="custom-control-label" for="coastlines">Show real-world coastlines</label>
+                </div>
+            </div>
+
+
+
+
+
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer">
+        {% if common %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+        {% endif %}
+                </div>
+                <!-- /.card-footer-->
+            </div>
+
+
+
+{% elif infiles is not none %}
+
+                {% for f in file1 %}
+                <input type="hidden" name="file1" value="{{f}}">
+                {% endfor %}
+
+                {% for f in file2 %}
+                <input type="hidden" name="file2" value="{{f}}">
+                {% endfor %}
+
+                <input type="hidden" name="component" value="{{component}}">
+                <input type="hidden" name="common" value="{{common}}">
+                <input type="hidden" name="validated" value="True">
+                <div class="callout callout-warning">
+
+                    The following files are needed to perform this analysis. To speed up the the analysis,
+                    or in the event of a server timeout, consider recalling these files first from tape:
+
+                    <pre>dmget {{infiles|join(" ")}} </pre>
+                    <button type="submit" class="btn btn-primary">Continue with Analysis</button>
+                </div>
+
+
+{% else %}
+
+<input type="hidden" name="component" value="{{component}}">
+<input type="hidden" name="common" value="{{common}}">
+
+
+<div class="card card-secondary">
+    <div class="card-header">
+        {% if common == true %}
+        <h3 class="card-title">Files Common to Both Experiments</h3>
+        {% else %}
+        <h3 class="card-title">{{groups[0].experiment.expName}}</h3>
+        {% endif %}
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                {% for grp in groups[0].filegroups %}
+                <div class="form-group">
+                    <label>{{grp.rootpath}}</label>
+                    <select class="duallistbox" multiple="multiple" name="file1">
+                        {% for file in grp.filelist %}
+                        <option>{{file}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+                <!-- /.form-group -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">
+        {% if common %}
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+        {% endif %}
+    </div>
+</div>
+<!-- /.card -->
+
+
+{% if not common %}
+
+<div class="card card-secondary">
+    <div class="card-header">
+        <h3 class="card-title">{{groups[1].experiment.expName}}</h3>
+
+        <div class="card-tools">
+            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button>
+            <button type="button" class="btn btn-tool" data-card-widget="remove">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body">
+        <div class="row">
+            <div class="col-12">
+                {% for grp in groups[1].filegroups %}
+                <div class="form-group">
+                    <label>{{grp.rootpath}}</label>
+                    <select class="duallistbox" multiple="multiple" name="file2">
+                        {% for file in grp.filelist %}
+                        <option>{{file}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endfor %}
+                <!-- /.form-group -->
+            </div>
+            <!-- /.col -->
+        </div>
+        <!-- /.row -->
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</div>
+<!-- /.card -->
+
+
+{% endif %}
+
+
+{% endif %}
+
+
+</div>
+
+</section>
+<!-- /.content -->
 </div>
 
 </form>
@@ -263,6 +451,7 @@
       //Bootstrap Duallistbox
       $('.duallistbox').bootstrapDualListbox()
     })
+
 
 </script>
 

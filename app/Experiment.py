@@ -50,7 +50,7 @@ class Experiment:
             for k in dict_items.keys():
                 value = dict_items[k]
                 if isinstance(value, str):
-                    if "path" in k.lower():
+                    if ("path" in k.lower()) and (len(value) > 0):
                         dict_items[k] = value + "/" if value[-1] != "/" else value
             return dict_items
 

@@ -278,6 +278,7 @@ class Componentgroup:
         self.component = component
         self.pptype = pptype
         self.experiment = experiment
+        self.static = f"{ppdir}{component}/{component}.static.nc"
 
     def reconstitute_files(self):
         result = []
