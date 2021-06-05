@@ -220,10 +220,14 @@ def diffmaps_start():
 
     # open datasets
     ds1 = xr.open_mfdataset(
-        [groups[0].reconstitute_files()] + [groups[0].static], use_cftime=True
+        [groups[0].reconstitute_files()] + [groups[0].static],
+        use_cftime=True,
+        join="override",
     )
     ds2 = xr.open_mfdataset(
-        [groups[1].reconstitute_files()] + [groups[1].static], use_cftime=True
+        [groups[1].reconstitute_files()] + [groups[1].static],
+        use_cftime=True,
+        join="override",
     )
 
     zlev = float(request.args.get("zlev"))
