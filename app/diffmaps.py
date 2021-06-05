@@ -55,7 +55,16 @@ def get_vertical_coord(dset):
     varcoords = ["plev"] + varcoords
 
     # known vertical coordinates
-    known_vert_coords = ["z_l", "z_i", "depth", "lev", "plev", "level"]
+    known_vert_coords = [
+        "z_l",
+        "z_i",
+        "depth",
+        "lev",
+        "pfull",
+        "phalf",
+        "level",
+        "plev",
+    ]
     varcoords = [x for x in varcoords if x in known_vert_coords]
 
     # sort the coords in the file in order of preference and
