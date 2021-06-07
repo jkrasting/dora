@@ -113,7 +113,10 @@ def diffmaps_start():
         components = list(components[0].intersection(components[1]))
         components = sorted(components)
         # filter out passage flow components
+        single_comps = [x for x in components if not "_" in x]
+        components = list(set(components) - set(single_comps))
         components = [x for x in components if not x.split("_")[1][0].isupper()]
+        components = sorted(components + single_comps)
         return render_template(
             "diffmaps-selector.html",
             component=component,
@@ -126,7 +129,7 @@ def diffmaps_start():
         )
 
     # Determine if overlapping files is requested
-    common = True if request.args.get("common") is not None else False
+    common = True if request.args.get("common") == "1" else False
 
     # create a component group object for each experiment and resolve the files
     groups = [Componentgroup(x.pathPP, component, experiment=x) for x in experiments]
