@@ -1,4 +1,7 @@
 CREATE DATABASE IF NOT EXISTS mdt_tracker;
+
+GRANT ALL PRIVILEGES ON mdt_tracker.* to 'mdtadmin'@'172.19.%.%' IDENTIFIED BY 'adminpassword' WITH GRANT OPTION;
+
 USE mdt_tracker;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;

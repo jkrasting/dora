@@ -129,7 +129,11 @@ def diffmaps_start():
         )
 
     # Determine if overlapping files is requested
-    common = True if request.args.get("common") == "1" else False
+    common = (
+        True
+        if (request.args.get("common") == "1" or request.args.get("common") == "True")
+        else False
+    )
 
     # create a component group object for each experiment and resolve the files
     groups = [Componentgroup(x.pathPP, component, experiment=x) for x in experiments]
@@ -195,7 +199,11 @@ def diffmaps_start():
 
     if len(variable) == 0:
         ds1 = xr.open_dataset(groups[0].reconstitute_files()[0])
-        ds2 = xr.open_dataset(groups[1].reconstitute_files()[0])
+        try:
+            ds2 = xr.open_dataset(groups[1].reconstitute_files()[0])
+        except Exception as e:
+            print("flist", groups[1].reconstitute_files(debug=True))
+            print(e)
         stdname = lambda x: ds1[x].long_name if "long_name" in ds1[x].attrs else ""
         varlist = set(ds1.variables).intersection(set(ds2.variables))
         varlist = list(varlist - set(ds1.coords))

@@ -28,4 +28,7 @@ RUN cat bootstrap_project_map.sql >> /docker-entrypoint-initdb.d/default_schema.
 COPY bootstrap_projects.sql bootstrap_projects.sql
 RUN cat bootstrap_projects.sql >> /docker-entrypoint-initdb.d/default_schema.sql
 
+COPY bootstrap_users.sql bootstrap_users.sql
+RUN cat bootstrap_users.sql >> /docker-entrypoint-initdb.d/default_schema.sql
+
 RUN chmod ugo+rx /docker-entrypoint-initdb.d/default_schema.sql
