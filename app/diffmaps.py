@@ -254,7 +254,7 @@ def diffmaps_start():
     ds1 = ds1.sel({get_vertical_coord(ds1)[0]: zlev}, method="nearest")
     ds2 = ds2.sel({get_vertical_coord(ds2)[0]: zlev}, method="nearest")
 
-    results = xcompare.compare_datasets(ds1, ds2, varlist=variable)
+    results = xcompare.compare_datasets(ds1, ds2, varlist=variable, timeavg=True)
 
     # get requested projection
     projection = request.args.get("projection")
