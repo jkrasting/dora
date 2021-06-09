@@ -283,6 +283,7 @@ def diffmaps_start():
 
     cmap = request.args.get("cmap")
 
+    sigma = 1.5 if request.args.get("sigma") == "" else float(request.args.get("sigma"))
     vmin = None if request.args.get("vmin") == "" else float(request.args.get("vmin"))
     vmax = None if request.args.get("vmax") == "" else float(request.args.get("vmax"))
     diffvmin = (
@@ -312,6 +313,7 @@ def diffmaps_start():
                 lat_range=lat_range,
                 lon_range=lon_range,
                 coastlines=coastlines,
+                sigma=sigma,
             ),
         )
         for x in variable
