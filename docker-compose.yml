@@ -23,7 +23,7 @@ services:
       - db_network
     depends_on: 
       - mariadb
-  appseed-app:
+  webapp:
     restart: always
     env_file: .env
     build: .
