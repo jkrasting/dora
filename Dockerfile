@@ -13,9 +13,9 @@ FROM server
 ENV FLASK_APP run.py
 COPY run.py gunicorn-cfg.py ./
 COPY certs /etc/certificates
-COPY app app
 COPY .env .env
 COPY run_gunicorn.sh run_gunicorn.sh
 RUN chmod +x run_gunicorn.sh
 EXPOSE 5000
+COPY app app
 CMD ["/bin/bash", "run_gunicorn.sh"]
