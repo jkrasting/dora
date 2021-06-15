@@ -250,9 +250,11 @@ def diffmaps_start():
         join="override",
     )
 
-    zlev = float(request.args.get("zlev"))
-    ds1 = ds1.sel({get_vertical_coord(ds1)[0]: zlev}, method="nearest")
-    ds2 = ds2.sel({get_vertical_coord(ds2)[0]: zlev}, method="nearest")
+    zlev = request.args.get("zlev")
+    if zlev is not None:
+        zlev = float(zlev)
+        ds1 = ds1.sel({get_vertical_coord(ds1)[0]: zlev}, method="nearest")
+        ds2 = ds2.sel({get_vertical_coord(ds2)[0]: zlev}, method="nearest")
 
     results = xcompare.compare_datasets(ds1, ds2, varlist=variable, timeavg=True)
 
