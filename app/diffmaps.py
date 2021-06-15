@@ -52,18 +52,18 @@ def get_vertical_coord(dset):
     varcoords = [list(dset[x].coords) for x in varlist]
     varcoords = [x for sublist in varcoords for x in sublist]
     varcoords = list(set(varcoords))
-    varcoords = ["plev"] + varcoords
+    varcoords = varcoords
 
     # known vertical coordinates
     known_vert_coords = [
         "z_l",
         "z_i",
         "depth",
-        "lev",
         "pfull",
         "phalf",
         "level",
         "plev",
+        "lev",
     ]
     varcoords = [x for x in varcoords if x in known_vert_coords]
 
