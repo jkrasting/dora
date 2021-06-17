@@ -198,6 +198,10 @@ class Experiment:
     def value(self, key):
         return self.__dict__[key]
 
+    def validate_path(self, key):
+        result = "" if key not in self.__dict__ else self.__dict__[key]
+        return os.path.exists(result)
+
     def to_dict(self):
         return self.__dict__
 
