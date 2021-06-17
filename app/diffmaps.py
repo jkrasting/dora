@@ -101,7 +101,19 @@ def diffmaps_start():
         return render_template("diffmaps-splash.html")
 
     # Get an Experiment object for each idnumber
-    experiments = [Experiment(x) for x in idnum]
+    experiments = {x: Experiment(x) for x in idnum}
+
+    # Validate that the experiment paths exist
+    validated = {k: v.validate_path("pathPP") for k, v in experiments.items()}
+    failed = [x for x in list(experiments.keys()) if validated[x] is False]
+    experiments = [
+        experiments[x] for x in list(experiments.keys()) if validated[x] is True
+    ]
+    if len(failed) > 0:
+        return render_template(
+            "page-500.html",
+            msg=f"Unable to locate postprocessing for {str(',').join(failed)}",
+        )
 
     # Get the requested component and send user to the file selector
     # if it is not defined

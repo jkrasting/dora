@@ -51,7 +51,17 @@ def scalardiags():
     if (region is None) or (realm is None):
         return render_template("scalar-menu.html", id=idnum)
 
-    exper = [Experiment(x) for x in idnum]
+    exper = {x: Experiment(x) for x in idnum}
+
+    # validate experiments before continuing
+    validated = {k: v.validate_path("pathDB") for k, v in exper.items()}
+    failed = [x for x in list(exper.keys()) if validated[x] is False]
+    exper = [exper[x] for x in list(exper.keys()) if validated[x] is True]
+    if len(failed) > 0:
+        return render_template(
+            "page-500.html", msg=f"Unable to locate {str(',').join(failed)}"
+        )
+
     dset = [f"{x.pathDB}/{region}Ave{realm}.db" for x in exper]
     dset = [gfdlvitals.open_db(x) for x in dset]
     labels = [x.expName for x in exper]

@@ -195,6 +195,12 @@ def om4labs_start():
     # experiment metadata
     experiment = Experiment(idnum)
 
+    # Make sure the experiment is valid
+    if experiment.validate_path("pathPP") is False:
+        return render_template(
+            "page-500.html", msg=f"{idnum} is not a valid experiment or path."
+        )
+
     # Get the requested analysis from the URL or provide user with
     # a menu of available diagnostics in OM4Labs
     analysis = request.args.getlist("analysis")
