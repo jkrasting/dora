@@ -217,7 +217,7 @@ class Filegroup:
 
         # setup pp directory path and get number of files
         self.rootpath = rootpath
-        self.filelist = filelist
+        self.filelist = sorted(filelist)
         self.nfiles = len(filelist)
 
         # determine the range of years in the file group
@@ -313,7 +313,7 @@ class Componentgroup:
 
     def exclude_files(self, filelist):
         for grp in self.filegroups:
-            grp.filelist = [x for x in grp.filelist if x in filelist]
+            grp.filelist = sorted([x for x in grp.filelist if x in filelist])
         return self
 
 
@@ -339,6 +339,6 @@ def compare_compgroups(comp1, comp2):
         filelist = sorted(list(filelist1.intersection(filelist2)))
 
         for x in comp1.filegroups:
-            x.filelist = filelist if x.rootpath == grp else sorted(x.filelist)
+            x.filelist = sorted(filelist) if x.rootpath == grp else sorted(x.filelist)
         for x in comp2.filegroups:
-            x.filelist = filelist if x.rootpath == grp else sorted(x.filelist)
+            x.filelist = sorted(filelist) if x.rootpath == grp else sorted(x.filelist)
