@@ -72,8 +72,11 @@ class Experiment:
             self.id = str(input)
             self.source = "sql"
             result = _fetch_from_master(self.id, db=db)
-            result = fix_dir_paths(result)
-            self.__dict__ = {**self.__dict__, **result}
+            if result is not None:
+                result = fix_dir_paths(result)
+                self.__dict__ = {**self.__dict__, **result}
+            else:
+                self.__dict__ = {}
 
         elif input[0:5] == "exper":
             import UseCurator
@@ -110,14 +113,17 @@ class Experiment:
             sql = f"SELECT master_id from {split_input[0]}_map where experiment_id='{split_input[1]}'"
             cursor.execute(sql)
             result = cursor.fetchone()
-            master_id = result["master_id"]
-            cursor.close()
+            if result is not None:
+                master_id = result["master_id"]
+                cursor.close()
 
-            self.id = str(input)
-            self.source = "sql"
-            result = _fetch_from_master(master_id, db=db)
-            result = fix_dir_paths(result)
-            self.__dict__ = {**self.__dict__, **result}
+                self.id = str(input)
+                self.source = "sql"
+                result = _fetch_from_master(master_id, db=db)
+                result = fix_dir_paths(result)
+                self.__dict__ = {**self.__dict__, **result}
+            else:
+                self.__dict__ = {}
 
         # else:
         #    raise ValueError(
