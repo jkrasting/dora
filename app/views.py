@@ -36,6 +36,7 @@ from .xml import parse_xml
 from .om4 import *
 from .diffmaps import *
 from .auth import *
+from .api import *
 from .cvdp import *
 from .globals import *
 from .paramdiff import *
