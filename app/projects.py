@@ -1,5 +1,6 @@
 """ Module for project-related pages """
 
+from app.paramdiff import parameter_diff
 import yaml
 from flask import request
 from flask import render_template
@@ -28,6 +29,8 @@ def display_project(project_name):
     flask.render_template
         Renders a template from the template folder with the given context
     """
+
+    error = ""
 
     # open a database connection and cursor
     db = get_db()
@@ -102,6 +105,33 @@ def display_project(project_name):
 
         tables.append(table_data)
 
+    # get list of parameters from URL
+    parameter = request.args.getlist("parameter")
+
+    # get parameters from database
+    if len(parameter) > 0:
+        masterlist = [
+            [x["master_id"] for x in table["experiments"]] for table in tables
+        ]
+        masterlist = [value for sublist in masterlist for value in sublist]
+        masterlist = sorted(list(set(masterlist)))
+        masterlist = [str(x) for x in masterlist]
+        sql = f"SELECT expID, param, val from parameters where param in {str(tuple(parameter)).replace(',)',')')} and expID in {tuple(masterlist)}"
+
+        try:
+            cursor.execute(sql)
+            results = cursor.fetchall()
+            params = {k: {k: "" for k in parameter} for k in masterlist}
+            for result in results:
+                params[result["expID"]][result["param"]] = result["val"]
+        except Exception as e:
+            print(sql)
+            error = str(e)
+            params = {}
+            parameter = []
+    else:
+        params = {}
+
     # close the database cursor
     cursor.close()
 
@@ -111,6 +141,9 @@ def display_project(project_name):
         tables=tables,
         project_name=project_name,
         project_description=config_result["project_description"],
+        parameter=parameter,
+        params=params,
+        error=error,
     )
 
 
@@ -135,6 +168,8 @@ def project(
     flask.render_template
         Renders a template from the template folder with the given context
     """
+
+    error = ""
 
     # add project id from url to the params dict
     params["project_id"] = project_id
