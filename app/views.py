@@ -46,6 +46,7 @@ from .scalar import *
 from .stats import *
 from .user import user_experiment_count
 from .usertools import *
+from .parameters import *
 
 # App modules
 from app import app
