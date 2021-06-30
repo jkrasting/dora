@@ -84,7 +84,9 @@
                                         <th>User Name</th>
                                         <!--<th>Model Type</th>-->
                                         <th>Experiment Name</th>
-                                        <th>Job ID</th>
+                                        {% for p in parameter %}
+                                        <th>{{p}}</th>
+                                        {% endfor %}
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -94,7 +96,9 @@
                                         <td>{{experiment["userName"]}}</td>
                                         <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a>
                                         </td>
-                                        <td>{{experiment["jobID"]}}</td>
+                                        {% for p in parameter %}
+                                        <td>{{params[experiment["master_id"]|string][p]}}</td>
+                                        {% endfor %}
                                     </tr>
                                     {% endfor %}
                                     </tbody>
