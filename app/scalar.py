@@ -30,7 +30,10 @@ def stream_template(template_name, **context):
 def scalardiags():
 
     idnum = request.args.getlist("id")
-    idnum = [] if len(idnum) == 0 else idnum
+
+    if len(idnum) == 1:
+        idnum = idnum[0]
+        idnum = [] if idnum == "" else idnum.replace(" ", "").split(",")
 
     if len(idnum) == 0:
         return render_template("scalar-splash.html")

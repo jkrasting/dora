@@ -37,10 +37,13 @@ def parameter_diff(params):
 def paramscan():
 
     idnum = request.args.getlist("id")
+
+    if len(idnum) == 1:
+        idnum = idnum[0]
+        idnum = [] if idnum == "" else idnum.replace(" ", "").split(",")
+
     if len(idnum) == 0:
         return render_template("parameter-splash.html")
-
-    idnum = [] if len(idnum) == 0 else idnum
 
     exper = [Experiment(x) for x in idnum]
     names = [x.expName for x in exper]

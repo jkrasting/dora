@@ -62,13 +62,28 @@
                     <p>The code is open-source and available on <a
                             href="https://github.com/adcroft/MOM6_parameter_scanner">GitHub</a>.
                     </p>
-                    <p>To use this tool, select two or more experiments in the table view and select the "Parameter
-                        Diff" button
+                    <p>To begin, enter a comma-separated list of IDs or choose two or 
+                        more experiments in the table view and select the "Parameter Diff" button
                     <p>
+
+                    <form action="/analysis/parameters" method="GET">
+
+                        <label for="id">Experiment</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-vial"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="id" name="id"
+                                   placeholder="e.g. 890,891,892">
+                        </div>
+
+
 
                 </div>
                 <!-- /.card-body -->
                 <div class="card-footer">
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                </form>
                 </div>
                 <!-- /.card-footer-->
             </div>
