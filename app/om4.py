@@ -93,7 +93,7 @@ class Diagnostic:
         elif os.path.exists(ppdir + _component2):
             self.component = _component2
 
-    def resolve_files(self, ppdir, label, startyr, endyr):
+    def resolve_files(self, ppdir, label, startyr, endyr, downsample=True):
         """Resolves what post-processing files to use
 
         Parameters
@@ -122,7 +122,8 @@ class Diagnostic:
             exclude_list = ["section_transports"]
             if self.name not in exclude_list:
                 # look for _d2 files
-                self.update_component()
+                if downsample:
+                    self.update_component()
                 # determine the input files
                 self.startyr = startyr
                 self.endyr = endyr
@@ -240,8 +241,11 @@ def om4labs_start():
     diags = [Diagnostic(x, default_dirs[x]) for x in analysis]
 
     # Resolve the needed files for each diagostic
+    downsample = True if request.args.get("downsample") == "True" else False
     diags = [
-        x.resolve_files(experiment.pathPP, experiment.expName, startyr, endyr)
+        x.resolve_files(
+            experiment.pathPP, experiment.expName, startyr, endyr, downsample=downsample
+        )
         for x in diags
     ]
 
