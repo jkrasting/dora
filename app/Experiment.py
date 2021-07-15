@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import glob
 import os
 import pymysql
 import sys
@@ -131,6 +132,19 @@ class Experiment:
         #        + "an integer corresponding to an experiment on the MDT Tracker, "
         #        + "Curator tripleID, or a filesystem path."
         #    )
+
+    def year_range(self):
+        history_dir = self.pathPP.replace("/pp", "/history")
+        history_files = glob.glob(f"{history_dir}/*.tar")
+        if len(history_files) > 0:
+            history_files = [os.path.split(x)[1] for x in history_files]
+            history_files = [x for x in history_files if x[0].isnumeric()]
+            history_files = [x for x in history_files if len(x) >= 4]
+            history_files = sorted([int(x[0:4]) for x in history_files])
+            result = (history_files[0], history_files[-1])
+        else:
+            result = (-999, -999)
+        return result
 
     def modify(self, **kwargs):
         if "id" in list(dict(**kwargs).keys()):

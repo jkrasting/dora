@@ -206,6 +206,7 @@ def om4labs_start():
     # a menu of available diagnostics in OM4Labs
     analysis = request.args.getlist("analysis")
     if analysis == []:
+        year_range = experiment.year_range()
         avail_diags = [x for x in dir(om4labs.diags) if not x.startswith("__")]
         exclude = ["avail", "generic"]
         avail_diags = [x for x in avail_diags if not any(diag in x for diag in exclude)]
@@ -218,6 +219,7 @@ def om4labs_start():
             avail_diags=avail_diags,
             idnum=idnum,
             experiment=experiment,
+            year_range=year_range,
         )
 
     # get the start and end years for the analysis
