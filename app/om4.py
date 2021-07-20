@@ -39,7 +39,7 @@ def base64it(imgbuf):
 class Diagnostic:
     """Container class for an OM4labs diagnostic"""
 
-    def __init__(self, name, component, pptype="av"):
+    def __init__(self, name, component, pptype="av", varlist=[]):
         """Initalize an OM4Labs diagnostic
 
         Parameters
@@ -52,9 +52,10 @@ class Diagnostic:
             Post-processing stream to use, by default "av"
         """
         self.name = name
+        self.name = self.name.replace("_z", "").replace("_rho", "")
         # Intialize and empty dictionary of options pertaining to the
         # requested diagnostic
-        self.args = om4labs.diags.__dict__[name].parse(template=True)
+        self.args = om4labs.diags.__dict__[self.name].parse(template=True)
         # Tell OM4Labs where to find the observational data
         self.args["platform"] = os.environ["OM4LABS_PLATFORM"]
         # Tell OM4Labs we want streaming image buffers back
@@ -66,6 +67,8 @@ class Diagnostic:
         self.component = component
         # Assign pp type
         self.pptype = pptype
+        # Assign variable list
+        self.varlist = [varlist] if not isinstance(varlist, list) else varlist
 
     def _find_files(self):
         """Resolves paths to post-processing files
@@ -81,6 +84,10 @@ class Diagnostic:
         assert len(ncfiles) > 0, f"No files found in {ppdir}."
         ncfiles = [x for x in ncfiles if in_daterange(x, self.startyr, self.endyr)]
         ncfiles = optimize_filegroup_selection(ncfiles, self.startyr, self.endyr)
+        if len(self.varlist) > 0:
+            varlist = [f".{x}." for x in self.varlist]
+            ncfiles = [x for x in ncfiles if any(var in x for var in varlist)]
+            print(ncfiles)
         return ncfiles
 
     def update_component(self):
@@ -214,6 +221,15 @@ def om4labs_start():
             (diag, eval(f"om4labs.diags.{diag}.__description__"))
             for diag in avail_diags
         ]
+        moc_diags = [x for x in avail_diags if x[0] == "moc"]
+        avail_diags = [x for x in avail_diags if x[0] != "moc"]
+        moc_diags = [
+            (moc_diags[0][0] + "_rho", moc_diags[0][1]),
+            (moc_diags[0][0] + "_z", moc_diags[0][1]),
+        ]
+
+        avail_diags = sorted(avail_diags + moc_diags)
+
         return render_template(
             "om4labs-start.html",
             avail_diags=avail_diags,
@@ -229,18 +245,25 @@ def om4labs_start():
 
     # default directories
     default_dirs = {
-        "heat_transport": "ocean_monthly",
-        "moc": "ocean_annual_z",
-        "seaice": "ice_1x1deg",
-        "section_transports": None,
-        "so_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
-        "sss_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
-        "sst_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
-        "thetao_yz_annual_bias_1x1deg": "ocean_annual_z_1x1deg",
+        "enso": ("ocean_monthly_1x1deg", "ts", ["tos"]),
+        "heat_transport": ("ocean_monthly", "av", None),
+        "moc_z": ("ocean_annual_z", "av", None),
+        "moc_rho": ("ocean_annual_rho2", "av", None),
+        "seaice": ("ice_1x1deg", "av", None),
+        "section_transports": (None, None),
+        "so_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
+        "sss_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
+        "sst_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
+        "thetao_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
     }
 
     # Create a Diagnostic object for each requested analysis
-    diags = [Diagnostic(x, default_dirs[x]) for x in analysis]
+    diags = [
+        Diagnostic(
+            x, default_dirs[x][0], pptype=default_dirs[x][1], varlist=default_dirs[x][2]
+        )
+        for x in analysis
+    ]
 
     # Resolve the needed files for each diagostic
     downsample = True if request.args.get("downsample") == "True" else False
