@@ -20,7 +20,7 @@ def daterange(fname):
         start year, end year
     """
     fname = fname.split(".")[1]
-    return tuple([int(x) for x in fname.split("-")])
+    return tuple([int(x[0:4]) for x in fname.split("-")])
 
 
 def in_daterange(fname, startyr, endyr):
@@ -258,7 +258,7 @@ class Filegroup:
 
 
 class Componentgroup:
-    """ Object describing a frepp-generated post-processing component directory """
+    """Object describing a frepp-generated post-processing component directory"""
 
     def __init__(self, ppdir, component, experiment=None, pptype="av"):
         """Intialized a Component group object
