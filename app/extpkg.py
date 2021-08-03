@@ -25,3 +25,20 @@ def view_cvdp(project_id, filename):
         return render_template("page-404.html"), 404
     else:
         return send_from_directory(path, filename)
+
+
+@app.route("/mdtf/<project_id>")
+def view_mdtf_root(project_id):
+    return redirect(f"/mdtf/{project_id}/index.html", 302)
+
+
+@app.route("/mdtf/<project_id>/<path:filename>")
+def view_mdtf(project_id, filename):
+    exper = Experiment(project_id)
+    path = f"{exper.pathAnalysis}/mdtf/"
+    path = path.replace("//", "/")
+    print(path)
+    if not os.path.exists(path + filename):
+        return render_template("page-404.html"), 404
+    else:
+        return send_from_directory(path, filename)

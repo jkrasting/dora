@@ -37,7 +37,7 @@ from .om4 import *
 from .diffmaps import *
 from .auth import *
 from .api import *
-from .cvdp import *
+from .extpkg import *
 from .globals import *
 from .paramdiff import *
 from .projects import *
