@@ -16,4 +16,4 @@ from app import app
 if __name__ == "__main__":
     load_dotenv(".env")
     context = ("certs/cert.pem", "certs/key.pem")
-    app.run(host="0.0.0.0", port=5000, debug=True, ssl_context=context)
+    app.run(host="0.0.0.0", port=7070, debug=True, ssl_context=context)
