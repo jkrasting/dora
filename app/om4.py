@@ -281,6 +281,13 @@ def om4labs_start():
     # See if the user acknowleged the need to pre-dmget the files
     validated = request.args.get("validated")
 
+    # Handle special case when section transports do not need to be validated
+    validated = (
+        "True"
+        if (validated is None and analysis == ["section_transports"])
+        else validated
+    )
+
     # If the user has *not* validated the files, display a list
     # of files that the user should dmget on their own
     if validated is None:
