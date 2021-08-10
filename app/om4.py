@@ -246,15 +246,15 @@ def om4labs_start():
     # default directories
     default_dirs = {
         "enso": ("ocean_monthly_1x1deg", "ts", ["tos"]),
-        "heat_transport": ("ocean_monthly", "av", None),
-        "moc_z": ("ocean_annual_z", "av", None),
-        "moc_rho": ("ocean_annual_rho2", "av", None),
-        "seaice": ("ice_1x1deg", "av", None),
-        "section_transports": (None, None),
-        "so_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
-        "sss_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
-        "sst_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
-        "thetao_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", None),
+        "heat_transport": ("ocean_monthly", "av", []),
+        "moc_z": ("ocean_annual_z", "av", []),
+        "moc_rho": ("ocean_annual_rho2", "av", []),
+        "seaice": ("ice_1x1deg", "av", []),
+        "section_transports": (None, None, []),
+        "so_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
+        "sss_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
+        "sst_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
+        "thetao_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
     }
 
     # Create a Diagnostic object for each requested analysis
