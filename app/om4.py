@@ -245,6 +245,7 @@ def om4labs_start():
 
     # default directories
     default_dirs = {
+        "acc_drake": ("ocean_Drake_Passage", "ts", ["umo"]),
         "enso": ("ocean_monthly_1x1deg", "ts", ["tos"]),
         "heat_transport": ("ocean_monthly", "av", []),
         "moc_z": ("ocean_annual_z", "av", []),
