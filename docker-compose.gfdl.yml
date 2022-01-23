@@ -1,0 +1,49 @@
+version: '3'
+services:
+  mariadb:
+    restart: always
+    env_file: .dbenv
+    build: mariadb
+    hostname: "dbserver"
+    expose:
+      - "3306"
+    networks:
+      - db_network
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    environment:
+     - PMA_ARBITRARY=1
+    ports:
+     - 8080:80
+    volumes:
+     - /sessions
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
+  webapp:
+    restart: always
+    env_file: .env
+    build: .
+    hostname: "dashboard"
+    volumes:
+      - /gfdlhome:/home:ro
+      - /nbhome:/nbhome:ro
+      - ./certs:/etc/certificates
+      - type: bind
+        source: /archive
+        target: /archive
+        read_only: true
+        bind:
+            propagation: shared      
+    ports:
+      - "5050:5050"
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
+
+networks:
+  db_network:
+    driver: bridge

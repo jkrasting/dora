@@ -1,0 +1,159 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} OM4Labs Results {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Results from OM4Labs</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">OM4Labs Results</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        {% if infiles|length > 0 %}
+
+        <div class="callout callout-warning">
+
+            The following files are needed to perform this analysis. To speed up the the analysis,
+            or in the event of a server timeout, consider recalling these files first from tape:
+
+            <pre>cd {{experiment.pathPP}} {{"\n"|safe}}dmget {{infiles|join(" ")}} </pre>
+
+            <form method="/om4labs/analysis" method="GET">
+
+                {% for key, value in args.items() %}
+                {% if key != "analysis" %}
+                <input type="hidden" name="{{key}}" value="{{value}}">
+                {% endif %}
+                {% endfor %}
+
+                {% for x in analysis %}
+                <input type="hidden" name="analysis" value="{{x}}">
+                {% endfor %}
+                <input type="hidden" name="validated" value="True">
+
+                <button type="submit" class="btn btn-primary">Continue with Analysis</button>
+            </form>
+        </div>
+        <!-- /.card -->
+
+
+        {% else %}
+
+
+        <!-- Default box -->
+        {% for diag in passed %}
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">{{diag.name}}</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                {% for fig in diag.figures %}
+                <img src="{{ fig | safe }}"/><br>
+                {% endfor %}
+
+                {% if download_flag %}
+                <a href="{{ request.url }}&savefile=True">Download this data in NetCDF format</a>
+                {% endif %}
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+        {% endfor %}
+
+        {% endif %}
+
+        {% for diag in failed %}
+
+        <div class="card collapsed-card">
+            <div class="card-header">
+                <h3 class="card-title">{{diag.name}}</h3>
+
+                <div class="card-tools">
+                    <span class="badge badge-danger">ERROR</span>
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <pre>{{ diag.error | safe }}</pre>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+        {% endfor %}
+
+
+    </section>
+    <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}

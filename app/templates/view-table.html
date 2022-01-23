@@ -1,0 +1,189 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} {{project_name}} experiments {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- DataTables -->
+<link rel="stylesheet" href="/static/assets/plugins/datatables-bs4/css/dataTables.bootstrap4.css">
+<link rel="stylesheet" href="/static/assets/plugins/datatables-responsive/css/responsive.bootstrap4.css">
+<link rel="stylesheet" href="/static/assets/plugins/datatables-select/css/select.bootstrap4.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/assets/css/adminlte.css">
+
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Project {{project_name}}</h1>
+                    <i>{{project_description}}</i>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="/">Home</a></li>
+                        <li class="breadcrumb-item active">{{project_name}}</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+
+    <!-- Main content -->
+    <form id="selectionform" method="get">
+        <section class="content">
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success" onclick="getids('/analysis/scalar')">Scalar
+                            Diags
+                        </button>
+                        <button type="submit" class="btn btn-success" onclick="getids('/analysis/om4labs')">OM4Labs
+                        </button>
+                        <button type="submit" class="btn btn-success" onclick="getids('/analysis/parameters')">Parameter
+                            Diff
+                        </button>
+                        <button type="submit" class="btn btn-success" onclick="getids('/analysis/stats')">Stat Compare
+                        </button>
+                        </p>
+                    </div>
+                </div>
+            </div>
+            <div class="container-fluid">
+                <div class="row">
+                    <div class="col-12">
+                        {% for table in tables %}
+                        <div class="card card-secondary">
+                            <div class="card-header">
+                                <h3 class="card-title">{{table["title"]}}</h3>
+                            </div>
+                            <!-- /.card-header -->
+                            <div class="card-body">
+                                <table id="example{{loop.index}}" class="hover table-striped" width="100%">
+                                    <!-- <table id="1" class="table" width="100%"> -->
+                                    <!-- <table id="example1" class="compact table table-bordered table-striped"> -->
+                                    <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User Name</th>
+                                        <!--<th>Model Type</th>-->
+                                        <th>Experiment Name</th>
+                                        {% for p in parameter %}
+                                        <th>{{p}}</th>
+                                        {% endfor %}
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for experiment in table["experiments"] %}
+                                    <tr>
+                                        <td>{{experiment["id"]}}</td>
+                                        <td>{{experiment["userName"]}}</td>
+                                        <td><a href="/experiment/{{experiment['id']}}">{{experiment["expName"]}}</a>
+                                        </td>
+                                        {% for p in parameter %}
+                                        <td>{{params[experiment["master_id"]|string][p]}}</td>
+                                        {% endfor %}
+                                    </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <!-- /.card-body -->
+                        </div>
+                        <!-- /.card -->
+                        {% endfor %}
+                    </div>
+                    <!-- /.col -->
+                </div>
+                <!-- /.row -->
+            </div>
+            <!-- /.container-fluid -->
+        </section>
+        <!-- /.content -->
+    </form>
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- DataTables -->
+<script src="/static/assets/plugins/datatables/jquery.dataTables.min.js"></script>
+<script src="/static/assets/plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
+<script src="/static/assets/plugins/datatables-buttons/js/dataTables.buttons.min.js"></script>
+<script src="/static/assets/plugins/datatables-buttons/js/buttons.html5.min.js"></script>
+<script src="/static/assets/plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
+<script src="/static/assets/plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>
+<script src="/static/assets/plugins/datatables-select/js/dataTables.select.js"></script>
+<script src="/static/assets/plugins/datatables-natural/js/natural.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- page script -->
+className: 'select-checkbox',
+selector: 'td:first-child',
+<script>
+
+   {% for table in tables %}
+   var events = $('#events');
+   var table = $("#example{{loop.index}}").DataTable({
+        lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
+        buttons: ["selectNone"],
+        columnDefs: [ {
+            type: 'natural',
+            targets:   0
+        } ],
+        select: {
+            style: 'none',
+            toggleable: true,
+            blurable: false
+        },
+        "responsive": false,
+        "autoWidth": false,
+        "order": [[ 0, "desc"]],
+      }).buttons().container().appendTo('#example{{loop.index}}_wrapper .col-md-6:eq(0)');;
+
+    {% endfor %}
+
+  function getids(action) {
+      {% for table in tables %}
+      var table = $("#example{{loop.index}}").DataTable()
+      console.log(table);
+      var rows = table.rows({ selected: true }).data();
+      for (var i = 0; i < rows.length; i++) {
+          $('#selectionform').append('<input type="hidden" name="id" value="'+rows[i][0]+'" />');
+          document.getElementById('selectionform').action = action;
+          $('#example{{loop.index}}_length').remove();
+          document.getElementById("selectionform").submit(); 
+      }
+     {% endfor %}
+  }
+
+
+
+</script>
+
+{% endblock javascripts %}

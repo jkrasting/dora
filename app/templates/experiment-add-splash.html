@@ -1,0 +1,181 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Add a New Experiment</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Start</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Default box -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Specify Path to XML</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <h3></h3>
+                <div class="col-sm-8">
+                    <p>In order to add a new experiment to the tracking page, you will need the path to an XML file
+                        located on the GFDL home filesystem. This page will read your XML file and guide you through the
+                        remainder of the registration process. This web interface replaces the old command-line Python
+                        script used prior to January 2019.</p>
+
+
+                    <div class="callout callout-warning">
+                        <h5>Note:</h5>
+                        <p>This web page uses a lightweight XML parser to read your XML file. It is possible, if not
+                            likely, that the resolved paths may be
+                            incorrect for some XMLs/experiments. Please check them carefully and report any errors.
+                        </p>
+                    </div>
+
+                    <p>The following attributes will be resolved by the webpage:
+                    <ul>
+                        <li>Model Type (Selected from a drop-down list)</li>
+                        <li>Experiment Name</li>
+                        <li>Alternate Display Name (In case you would like the page to display a different name)</li>
+                        <li>Ending Year of Experiment</li>
+                        <li>Experiment Type</li>
+                        <li>GFDL Post-processing Path</li>
+                        <li>GFDL Analysis Path</li>
+                        <li>Global Mean Database Path</li>
+                        <li>Gaea Script Path</li>
+                        <li>Experiment Keywords (Comma-separated list of keyword strings for the experiment, optional)
+                        </li>
+                        <li>XML Path</li>
+                        <li>Log File Path (Optional)</li>
+                        <li>Curator Experiment ID (e.g. exper_id_OxnXwq0oL1)</li>
+                        <li>Status (e.g Running, Complete, Crashed)</li>
+                        <li>Update this experiment every hour? (If checked, page will attempt to get queue information
+                            and update run progress.)
+                        </li>
+                        <li>Last History File at GFDL (Year of most recent history file transferred back to GFDL
+                            archive)
+                        </li>
+                        <li>User Name (of the account running the experiment</li>
+                    </ul>
+                    </p>
+                </div>
+
+                <div class="col-sm-10">
+
+                    <form action="/admin/experiment/new" method="POST">
+
+                        <label for="xmlfile">To get started, please provide a path to an xml file:</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-file-code"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="xmlfile" name="xmlfile"
+                                   placeholder="e.g. /home/oar.gfdl.cmip6/ncrc/xml/ESM4/production/ESM4_historical_D1.xml">
+                        </div>
+
+                        <label for="user">User Name of Experiment Owner:</label>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            </div>
+                            <input type="text" class="form-control" id="user" name="user" placeholder="First.Last">
+                        </div>
+
+
+                </div>
+                <!--
+
+                if P is not None:
+                  print('<p>You are adding an experiment to the <b>'+P.project_name+'</b> Project.
+                  if len(authorized) > 2:
+                    print('You are also authorized to add this experiment to the following projects:<br>
+                    for p in authorized:
+                      if p.project_id == 1:
+                        print('<input type="hidden" name="projectid" value="'+str(p.project_id)+'">
+                      else:
+                        if p.project_id == P.project_id:
+                          checked = 'checked="checked"'
+                        else:
+                          checked = ''
+                        print('<input type="checkbox" name="projectid" value="'+str(p.project_id)+'" '+checked+'> '+p.project_name+'<br>
+                  else:
+                    print('<input type="hidden" name="projectid" value="'+str(P.project_id)+'">
+
+                f.send()
+                webtoolbox.formClose()
+                exit(0)
+                  -->
+
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <button type="submit" class="btn btn-primary">Submit</button>
+            </div>
+            </form>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}

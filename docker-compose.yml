@@ -1,27 +1,39 @@
 version: '3'
 services:
-  appseed-app:
-    restart: always
-    env_file: .env
-    build: .
-    ports:
-      - "5005:5005"
+  mariadb:
+    env_file: .dbenv
+    build:
+      context: mariadb
+      dockerfile: Dockerfile.local
+    hostname: "dbserver"
+    expose:
+      - "3306"
     networks:
       - db_network
-      - web_network
-  nginx:
-    restart: always
-    image: "nginx:latest"
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    environment:
+     - PMA_ARBITRARY=1
     ports:
-      - "85:85"
+     - 8080:80
     volumes:
-      - ./nginx:/etc/nginx/conf.d
+     - /sessions
     networks:
-      - web_network
+      - db_network
     depends_on: 
-      - appseed-app
+      - mariadb
+  webapp:
+    env_file: .env
+    build: .
+    hostname: "dashboard"
+    ports:
+      - "5050:5050"
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
+
 networks:
   db_network:
-    driver: bridge
-  web_network:
     driver: bridge

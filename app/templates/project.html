@@ -1,0 +1,135 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Forms Editor {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- Theme style -->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+<!-- summernote -->
+<link rel="stylesheet" href="/static/assets/plugins/summernote/summernote-bs4.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<!-- Content Wrapper. Contains page content -->
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Project Details</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Text Editors</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card card-outline card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            {% if project_id =="new" %}
+                            Add New Project
+                            {% else %}
+                            Project ID: {{project_id}}
+                            {% endif %}
+                        </h3>
+                        <!-- tools box -->
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool btn-sm" data-card-widget="collapse"
+                                    title="Collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool btn-sm" data-card-widget="remove" title="Remove">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <!-- /. tools -->
+                    </div>
+                    <!-- /.card-header -->
+                    <form action="/admin/project_update.html" method="POST">
+                        <div class="card-body pad">
+                            <div class="mb-3">
+                                <div class="form-group">
+                                    <label for="project_name">Project Name</label>
+                                    <input type="text" class="form-control" id="project_name" name="project_name"
+                                           placeholder="Enter project name" value={{project_name}}>
+                                </div>
+                                <div class="form-group">
+                                    <label for="project_description">Project description</label>
+                                    <input type="text" class="form-control" id="project_description"
+                                           name="project_description"
+                                           placeholder="Enter project description" value="{{project_description}}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="project_config">Project Configuration</label><br>
+                                    <textarea id="project_config" id="project_config" name="project_config" cols=80
+                                              rows=10
+                                              placeholder="YAML formatting">{{project_config}}</textarea>
+                                </div>
+                                <div>
+                                    <a href="/admin/projects/membership/{{project_name}}">Add/remove experiments from
+                                        this project</a>
+                                </div>
+                                <input type="hidden" id="project_id" name="project_id" value="{{project_id}}">
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                </div>
+
+
+            </div>
+            <!-- /.col-->
+        </div>
+        <!-- ./row -->
+    </section>
+    <!-- /.content -->
+</div>
+<!-- /.content-wrapper -->
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+<!-- Summernote -->
+<script src="/static/assets/plugins/summernote/summernote-bs4.min.js"></script>
+<script>
+    $(function () {
+      // Summernote
+      $('.textarea').summernote()
+    })
+
+</script>
+
+{% endblock javascripts %}

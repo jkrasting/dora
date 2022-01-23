@@ -1,0 +1,134 @@
+{% extends "layouts/base.html" %}
+
+{% block title %} Blank Page {% endblock %}
+
+<!-- Element injected in the BODY element -->
+{% block body_class %} sidebar-mini pace-primary {% endblock body_class %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}
+
+<!-- Google Font: Source Sans Pro -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+<!-- Font Awesome -->
+<link rel="stylesheet" href="/static/assets/plugins/fontawesome-free/css/all.min.css">
+<!-- pace-progress -->
+<link rel="stylesheet" href="/static/assets/plugins/pace-progress/themes/black/pace-theme-flat-top.css">
+<!-- adminlte-->
+<link rel="stylesheet" href="/static/assets/css/adminlte.min.css">
+
+{% endblock stylesheets %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Experiment: {{experiment_id}}</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Start</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <!-- Default box -->
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">{{experiment["expName"]}}</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button type="button" class="btn btn-tool" data-card-widget="remove" title="Remove">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+
+                <div class="col-sm-10">
+
+                    <dl class="row">
+                        <dt class="col-sm-4">User Name</dt>
+                        <dd class="col-sm-8">{{experiment["userName"]}}</dd>
+                        <dt class="col-sm-4">Master ID</dt>
+                        <dd class="col-sm-8">{{experiment["id"]}}</dd>
+                        <dt class="col-sm-4">Model</dt>
+                        <dd class="col-sm-8">{{experiment["modelType"]}}</dd>
+                        <dt class="col-sm-4">Experiment</dt>
+                        <dd class="col-sm-8">{{experiment["expType"]}}</dd>
+                        <dt class="col-sm-4">CMIP MIP</dt>
+                        <dd class="col-sm-8">{{experiment["expMIP"]}}</dd>
+                        <dt class="col-sm-4">Post-processing Path</dt>
+                        <dd class="col-sm-8">{{experiment["pathPP"]}}</dd>
+                        <dt class="col-sm-4">SQLite Files</dt>
+                        <dd class="col-sm-8">{{experiment["pathDB"]}}</dd>
+                        <dt class="col-sm-4">XML File</dt>
+                        <dd class="col-sm-8">{{experiment["pathXML"]}}</dd>
+                        <dt class="col-sm-4">Run Script</dt>
+                        <dd class="col-sm-8">{{experiment["pathScript"]}}</dd>
+                        <dt class="col-sm-4">Log File</dt>
+                        <dd class="col-sm-8">{{experiment["pathLog"]}}</dd>
+                        <dt class="col-sm-4">Curator ID</dt>
+                        <dd class="col-sm-8">{{experiment["urlCurator"]}}</dd>
+
+
+                    </dl>
+                </div>
+            </div>
+            <!-- /.card-body -->
+            <div class="card-footer">
+                <form>
+                    <input type="hidden" name="id" value="{{experiment_id}}">
+                    <button type="submit" formaction="/analysis/scalar" method="GET" class="btn btn-primary">Scalar
+                        Plots
+                    </button>
+                    <button type="submit" formaction="/analysis/om4labs" class="btn btn-primary">OM4Labs</button>
+                    <button type="submit" formaction="/cvdp/{{experiment_id}}" class="btn btn-primary">CVDP</button>
+                    <button type="submit" formaction="/mdtf/{{experiment_id}}" class="btn btn-primary">MDTF</button>
+                    <button type="submit" formaction="/param/update/{{experiment_id}}" class="btn btn-primary">Update Param.</button>
+                    {% if current_user.firstlast|lower == experiment["userName"]|lower or current_user.firstlast|lower
+                    == experiment["owner"]|lower or current_user.admin %}
+                    <button type="submit" formaction="/admin/experiment/{{experiment_id}}" class="btn btn-primary">Edit
+                        Experiment
+                    </button>
+                    {% endif %}
+                </form>
+            </div>
+            <!-- /.card-footer-->
+        </div>
+        <!-- /.card -->
+
+    </section>
+    <!-- /.content -->
+</div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<!-- jQuery -->
+<script src="/static/assets/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/static/assets/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- pace-progress -->
+<script src="/static/assets/plugins/pace-progress/pace.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/static/assets/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="/static/assets/js/demo.js"></script>
+
+{% endblock javascripts %}

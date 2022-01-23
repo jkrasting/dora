@@ -1,2 +1,12 @@
 flask
 gunicorn
+lxml
+pymysql
+Flask-Login
+oauthlib
+requests
+pyOpenSSL
+pyyaml
+-e git://github.com/jkrasting/gfdlvitals.git#egg=gfdlvitals
+-e git://github.com/jkrasting/cmipbasins.git#egg=cmipbasins
+-e git://github.com/raphaeldussin/om4labs.git#egg=om4labs
