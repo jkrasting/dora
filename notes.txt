@@ -1,0 +1,58 @@
+Building a containerized version of Dora:
+-----------------------------------------
+
+Building Dora inside of a container is the easiest way to get started.
+
+Requirements:
+
+* Docker
+* Docker compose
+
+Download source code:
+git clone https://github.com/jkrasting/dora.git
+cd dora
+docker-compose build
+docker-compose up
+
+Tip:
+If building at GFDL, specifify the modified docker-compose file to the commands above using the `-f` flag, i.e. ``-f docker-compose.gfdl.yaml``
+
+Once built, navigate your web browser to:
+https://localhost:5050
+
+
+
+Building a development version of Dora:
+---------------------------------------
+
+The development version is useful for debugging or adding new features to Dora.
+
+Requirements:
+
+* Anaconda / Miniconda
+
+Download source code:
+git clone https://github.com/jkrasting/dora.git
+cd dora
+conda install mamba
+mamba env create -n doraenv -f envs/env.dev.yml
+conda activate doraenv
+
+./run.py dev
+
+Should lauch a local instance
+Navigate to https://localhost:5050
+
+
+
+
+Note:
+There is a known issue with MacOS missing OpenSSL libraries. This can be addressed
+by installing OpenSSL via HomeBrew and symlinking the installed libraries to their
+expected locations.
+
+brew install openssl@1.1
+ln -s /usr/local/opt/openssl/lib/libssl.1.1.dylib libssl.1.1.dylib
+ln -s /usr/local/opt/openssl/lib/libcrypto.1.1.dylib libcrypto.1.1.dylib
+
+

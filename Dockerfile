@@ -1,23 +1,34 @@
-FROM krasting/dorabase:dev as server
+# Base Docker Container for Dora
+# ==============================
 
-RUN pip install nc-time-axis
-RUN pip install git+https://github.com/raphaeldussin/static_downsampler
-RUN pip install git+https://github.com/raphaeldussin/xoverturning
-RUN pip install git+https://github.com/jkrasting/gfdlvitals
-RUN pip install git+https://github.com/jkrasting/xwavelet@dev
-RUN pip install git+https://github.com/jkrasting/om4labs@enso
-RUN pip install git+https://github.com/jkrasting/MOM6_parameter_scanner.git
-RUN pip install git+https://github.com/jkrasting/xcompare
+FROM continuumio/miniconda3:master-alpine
 
-FROM server
+# Update OS packages
+RUN apk update \
+  && apk add --no-cache git \
+  && apk add --no-cache bash \
+  && apk add --no-cache mysql-client
+
+# Update conda channels and install mamba
+RUN conda config --add channels conda-forge \
+  && conda config --add channels krasting \
+  && conda install -y mamba
+
+# Create the environment:
+COPY envs envs
+RUN mamba env create -f envs/env.prod.yml \
+  && conda clean --all \
+  && echo "conda activate env" >> ~/.bashrc
+
+ENV PATH /opt/conda/envs/env/bin:$PATH
 
 # The code to run when container is started:
 ENV FLASK_APP run.py
-COPY run.py gunicorn-cfg.py ./
-COPY certs /etc/certificates
+COPY run.py run.py
 COPY .env .env
-COPY run_gunicorn.sh run_gunicorn.sh
-RUN chmod +x run_gunicorn.sh
-EXPOSE 5000
+COPY gunicorn gunicorn
+RUN chmod +x gunicorn/gunicorn-run.sh
+EXPOSE 5050
 COPY app app
-CMD ["/bin/bash", "run_gunicorn.sh"]
+
+CMD ["/bin/bash", "gunicorn/gunicorn-run.sh"]
