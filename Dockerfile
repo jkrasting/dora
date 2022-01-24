@@ -26,6 +26,7 @@ ENV PATH /opt/conda/envs/env/bin:$PATH
 ENV FLASK_APP run.py
 COPY run.py run.py
 COPY .env .env
+COPY certs certs
 COPY gunicorn gunicorn
 RUN chmod +x gunicorn/gunicorn-run.sh
 EXPOSE 5050
