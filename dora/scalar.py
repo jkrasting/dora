@@ -70,25 +70,29 @@ def scalardiags():
     labels = [x.expName for x in exper]
     labels = str(",").join(labels)
 
-    def plot_gen():
+    def plot_gen(raise_exception=False):
         for x in sorted(list(dset[0].columns)):
-            fig = gfdlvitals.plot_timeseries(
-                dset,
-                trend=trend,
-                smooth=smooth,
-                var=x,
-                nyears=nyears,
-                align_times=align,
-                labels=labels,
-            )
-            fig = fig[0]
-            imgbuf = io.BytesIO()
-            fig.savefig(imgbuf, format="png", bbox_inches="tight", dpi=72)
-            plt.close(fig)
-            imgbuf.seek(0)
-            uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode(
-                "utf-8"
-            ).replace("\n", "")
+            try:
+                fig = gfdlvitals.plot_timeseries(
+                    dset,
+                    trend=trend,
+                    smooth=smooth,
+                    var=x,
+                    nyears=nyears,
+                    align_times=align,
+                    labels=labels,
+                )
+                fig = fig[0]
+                imgbuf = io.BytesIO()
+                fig.savefig(imgbuf, format="png", bbox_inches="tight", dpi=72)
+                plt.close(fig)
+                imgbuf.seek(0)
+                uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode("utf-8").replace("\n", "")
+                uri = '<img src="' + uri + '">'
+            except Exception as e:
+                uri = "Caught Exception: " + str(e)
+                if raise_exception:
+                    raise e
             yield uri
 
     content = {
