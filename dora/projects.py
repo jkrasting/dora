@@ -1,11 +1,11 @@
 """ Module for project-related pages """
 
-from app.paramdiff import parameter_diff
+from dora.paramdiff import parameter_diff
 import yaml
 from flask import request
 from flask import render_template
 from flask_login import current_user, login_required
-from app import app
+from dora import dora
 
 from .db import get_db
 from .project_util import (
@@ -15,7 +15,7 @@ from .project_util import (
 )
 
 
-@app.route("/projects/<project_name>")
+@dora.route("/projects/<project_name>")
 def display_project(project_name):
     """Displays a table or set of tables for a given project
 
@@ -147,7 +147,7 @@ def display_project(project_name):
     )
 
 
-@app.route("/admin/projects/<project_id>")
+@dora.route("/admin/projects/<project_id>")
 @login_required
 def project(
     project_id,
@@ -220,14 +220,14 @@ def project(
     return render_template("project.html", **content)
 
 
-@app.route("/admin/projects")
+@dora.route("/admin/projects")
 @login_required
 def project_list_view():
     projects = [project[1] for project in list_projects()]
     return render_template("project_list.html", projects=projects)
 
 
-@app.route("/admin/projects/membership/<project_name>")
+@dora.route("/admin/projects/membership/<project_name>")
 @login_required
 def project_membership(project_name):
     db = get_db()
@@ -248,7 +248,7 @@ def project_membership(project_name):
     )
 
 
-@app.route("/admin/projects/membership_update", methods=["POST"])
+@dora.route("/admin/projects/membership_update", methods=["POST"])
 @login_required
 def project_membership_update():
     # process form input
@@ -310,7 +310,7 @@ def project_membership_update():
     return result
 
 
-@app.route("/admin/project_update.html", methods=["POST"])
+@dora.route("/admin/project_update.html", methods=["POST"])
 @login_required
 def project_update():
     """Updates SQL database with new project metadata

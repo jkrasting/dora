@@ -1,6 +1,6 @@
 import os
 
-from app import app
+from dora import dora
 from .db import get_db
 from .xml import parse_xml
 from flask import request
@@ -11,7 +11,7 @@ from .projects import associate_with_project
 from .Experiment import Experiment
 
 
-@app.route("/experiment/<experiment_id>")
+@dora.route("/experiment/<experiment_id>")
 def view_experiment(experiment_id):
     exper = Experiment(experiment_id)
     return render_template(
@@ -19,7 +19,7 @@ def view_experiment(experiment_id):
     )
 
 
-@app.route("/admin/experiment/<experiment_id>", methods=["GET", "POST"])
+@dora.route("/admin/experiment/<experiment_id>", methods=["GET", "POST"])
 def expadmin(experiment_id=None):
     if experiment_id == "new":
         args = dict(request.form)
@@ -78,7 +78,7 @@ def expadmin(experiment_id=None):
         return render_template("experiment-review.html", expobj=expobj)
 
 
-@app.route("/admin/experiment_update.html", methods=["POST"])
+@dora.route("/admin/experiment_update.html", methods=["POST"])
 def experiment_update():
     args = dict(request.form)
     projs = request.form.getlist("projects")

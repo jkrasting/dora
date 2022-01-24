@@ -13,10 +13,10 @@ from . import user
 from flask import Flask
 
 # Configuration
-app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
-app.config["TESTING"] = True
-app.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
+dora = Flask(__name__)
+dora.secret_key = os.environ.get("SECRET_KEY") or os.urandom(24)
+dora.config["TESTING"] = True
+dora.config["PERMANENT_SESSION_LIFETIME"] = timedelta(minutes=30)
 
 # Import routing to render the pages
-from app import views
+from dora import views

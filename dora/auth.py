@@ -3,8 +3,8 @@ import json
 import requests
 from datetime import datetime
 
-from app import app
-from app.user import User
+from dora import dora
+from dora.user import User
 from oauthlib.oauth2 import WebApplicationClient
 
 from flask_login import LoginManager
@@ -23,7 +23,7 @@ GOOGLE_CLIENT_SECRET = os.environ.get("GOOGLE_CLIENT_SECRET", None)
 GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
 
 login_manager = LoginManager()
-login_manager.init_app(app)
+login_manager.init_app(dora)
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 
 
@@ -32,7 +32,7 @@ def load_user(user_id):
     return User.get(user_id)
 
 
-@app.route("/protected.html")
+@dora.route("/protected.html")
 def protected():
     if current_user.is_authenticated:
         return (
@@ -51,7 +51,7 @@ def get_google_provider_cfg():
     return requests.get(GOOGLE_DISCOVERY_URL).json()
 
 
-@app.route("/login")
+@dora.route("/login")
 def login():
     google_provider_cfg = get_google_provider_cfg()
     authorization_endpoint = google_provider_cfg["authorization_endpoint"]
@@ -65,7 +65,7 @@ def login():
     return redirect(request_uri)
 
 
-@app.route("/login/callback")
+@dora.route("/login/callback")
 def callback():
     code = request.args.get("code")
 
@@ -138,7 +138,7 @@ def callback():
     return redirect(url_for("index"))
 
 
-@app.route("/logout")
+@dora.route("/logout")
 @login_required
 def logout():
     logout_user()

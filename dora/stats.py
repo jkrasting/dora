@@ -1,4 +1,4 @@
-from app import app
+from dora import dora
 
 from flask import render_template
 from flask import request
@@ -20,14 +20,14 @@ plt.switch_backend("Agg")
 def stream_template(template_name, **context):
     # if not current_user.is_authenticated:
     #    ## possibly needed, broke with login:
-    app.update_template_context(context)
-    t = app.jinja_env.get_template(template_name)
+    dora.update_template_context(context)
+    t = dora.jinja_env.get_template(template_name)
     rv = t.stream(context)
     rv.enable_buffering(5)
     return rv
 
 
-@app.route("/analysis/stats")
+@dora.route("/analysis/stats")
 def stats():
 
     # Fetch experiments

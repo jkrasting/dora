@@ -1,4 +1,4 @@
-from app import app
+from dora import dora
 from .projects import list_projects
 
 model_types = sorted(
@@ -42,7 +42,7 @@ cmip6_mips = sorted(
 )
 
 
-@app.context_processor
+@dora.context_processor
 def get_global_vars():
     return {
         "model_types": model_types,

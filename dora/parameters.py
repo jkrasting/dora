@@ -1,5 +1,5 @@
 from flask.globals import request
-from app import app
+from dora import dora
 
 import hashlib
 
@@ -42,14 +42,14 @@ def shrink_substring(X, sub="%,"):
 def stream_template(template_name, **context):
     # if not current_user.is_authenticated:
     #    ## possibly needed, broke with login:
-    app.update_template_context(context)
-    t = app.jinja_env.get_template(template_name)
+    dora.update_template_context(context)
+    t = dora.jinja_env.get_template(template_name)
     rv = t.stream(context)
     rv.enable_buffering(5)
     return rv
 
 
-@app.route("/param/update/<idnum>")
+@dora.route("/param/update/<idnum>")
 def update_param_database(idnum):
 
     exp = Experiment(idnum)

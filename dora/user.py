@@ -1,5 +1,5 @@
 from flask_login import UserMixin
-from app.db import get_db
+from dora.db import get_db
 from .project_util import *
 
 import socket

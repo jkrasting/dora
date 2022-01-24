@@ -5,12 +5,12 @@ from .project_util import *
 
 from flask import g
 
-from app import app
+from dora import dora
 from flask import request
 from flask import render_template
 
 
-@app.route("/admin/users")
+@dora.route("/admin/users")
 def list_users():
     db = get_db()
     cursor = db.cursor()
@@ -21,7 +21,7 @@ def list_users():
     return render_template("user_list.html", users=users)
 
 
-@app.route("/admin/users/edit/<id>")
+@dora.route("/admin/users/edit/<id>")
 def show_user_props(id):
     userprofile = User.get(id)
     username = userprofile.firstlast
@@ -39,7 +39,7 @@ def show_user_props(id):
     )
 
 
-@app.route("/admin/users/update", methods=["POST"])
+@dora.route("/admin/users/update", methods=["POST"])
 def update_user_perms():
     args = dict(request.form)
     id = args["id"]

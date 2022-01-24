@@ -1,4 +1,4 @@
-from app import app
+from dora import dora
 
 from flask import render_template
 from flask import request
@@ -11,12 +11,12 @@ import gfdlvitals
 
 import io
 
-@app.route("/api/info")
+@dora.route("/api/info")
 def exp_info():
     idnum = request.args.get("id")
     return Experiment(idnum).to_dict()
 
-@app.route("/api/data")
+@dora.route("/api/data")
 def csv_data():
     idnum = request.args.get("id")
     component = request.args.get("component")
@@ -31,7 +31,7 @@ def csv_data():
             return {}
 
 
-@app.route("/api/search")
+@dora.route("/api/search")
 def dbsearch():
     search = request.args.get("search")
     sql = (

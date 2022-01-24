@@ -1,5 +1,5 @@
 from flask.globals import g
-from app.project_util import list_projects
+from dora.project_util import list_projects
 import base64
 import xcompare
 import glob
@@ -17,7 +17,7 @@ from flask import render_template
 from flask import request
 from flask import send_file
 
-from app import app
+from dora import dora
 from .Experiment import Experiment
 
 from .frepptools import list_components, Componentgroup, compare_compgroups
@@ -85,7 +85,7 @@ def io_save(fig):
     return imgbuf
 
 
-@app.route("/analysis/diffmaps", methods=["GET"])
+@dora.route("/analysis/diffmaps", methods=["GET"])
 def diffmaps_start():
     """Flask route model-model comparison maps
 

@@ -1,4 +1,4 @@
-from app import app
+from dora import dora
 
 from flask import render_template
 from flask import request
@@ -33,7 +33,7 @@ def parameter_diff(params):
     return diff_vals
 
 
-@app.route("/analysis/parameters")
+@dora.route("/analysis/parameters")
 def paramscan():
 
     idnum = request.args.getlist("id")

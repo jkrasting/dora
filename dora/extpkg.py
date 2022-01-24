@@ -6,16 +6,16 @@ from flask import send_from_directory
 
 from .Experiment import Experiment
 
-from app import app
+from dora import dora
 
 
-@app.route("/cvdp/<project_id>")
+@dora.route("/cvdp/<project_id>")
 def view_cvdp_root(project_id):
     # path = "/cvdp_path"
     return redirect(f"/cvdp/{project_id}/index.html", 302)
 
 
-@app.route("/cvdp/<project_id>/<path:filename>")
+@dora.route("/cvdp/<project_id>/<path:filename>")
 def view_cvdp(project_id, filename):
     exper = Experiment(project_id)
     path = f"{exper.pathAnalysis}/cvdp/"
@@ -27,12 +27,12 @@ def view_cvdp(project_id, filename):
         return send_from_directory(path, filename)
 
 
-@app.route("/mdtf/<project_id>")
+@dora.route("/mdtf/<project_id>")
 def view_mdtf_root(project_id):
     return redirect(f"/mdtf/{project_id}/index.html", 302)
 
 
-@app.route("/mdtf/<project_id>/<path:filename>")
+@dora.route("/mdtf/<project_id>/<path:filename>")
 def view_mdtf(project_id, filename):
     exper = Experiment(project_id)
     path = f"{exper.pathAnalysis}/mdtf/"

@@ -49,6 +49,6 @@ def close_db(e=None):
 #    click.echo("Initialized the database")
 
 
-def init_app(app):
-    app.teardown_appcontext(close_db)
-    # app.click.add_command(init_db_command)
+def init_app(dora):
+    dora.teardown_appcontext(close_db)
+    # dora.click.add_command(init_db_command)

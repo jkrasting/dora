@@ -10,7 +10,7 @@ from flask import render_template
 from flask import request
 from flask import send_file
 
-from app import app
+from dora import dora
 from .Experiment import Experiment
 
 from .frepptools import Filegroup, in_daterange, optimize_filegroup_selection
@@ -184,7 +184,7 @@ class Diagnostic:
         return self
 
 
-@app.route("/analysis/om4labs", methods=["GET"])
+@dora.route("/analysis/om4labs", methods=["GET"])
 def om4labs_start():
     """Flask route for calling OM4Labs
 

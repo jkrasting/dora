@@ -29,7 +29,7 @@ from flask_login import current_user
 
 from jinja2 import TemplateNotFound
 from datetime import datetime
-from app.user import User
+from dora.user import User
 
 from .xml import parse_xml
 
@@ -49,14 +49,14 @@ from .usertools import *
 from .parameters import *
 
 # App modules
-from app import app
+from dora import dora
 
 # App main route + generic routing
-@app.route("/", defaults={"path": "index.html"}, methods=["GET"])
-@app.route("/<path>", methods=["GET"])
+@dora.route("/", defaults={"path": "index.html"}, methods=["GET"])
+@dora.route("/<path>", methods=["GET"])
 def index(path):
     try:
-        # Serve the file (if exists) from app/templates/FILE.html
+        # Serve the file (if exists) from dora/templates/FILE.html
         if current_user.is_authenticated:
             user_params = {
                 "username": current_user.name,
@@ -76,7 +76,7 @@ def index(path):
         return render_template("page-404.html"), 404
 
 
-@app.route("/profile/")
+@dora.route("/profile/")
 @login_required
 def show_user():
     username = current_user.firstlast
@@ -92,7 +92,7 @@ def show_user():
     )
 
 
-@app.route("/backup")
+@dora.route("/backup")
 def dump_database():
     cmd = f"mysqldump {os.environ['DB_DATABASE']} -h {os.environ['DB_HOSTNAME']} -u {os.environ['DB_USERNAME']} --password={os.environ['DB_PASSWORD']}"
     output = subprocess.check_output(cmd.split(" "))
@@ -100,7 +100,7 @@ def dump_database():
     return Response(output, mimetype="text/plain")
 
 
-@app.teardown_appcontext
+@dora.teardown_appcontext
 def teardown_db(exception):
     db = g.pop("db", None)
 
@@ -109,4 +109,4 @@ def teardown_db(exception):
 
 
 if __name__ == "__main__":
-    app.run(ssl_context="adhoc")
+    dora.run(ssl_context="adhoc")
