@@ -2,9 +2,7 @@ version: '3'
 services:
   mariadb:
     env_file: .dbenv
-    build:
-      context: mariadb
-      dockerfile: Dockerfile.local
+    build: mariadb
     hostname: "dbserver"
     expose:
       - "3306"

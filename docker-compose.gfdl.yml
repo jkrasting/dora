@@ -3,7 +3,9 @@ services:
   mariadb:
     restart: always
     env_file: .dbenv
-    build: mariadb
+    build:
+      context: mariadb
+      dockerfile: Dockerfile.bootstrap
     hostname: "dbserver"
     expose:
       - "3306"
