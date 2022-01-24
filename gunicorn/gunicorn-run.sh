@@ -5,11 +5,12 @@
 
 # create an SSL certificate
 mkdir -p /etc/certificates
-openssl req -x509 \
-  -newkey rsa:4096 \
+openssl req -x509 -nodes -days 365 \
+  -newkey rsa:2048 \
   -keyout /etc/certificates/key.pem \
   -out /etc/certificates/cert.pem \
-  -days 365 -nodes -subj "/CN=DORA"
+  -config certs/req.conf \
+  -extensions 'v3_req'
 
 # start server
 exec gunicorn -t 600 --preload \
