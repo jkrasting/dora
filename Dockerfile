@@ -30,6 +30,6 @@ COPY certs certs
 COPY gunicorn gunicorn
 RUN chmod +x gunicorn/gunicorn-run.sh
 EXPOSE 5050
-COPY app app
+COPY dora dora
 
 CMD ["/bin/bash", "gunicorn/gunicorn-run.sh"]

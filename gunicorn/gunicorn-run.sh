@@ -17,4 +17,4 @@ exec gunicorn -t 600 --preload \
   --certfile /etc/certificates/cert.pem \
   --keyfile /etc/certificates/key.pem \
   --config gunicorn/gunicorn-cfg.py \
-  run:app
+  run:dora
