@@ -30,7 +30,6 @@ services:
     volumes:
       - /gfdlhome:/home:ro
       - /nbhome:/nbhome:ro
-      - ./certs:/etc/certificates
       - type: bind
         source: /archive
         target: /archive
