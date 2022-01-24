@@ -26,6 +26,42 @@ def stream_template(template_name, **context):
     return rv
 
 
+def gfdlvitals_plot(
+    dset,
+    x,
+    labels=None,
+    trend=None,
+    align=None,
+    smooth=None,
+    nyears=None,
+    raise_exception=True,
+):
+    try:
+        fig = gfdlvitals.plot_timeseries(
+            dset,
+            trend=trend,
+            smooth=smooth,
+            var=x,
+            nyears=nyears,
+            align_times=align,
+            labels=labels,
+        )
+        fig = fig[0]
+        imgbuf = io.BytesIO()
+        fig.savefig(imgbuf, format="png", bbox_inches="tight", dpi=72)
+        plt.close(fig)
+        imgbuf.seek(0)
+        uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode(
+            "utf-8"
+        ).replace("\n", "")
+        uri = '<img src="' + uri + '">'
+    except Exception as e:
+        uri = "Caught Exception: " + str(e)
+        if raise_exception:
+            raise e
+    return uri
+
+
 @dora.route("/analysis/scalar")
 def scalardiags():
 
@@ -70,29 +106,18 @@ def scalardiags():
     labels = [x.expName for x in exper]
     labels = str(",").join(labels)
 
-    def plot_gen(raise_exception=False):
+    def plot_gen():
         for x in sorted(list(dset[0].columns)):
-            try:
-                fig = gfdlvitals.plot_timeseries(
-                    dset,
-                    trend=trend,
-                    smooth=smooth,
-                    var=x,
-                    nyears=nyears,
-                    align_times=align,
-                    labels=labels,
-                )
-                fig = fig[0]
-                imgbuf = io.BytesIO()
-                fig.savefig(imgbuf, format="png", bbox_inches="tight", dpi=72)
-                plt.close(fig)
-                imgbuf.seek(0)
-                uri = "data:image/png;base64," + base64.b64encode(imgbuf.getvalue()).decode("utf-8").replace("\n", "")
-                uri = '<img src="' + uri + '">'
-            except Exception as e:
-                uri = "Caught Exception: " + str(e)
-                if raise_exception:
-                    raise e
+            uri = gfdlvitals_plot(
+                dset,
+                x,
+                raise_exception=False,
+                labels=labels,
+                trend=trend,
+                align=align,
+                smooth=smooth,
+                nyears=nyears,
+            )
             yield uri
 
     content = {
