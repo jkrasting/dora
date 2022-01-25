@@ -37,7 +37,7 @@ def display_project(project_name):
     cursor = db.cursor()
 
     # define "always visible" projects regardless of the user
-    auth_proj = ["mdt", "cmip6"]
+    auth_proj = ["mdt", "cmip6", "postmdt"]
 
     # determine what projects the user is permitted to view
     if current_user.is_authenticated:
@@ -48,6 +48,12 @@ def display_project(project_name):
     )
     cursor.execute(sql)
     config_result = cursor.fetchone()
+
+    # check if project exists
+    if project_name not in list_projects():
+        return render_template(
+            "page-500.html", msg=f"Project '{project_name}' does not exist."
+        )
 
     # exit here if user is not authorized
     if project_name not in auth_proj:
