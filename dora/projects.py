@@ -49,6 +49,12 @@ def display_project(project_name):
     cursor.execute(sql)
     config_result = cursor.fetchone()
 
+    # check if project exists
+    if project_name not in list_projects():
+        return render_template(
+            "page-500.html", msg=f"Project '{project_name}' does not exist."
+        )
+
     # exit here if user is not authorized
     if project_name not in auth_proj:
         return render_template(
