@@ -31,14 +31,17 @@ def create_project_map(project_name):
     cursor.close()
 
 
-def list_projects():
+def list_projects(names=False):
     db = get_db()
     cursor = db.cursor()
     sql = "SELECT project_id,project_name from projects;"
     cursor.execute(sql)
     projs = cursor.fetchall()
     cursor.close()
-    return [tuple(x.values()) for x in projs]
+    result = [tuple(x.values()) for x in projs]
+    if names:
+        result = [x[1] for x in result]
+    return result
 
 
 def lookup_project_from_id(idnum):

@@ -50,7 +50,7 @@ def display_project(project_name):
     config_result = cursor.fetchone()
 
     # check if project exists
-    if project_name not in list_projects():
+    if project_name not in list_projects(names=True):
         return render_template(
             "page-500.html", msg=f"Project '{project_name}' does not exist."
         )
