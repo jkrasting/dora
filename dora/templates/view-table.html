@@ -61,12 +61,15 @@
                         </button>
                         <button type="submit" class="btn btn-success" onclick="getids('/analysis/stats')">Stat Compare
                         </button>
+                        <button type="submit" class="btn btn-success" onclick="getids('/analysis/diffmaps')">Diff Maps
+                        </button>
                         </p>
                     </div>
                 </div>
             </div>
             <div class="container-fluid">
                 <div class="row">
+
                     <div class="col-12">
                         {% for table in tables %}
                         <div class="card card-secondary">
@@ -171,15 +174,18 @@ selector: 'td:first-child',
   function getids(action) {
       {% for table in tables %}
       var table = $("#example{{loop.index}}").DataTable()
-      console.log(table);
       var rows = table.rows({ selected: true }).data();
       for (var i = 0; i < rows.length; i++) {
           $('#selectionform').append('<input type="hidden" name="id" value="'+rows[i][0]+'" />');
-          document.getElementById('selectionform').action = action;
-          $('#example{{loop.index}}_length').remove();
-          document.getElementById("selectionform").submit(); 
       }
      {% endfor %}
+     var inputs = document.getElementsByTagName("input");
+      const elements = document.getElementsByClassName("form-control");
+      while(elements.length > 0){
+        elements[0].parentNode.removeChild(elements[0]);
+    }
+     document.getElementById('selectionform').action = action;
+     document.getElementById("selectionform").submit();
   }
 
 
