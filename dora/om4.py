@@ -255,6 +255,7 @@ def om4labs_start():
         "so_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
         "sss_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
         "sst_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
+        "stress_curl": ("ocean_monthly", "av", []),
         "thetao_yz_annual_bias_1x1deg": ("ocean_annual_z_1x1deg", "av", []),
     }
 
