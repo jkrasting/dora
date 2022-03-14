@@ -120,6 +120,9 @@ class Diagnostic:
             Updated Diagnostic object with paths
         """
 
+        # list of diagnostics to never downsample
+        never_downsample = ["depth_time_temperature_drift", "depth_time_salinity_drift"]
+
         try:
             # set name and post-processing dir
             self.args["label"] = label
@@ -129,7 +132,7 @@ class Diagnostic:
             exclude_list = ["section_transports"]
             if self.name not in exclude_list:
                 # look for _d2 files
-                if downsample:
+                if downsample and self.name not in never_downsample:
                     self.update_component()
                 # determine the input files
                 self.startyr = startyr
@@ -162,6 +165,12 @@ class Diagnostic:
             Updated diagnostic object with results
         """
         try:
+            # Upgrade the resolution of figures for certain diagnostics
+            upgrade_dpi = ["depth_time_temperature_drift", "depth_time_salinity_drift"]
+
+            if self.name in upgrade_dpi:
+                self.args["dpi"] = 200
+
             # run the diagnostic
             results = om4labs.diags.__dict__[self.name].run(self.args)
 
@@ -246,6 +255,8 @@ def om4labs_start():
     # default directories
     default_dirs = {
         "acc_drake": ("ocean_Drake_Passage", "ts", ["umo"]),
+        "depth_time_temperature_drift": ("ocean_annual_z", "ts", ["thetao_xyave"]),
+        "depth_time_salinity_drift": ("ocean_annual_z", "ts", ["so_xyave"]),
         "enso": ("ocean_monthly_1x1deg", "ts", ["tos"]),
         "heat_transport": ("ocean_monthly", "av", []),
         "moc_z": ("ocean_annual_z", "av", []),
