@@ -11,13 +11,16 @@ from dotenv import load_dotenv
 from OpenSSL import SSL
 
 HOST = "0.0.0.0"
-PORT = 5050 
+PORT = 5050
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
         if sys.argv[1] == "dev":
             load_dotenv(".devenv")
             dora.run(host=HOST, port=PORT, debug=True, ssl_context="adhoc")
+        elif sys.argv[1] == "nossl":
+            load_dotenv(".devenv")
+            dora.run(host=HOST, port=PORT, debug=True)
         elif sys.argv[1] == "localcert":
             load_dotenv(".devenv")
             context = SSL.Context(SSL.TLSv1_2_METHOD)
