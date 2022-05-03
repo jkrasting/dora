@@ -43,6 +43,9 @@
     <section class="content">
 
         <!-- Default box -->
+
+
+        {% if mom_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">MOM Parameters</h3>
@@ -86,11 +89,12 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
 
-
+        {% if sis_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">SIS Parameters</h3>
@@ -134,11 +138,13 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
 
 
+        {% if log0_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">First FMS Log File</h3>
@@ -182,11 +188,13 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
 
 
+        {% if log1_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">Second FMS Log File</h3>
@@ -230,10 +238,12 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
 
+        {% if namelist0_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">First Namelist Group</h3>
@@ -277,17 +287,19 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
 
 
+        {% if namelist1_msg|length == 0 %}
         <div class="card collapsed-card">
             <div class="card-header">
                 <h3 class="card-title">Second Namelist Group</h3>
 
                 <div class="card-tools">
-                    <span class="badge badge-danger">{{mom|length}}</span>
+                    {% if namelist1|length > 0 %}<span class="badge badge-danger">{{namelist1|length}}</span>{% endif %}
                     <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
                         <i class="fas fa-plus"></i>
                     </button>
@@ -325,6 +337,7 @@
             <!-- /.card-footer-->
         </div>
         <!-- /.card -->
+        {% endif %}
 
 
 
