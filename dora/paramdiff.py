@@ -9,6 +9,11 @@ from .Experiment import Experiment
 import mom6_parameter_scanner
 
 
+class NullResult:
+    def __init__(self):
+        self.dict = {}
+
+
 def parameter_diff(params):
 
     # get a list of dicts of parameter differences
@@ -51,39 +56,76 @@ def paramscan():
 
     header = list(zip(idnum, names))
 
-    mom = [mom6_parameter_scanner.Parameters(x) for x in dirs]
+    # MOM Log File
+    mom_msg = []
+    try:
+        mom = [mom6_parameter_scanner.Parameters(x) for x in dirs]
+    except Exception as e:
+        mom = [NullResult()]
+        mom_msg.append(str(e))
     mom = parameter_diff(mom)
 
-    sis = [
-        mom6_parameter_scanner.Parameters(
-            x, parameter_files=["*SIS_parameter_doc.all", "*SIS_parameter_doc.short"]
-        )
-        for x in dirs
-    ]
+    # SIS Log File
+    sis_msg = []
+    try:
+        sis = [
+            mom6_parameter_scanner.Parameters(
+                x,
+                parameter_files=["*SIS_parameter_doc.all", "*SIS_parameter_doc.short"],
+            )
+            for x in dirs
+        ]
+    except Exception as e:
+        sis = [NullResult()]
+        sis_msg.append(str(e))
     sis = parameter_diff(sis)
 
-    log0 = [
-        mom6_parameter_scanner.Log(x, parameter_files=["*logfile.000000.out"])
-        for x in dirs
-    ]
+    # FMS Log File 0
+    log0_msg = []
+    try:
+        log0 = [
+            mom6_parameter_scanner.Log(x, parameter_files=["*logfile.000000.out"])
+            for x in dirs
+        ]
+    except Exception as e:
+        log0 = [NullResult()]
+        log0_msg.append(str(e))
     log0 = parameter_diff(log0)
 
-    log1 = [
-        mom6_parameter_scanner.Log(x, ignore_files=["*logfile.000000.out"])
-        for x in dirs
-    ]
+    # FMS Log File 1
+    log1_msg = []
+    try:
+        log1 = [
+            mom6_parameter_scanner.Log(x, ignore_files=["*logfile.000000.out"])
+            for x in dirs
+        ]
+    except Exception as e:
+        log1 = [NullResult()]
+        log1_msg.append(str(e))
     log1 = parameter_diff(log1)
 
-    namelist0 = [
-        mom6_parameter_scanner.Namelists(x, parameter_files=["*logfile.000000.out"])
-        for x in dirs
-    ]
+    # FMS Namelist 0
+    namelist0_msg = []
+    try:
+        namelist0 = [
+            mom6_parameter_scanner.Namelists(x, parameter_files=["*logfile.000000.out"])
+            for x in dirs
+        ]
+    except Exception as e:
+        namelist0 = [NullResult()]
+        namelist0_msg.append(str(e))
     namelist0 = parameter_diff(namelist0)
 
-    namelist1 = [
-        mom6_parameter_scanner.Namelists(x, ignore_files=["*logfile.000000.out"])
-        for x in dirs
-    ]
+    # FMS Namelist 1
+    namelist1_msg = []
+    try:
+        namelist1 = [
+            mom6_parameter_scanner.Namelists(x, ignore_files=["*logfile.000000.out"])
+            for x in dirs
+        ]
+    except Exception as e:
+        namelist1 = [NullResult()]
+        namelist1_msg.append(str(e))
     namelist1 = parameter_diff(namelist1)
 
     return render_template(
@@ -95,4 +137,10 @@ def paramscan():
         log1=log1,
         namelist0=namelist0,
         namelist1=namelist1,
+        mom_msg=mom_msg,
+        sis_msg=sis_msg,
+        log0_msg=log0_msg,
+        log1_msg=log1_msg,
+        namelist0_msg=namelist0_msg,
+        namelist1_msg=namelist1_msg,
     )
