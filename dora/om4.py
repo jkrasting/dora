@@ -81,6 +81,11 @@ class Diagnostic:
         ppdir = self.args["ppdir"][0] + self.component
         ppdir = f"{ppdir}/{self.pptype}"
         ncfiles = glob.glob(f"{ppdir}/**/*.nc", recursive=True)
+
+        # ignore known bad file patterns
+        exclude_patterns = ["/old_tmp/"]
+        ncfiles = [x for x in ncfiles if not any(var in x for var in exclude_patterns)]
+
         assert len(ncfiles) > 0, f"No files found in {ppdir}."
         ncfiles = [x for x in ncfiles if in_daterange(x, self.startyr, self.endyr)]
         ncfiles = optimize_filegroup_selection(ncfiles, self.startyr, self.endyr)
