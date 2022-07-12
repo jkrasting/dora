@@ -34,6 +34,7 @@ def gfdlvitals_plot(
     align=None,
     smooth=None,
     nyears=None,
+    plottype="average",
     raise_exception=True,
 ):
     try:
@@ -44,6 +45,7 @@ def gfdlvitals_plot(
             var=x,
             nyears=nyears,
             align_times=align,
+            plottype=plottype,
             labels=labels,
         )
         fig = fig[0]
@@ -80,9 +82,11 @@ def scalardiags():
     nyears = request.args.get("nyears")
     trend = request.args.get("trend")
     align = request.args.get("align")
+    plottype = request.args.get("plottype")
 
     trend = True if trend is not None else False
     align = True if align is not None else False
+    plottype = "average" if plottype is None else plottype
 
     smooth = None if (smooth == "" or smooth is None) else int(smooth)
     nyears = None if (nyears == "" or nyears is None) else int(nyears)
@@ -117,6 +121,7 @@ def scalardiags():
                 align=align,
                 smooth=smooth,
                 nyears=nyears,
+                plottype=plottype,
             )
             yield uri
 
