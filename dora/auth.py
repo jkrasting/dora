@@ -2,6 +2,7 @@ import os
 import json
 import requests
 from datetime import datetime
+from datetime import timedelta
 
 from dora import dora
 from dora.user import User
@@ -133,7 +134,7 @@ def callback():
             unique_id, users_name, users_email, picture, remote_addr, login_date
         )
 
-    login_user(user)
+    login_user(user, remember=False)
 
     return redirect(url_for("index"))
 

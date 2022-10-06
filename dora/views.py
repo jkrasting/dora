@@ -13,6 +13,10 @@ import sqlite3
 import yaml
 import subprocess
 
+import flask
+
+from datetime import timedelta
+
 from flask import (
     g,
     Flask,
@@ -50,6 +54,14 @@ from .parameters import *
 
 # App modules
 from dora import dora
+
+
+@dora.before_request
+def before_request():
+    flask.session.permanent = True
+    dora.permanent_session_lifetime = timedelta(hours=10)
+    flask.session.modified = False
+
 
 # App main route + generic routing
 @dora.route("/", defaults={"path": "index.html"}, methods=["GET"])
