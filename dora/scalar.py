@@ -107,6 +107,7 @@ def scalardiags():
 
     dset = [f"{x.pathDB}/{region}Ave{realm}.db" for x in exper]
     dset = [gfdlvitals.open_db(x) for x in dset]
+    dset = [x.build_netrad_toa() for x in dset]
     labels = [x.expName for x in exper]
     labels = str(",").join(labels)
 
