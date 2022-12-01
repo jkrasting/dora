@@ -49,10 +49,20 @@
             The following files are needed to perform this analysis. To speed up the the analysis,
             or in the event of a server timeout, consider recalling these files first from tape:
 
-            <pre>cd {{experiment.pathPP}} {{"\n"|safe}}dmget {{infiles|join(" ")}} </pre>
+            <pre><p id="dmget">cd {{experiment.pathPP}} {{"\n"|safe}}dmget {{infiles|join(" ")}}</p></pre>
+
+            <table>
+              <tr>
+                <td>
+                  <span title="Copy to Clipboard">
+                    <button class="btn btn-primary" onclick="copyToClipboard('#dmget')">
+                      <i class="fas fa-clipboard"></i>
+                    </button>
+                  </span>
+                </td>
+                <td>
 
             <form method="/om4labs/analysis" method="GET">
-
                 {% for key, value in args.items() %}
                 {% if key != "analysis" %}
                 <input type="hidden" name="{{key}}" value="{{value}}">
@@ -66,6 +76,10 @@
 
                 <button type="submit" class="btn btn-primary">Continue with Analysis</button>
             </form>
+
+                </td>
+              </tr>
+            </table>
         </div>
         <!-- /.card -->
 
@@ -156,4 +170,15 @@
 <!-- AdminLTE for demo purposes -->
 <script src="/static/assets/js/demo.js"></script>
 
+<script>
+
+function copyToClipboard(element) {
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val($(element).text().replace("\n","; ")).select();
+  document.execCommand("copy");
+  console.log($(element).text());
+  $temp.remove();
+}
+</script>
 {% endblock javascripts %}
