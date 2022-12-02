@@ -10,6 +10,7 @@ import os
 import pymysql
 import requests
 import sqlite3
+import traceback
 import yaml
 import subprocess
 
@@ -55,6 +56,25 @@ from .parameters import *
 # App modules
 from dora import dora
 
+# as a decorator
+@dora.errorhandler(500)
+def internal_server_error(e):
+    return render_template('page-500.html'), 500
+
+@dora.errorhandler(Exception)
+def special_exception_handler(error):
+    errormsg = str(error)
+    if current_user.is_authenticated:
+        if current_user.admin:
+            tbstr = traceback.format_exc()
+        else:
+            tbstr = ""
+    else:
+        tbstr = ""
+    return render_template('page-500-unspec.html',
+                            msg=f"Dora encountered an exception: {errormsg}",
+                            tbstr=tbstr)
+
 
 @dora.before_request
 def before_request():
@@ -88,6 +108,7 @@ def index(path):
         return render_template("page-404.html"), 404
 
 
+
 @dora.route("/profile/")
 @login_required
 def show_user():
@@ -118,6 +139,7 @@ def teardown_db(exception):
 
     if db is not None:
         db.close()
+
 
 
 if __name__ == "__main__":
