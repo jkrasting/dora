@@ -37,7 +37,7 @@ def display_project(project_name):
     cursor = db.cursor()
 
     # define "always visible" projects regardless of the user
-    auth_proj = ["mdt", "cmip6", "postmdt"]
+    auth_proj = ["mdt", "cmip6", "postmdt", "am5dt"]
 
     # determine what projects the user is permitted to view
     if current_user.is_authenticated:
