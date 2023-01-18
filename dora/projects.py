@@ -15,8 +15,7 @@ from .project_util import (
 )
 
 
-@dora.route("/projects/<project_name>")
-def display_project(project_name):
+def fetch_project_info(project_name, auth=True):
     """Displays a table or set of tables for a given project
 
     Parameters
@@ -51,15 +50,11 @@ def display_project(project_name):
 
     # check if project exists
     if project_name not in list_projects(names=True):
-        return render_template(
-            "page-500.html", msg=f"Project '{project_name}' does not exist."
-        )
+        return f"Project '{project_name}' does not exist."
 
     # exit here if user is not authorized
-    if project_name not in auth_proj:
-        return render_template(
-            "page-500.html", msg=f"You are not authorized to view {project_name}"
-        )
+    if auth and (project_name not in auth_proj):
+        return f"You are not authorized to view {project_name}"
 
     # construct the command to fetch the experiments based on the project's
     # yaml configuration. A table is generated for each entry in the yaml
@@ -141,16 +136,30 @@ def display_project(project_name):
     # close the database cursor
     cursor.close()
 
-    # render the web page
-    return render_template(
-        "view-table.html",
-        tables=tables,
-        project_name=project_name,
-        project_description=config_result["project_description"],
-        parameter=parameter,
-        params=params,
-        error=error,
-    )
+    project_description = config_result["project_description"]
+
+    return (tables, project_description, parameter, params, error)
+
+
+@dora.route("/projects/<project_name>")
+def display_project(project_name):
+
+    result = fetch_project_info(project_name)
+
+    if isinstance(result, tuple):
+        tables, project_description, parameter, params, error = result
+        # render the web page
+        return render_template(
+            "view-table.html",
+            tables=tables,
+            project_name=project_name,
+            project_description=project_description,
+            parameter=parameter,
+            params=params,
+            error=error,
+        )
+    else:
+        return render_template("page-500.html", msg=result)
 
 
 @dora.route("/admin/projects/<project_id>")

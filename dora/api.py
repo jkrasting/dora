@@ -7,14 +7,17 @@ from flask_login import current_user
 
 from .Experiment import Experiment
 from .db import get_db
+from .projects import fetch_project_info
 import gfdlvitals
 
 import io
+
 
 @dora.route("/api/info")
 def exp_info():
     idnum = request.args.get("id")
     return Experiment(idnum).to_dict()
+
 
 @dora.route("/api/data")
 def csv_data():
@@ -29,6 +32,19 @@ def csv_data():
             return gfdlvitals.open_db(dbfile).to_json()
         except:
             return {}
+
+
+@dora.route("/api/list")
+def project_json():
+    project_name = request.args.get("project_name")
+
+    result = fetch_project_info(project_name, auth=False)
+
+    if isinstance(result, tuple):
+        tables, project_description, parameter, params, error = result
+        return {"project": tables}
+    else:
+        return render_template("page-500.html", msg=result)
 
 
 @dora.route("/api/search")
@@ -90,4 +106,4 @@ def dbsearch():
     cursor.execute(sql)
     result = cursor.fetchall()
 
-    return {x["id"]:x for x in result}
+    return {x["id"]: x for x in result}
