@@ -189,7 +189,14 @@ def parse_xml(xmlfile, user=None):
     # hack to set postProcessing path if undefined
     resolved_paths = {
         k1: {
-          k2: {k3: (v2['archive'] + 'pp/' if ('postprocess' in k3.lower() and not v3) else v3) for (k3, v3) in v2.items()}
+            k2: {
+                k3: (
+                    v2["archive"] + "pp/"
+                    if ("postprocess" in k3.lower() and not v3)
+                    else v3
+                )
+                for (k3, v3) in v2.items()
+            }
             for (k2, v2) in v1.items()
         }
         for (k1, v1) in resolved_paths.items()
