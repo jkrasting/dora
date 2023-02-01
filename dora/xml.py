@@ -121,6 +121,8 @@ def parse_xml(xmlfile, user=None):
     properties["ARCHIVE"] = "/archive/$USER"
     properties["archiveDir"] = "$(archive)"
     properties["rootDir"] = "/home/$(USER)/$(stem)"
+    properties["xmlDir"] = os.path.dirname(xmlfile)
+    properties["stem"] = "$(FRE_STEM)"
 
     # some gaea-specific properties
     properties["CPERM"] = "/lustre/f1/unswept"
@@ -182,6 +184,22 @@ def parse_xml(xmlfile, user=None):
             for (k, v) in resolved_paths.items()
         }
         for x in exps
+    }
+
+    # hack to set postProcessing path if undefined
+    resolved_paths = {
+        k1: {
+            k2: {
+                k3: (
+                    v2["archive"] + "pp/"
+                    if ("postprocess" in k3.lower() and not v3)
+                    else v3
+                )
+                for (k3, v3) in v2.items()
+            }
+            for (k2, v2) in v1.items()
+        }
+        for (k1, v1) in resolved_paths.items()
     }
 
     return (exps, platforms, resolved_paths)
