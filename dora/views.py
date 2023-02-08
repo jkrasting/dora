@@ -112,8 +112,7 @@ def special_exception_handler(error):
     )
 
 
-@dora.before_first_request
-def before_first_request():
+with dora.app_context():
     db = get_db()
     cursor = db.cursor()
     if not check_sql_table_exists("tokens", cursor):

@@ -1,7 +1,5 @@
 #!/bin/sh
 
-conda activate env
-
 # load environment variables 
 `sed -e "s/^/export /g" .env`
 
@@ -15,6 +13,7 @@ openssl req -x509 -nodes -days 365 \
   -extensions 'v3_req'
 
 # start server
+conda run -n env \
 exec gunicorn -t 600 --preload \
   --certfile /etc/certificates/cert.pem \
   --keyfile /etc/certificates/key.pem \

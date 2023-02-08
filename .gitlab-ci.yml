@@ -1,0 +1,25 @@
+image: alpine:latest
+
+stages: 
+  - generateconfig
+  - run
+
+variables:
+  mode: "standard-test"
+
+generate-config:
+  image: python:withyaml
+  stage: generateconfig
+  script: chmod 744 generate-ci-config.py && python generate-ci-config.py
+  tags:
+    - dpdev
+  artifacts:
+    paths:
+      - generated-config.yml
+
+generated-pipeline:
+  stage: run
+  trigger:
+    include:
+      - artifact: generated-config.yml
+        job: generate-config
