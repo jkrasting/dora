@@ -156,6 +156,18 @@ class User(UserMixin):
         db.commit()
         cursor.close()
 
+    @staticmethod
+    def reset(id_, name, email, profile_pic, remote_addr, login_date):
+        db = get_db()
+        cursor = db.cursor()
+        sql = (
+            f"UPDATE users SET id='{id_}', name='{name}', profile_pic='{profile_pic}', "
+            + f"remote_addr='{remote_addr}', login_date='{login_date}' WHERE email='{email}'"
+        )
+        cursor.execute(sql)
+        db.commit()
+        cursor.close()
+
 
 def user_experiment_count(username):
     db = get_db()
