@@ -5,7 +5,7 @@ from .db import get_db
 from .user import User
 from .user import user_experiment_count
 from .project_util import *
-from .tokens import check_sql_table_exists, get_api_token
+from .user import check_sql_table_exists, get_api_token
 
 from flask import g
 
@@ -43,6 +43,7 @@ def update_api_token():
     args["email"] = userprofile.email
     args["created"] = datetime.datetime.now().isoformat()
     args["token"] = secrets.token_urlsafe()
+    args["expires"] = "2099-12-31T23:59:59"
 
     # loop over keys and values to construct a SQL call
     keys = str(",").join([f"{x}" for x in list(args.keys())])

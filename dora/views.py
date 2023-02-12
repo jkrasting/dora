@@ -49,19 +49,20 @@ from .projects import *
 from .experiments import *
 from .scalar import *
 from .stats import *
-from .user import user_experiment_count
+from .user import user_experiment_count, check_sql_table_exists, create_tokens_table
 from .usertools import *
-from .tokens import *
 from .tokentools import *
 from .parameters import *
 
 # App modules
 from dora import dora
 
+
 # as a decorator
 @dora.errorhandler(500)
 def internal_server_error(e):
-    return render_template('page-500.html'), 500
+    return render_template("page-500.html"), 500
+
 
 @dora.errorhandler(Exception)
 def special_exception_handler(error):
@@ -74,17 +75,19 @@ def special_exception_handler(error):
             tbstr = ""
     else:
         tbstr = ""
-    return render_template('page-500-unspec.html',
-                            msg=f"Dora encountered an exception: {errormsg}",
-                            tbstr=tbstr)
+    return render_template(
+        "page-500-unspec.html",
+        msg=f"Dora encountered an exception: {errormsg}",
+        tbstr=tbstr,
+    )
 
 
 @dora.before_first_request
 def before_first_request():
     db = get_db()
     cursor = db.cursor()
-    if not check_sql_table_exists("tokens",cursor):
-        create_tokens_table(db,cursor)
+    if not check_sql_table_exists("tokens", cursor):
+        create_tokens_table(db, cursor)
     cursor.close()
 
 
@@ -150,7 +153,6 @@ def teardown_db(exception):
 
     if db is not None:
         db.close()
-
 
 
 if __name__ == "__main__":
