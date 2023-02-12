@@ -12,13 +12,14 @@ from flask import g
 from dora import dora
 from flask import request
 from flask import render_template
+from flask import session
+from flask import redirect
 
 from flask_login import current_user, login_required
 
+
 @dora.route("/admin/tokens")
 def list_tokens():
-
-
     db = get_db()
     cursor = db.cursor()
 
@@ -32,7 +33,8 @@ def list_tokens():
 
     return render_template("examples-blank.html", tokens=tokens)
 
-@dora.route("/hello", methods=["GET"])
+
+@dora.route("/admin/tokens/reset", methods=["GET"])
 @login_required
 def update_api_token():
     assert current_user.admin, "Admin privileges are required for this function"
@@ -58,4 +60,4 @@ def update_api_token():
     cursor.execute(sql)
     db.commit()
 
-    return render_template("examples-blank.html")
+    return redirect(f"/admin/users/edit/{id}")
