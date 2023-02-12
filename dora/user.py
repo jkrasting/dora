@@ -1,7 +1,7 @@
 from flask_login import UserMixin
 from dora.db import get_db
 from .project_util import *
-
+from .tokens import get_api_token
 import socket
 
 
@@ -167,6 +167,10 @@ class User(UserMixin):
         cursor.execute(sql)
         db.commit()
         cursor.close()
+
+    @property
+    def token(self):
+        return get_api_token(self.email)
 
 
 def user_experiment_count(username):

@@ -51,6 +51,8 @@ from .scalar import *
 from .stats import *
 from .user import user_experiment_count
 from .usertools import *
+from .tokens import *
+from .tokentools import *
 from .parameters import *
 
 # App modules
@@ -64,6 +66,7 @@ def internal_server_error(e):
 @dora.errorhandler(Exception)
 def special_exception_handler(error):
     errormsg = str(error)
+    print(errormsg)
     if current_user.is_authenticated:
         if current_user.admin:
             tbstr = traceback.format_exc()
@@ -74,6 +77,15 @@ def special_exception_handler(error):
     return render_template('page-500-unspec.html',
                             msg=f"Dora encountered an exception: {errormsg}",
                             tbstr=tbstr)
+
+
+@dora.before_first_request
+def before_first_request():
+    db = get_db()
+    cursor = db.cursor()
+    if not check_sql_table_exists("tokens",cursor):
+        create_tokens_table(db,cursor)
+    cursor.close()
 
 
 @dora.before_request
@@ -106,7 +118,6 @@ def index(path):
 
     except TemplateNotFound:
         return render_template("page-404.html"), 404
-
 
 
 @dora.route("/profile/")
