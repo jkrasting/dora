@@ -8,9 +8,34 @@ from flask_login import current_user
 from .Experiment import Experiment
 from .db import get_db
 from .projects import fetch_project_info
+from .user import Token
+
+import datetime
+
 import gfdlvitals
 
 import io
+
+
+@dora.route("/api/add")
+def add():
+    token = request.args.get("token")
+
+    if token is None:
+        return "API Token required for this operation."
+
+    token = Token(token)
+
+    if not hasattr(token, "token"):
+        return "Invalid token specified."
+
+    if token.active == 0:
+        return "Specified token is not active."
+
+    if datetime.datetime.now() > token.expires:
+        return "Token is expired."
+
+    return f"Welcome {token.user.firstlast} ({token.user.name})."
 
 
 @dora.route("/api/info")

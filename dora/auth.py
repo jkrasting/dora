@@ -126,9 +126,17 @@ def callback():
             remote_addr,
             login_date,
         )
-        User.create(
-            unique_id, users_name, users_email, picture, remote_addr, login_date
-        )
+        try:
+            User.create(
+                unique_id, users_name, users_email, picture, remote_addr, login_date
+            )
+        except Exception as exc:
+            if "Duplicate entry" in str(exc):
+                User.reset(
+                    unique_id, users_name, users_email, picture, remote_addr, login_date
+                )
+            else:
+                raise exc
     else:
         User.update(
             unique_id, users_name, users_email, picture, remote_addr, login_date

@@ -205,6 +205,20 @@
                     </div>
                 </div>
 
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">API Token</h3>
+                    </div>
+                    <!-- /.card-header -->
+                    <div class="card-body">
+                        {{userprofile.token}}
+                        <h6><a href="/admin/tokens/reset?id={{userprofile.id}}">Reset Token</a></h6>
+                    </div>
+                </div>
+
+
+
+
                 <div class="form-group">
                     <div class="custom-control custom-switch">
                         <input type="checkbox" class="custom-control-input" id="customSwitch1" name="admin" value="1" {%
