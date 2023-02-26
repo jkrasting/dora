@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-
+import datetime
 import json
 import lxml
 import os
@@ -16,7 +16,6 @@ import subprocess
 
 import flask
 
-from datetime import timedelta
 
 from flask import (
     g,
@@ -33,7 +32,6 @@ from flask import (
 from flask_login import current_user
 
 from jinja2 import TemplateNotFound
-from datetime import datetime
 from dora.user import User
 
 from .xml import parse_xml
@@ -50,6 +48,7 @@ from .experiments import *
 from .scalar import *
 from .stats import *
 from .user import user_experiment_count, check_sql_table_exists, create_tokens_table
+from .logging import create_error_log_table
 from .usertools import *
 from .tokentools import *
 from .parameters import *
@@ -69,12 +68,36 @@ def special_exception_handler(error):
     errormsg = str(error)
     print(errormsg)
     if current_user.is_authenticated:
+        username = current_user.email
         if current_user.admin:
             tbstr = traceback.format_exc()
         else:
             tbstr = ""
     else:
+        username = None
         tbstr = ""
+
+    details = {
+        "timestamp": datetime.datetime.now().isoformat(),
+        "ip": request.remote_addr,
+        "hostname": None,
+        "username": username,
+        "url": request.url,
+        "error": errormsg,
+        "traceback": traceback.format_exc(),
+    }
+
+    details = {k: v for k, v in details.items() if v is not None}
+
+    keys, values = list(zip(*details.items()))
+    keys = str(tuple([str(x) for x in keys])).replace("'", "")
+    values = str(tuple([str(x) for x in values]))
+    sql = f"insert into logs {keys} values {values}"
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute(sql)
+    db.commit()
+
     return render_template(
         "page-500-unspec.html",
         msg=f"Dora encountered an exception: {errormsg}",
@@ -88,13 +111,15 @@ def before_first_request():
     cursor = db.cursor()
     if not check_sql_table_exists("tokens", cursor):
         create_tokens_table(db, cursor)
+    if not check_sql_table_exists("logs", cursor):
+        create_error_log_table(db, cursor)
     cursor.close()
 
 
 @dora.before_request
 def before_request():
     flask.session.permanent = True
-    dora.permanent_session_lifetime = timedelta(hours=10)
+    dora.permanent_session_lifetime = datetime.timedelta(hours=10)
     flask.session.modified = False
 
 
@@ -121,6 +146,12 @@ def index(path):
 
     except TemplateNotFound:
         return render_template("page-404.html"), 404
+
+
+@dora.route("/err")
+def test_exception():
+    raise ValueError("some test error")
+    return "Success."
 
 
 @dora.route("/profile/")
