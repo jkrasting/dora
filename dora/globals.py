@@ -3,6 +3,8 @@ from .projects import list_projects
 
 model_types = sorted(
     [
+        "AM5c96",
+        "AM5c384"
         "CM4",
         "OM4",
         "AM4",
