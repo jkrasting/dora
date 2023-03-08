@@ -180,14 +180,14 @@
                                             <input type="text" class="form-control form-control-sm" size=75
                                                    id="expLabels" name="expLabels" {% if expobj.expLabels !="None"
                                                    %}value="{{expobj.expLabels}}" {% endif %}
-                                                   placeholder="Comma-separated list of keywords for searching">
+                                                   placeholder="Short description of experiment or comma-separated keywords (optional)">
                                         </div>
                                         <div class="form-group">
                                             <label for="expLabels">Curator Experiment ID:</label>
                                             <input type="text" class="form-control form-control-sm" size=75
                                                    id="urlCurator" name="urlCurator" {% if expobj.urlCurator !="None"
                                                    %}value="{{expobj.urlCurator}}" {% endif %}
-                                                   placeholder="Curator database ID, e.g. exper_xxxxxxxx">
+                                                   placeholder="Curator database ID, e.g. exper_xxxxxxxx, (depreciated)">
                                         </div>
                                     </div>
                                 </div>
