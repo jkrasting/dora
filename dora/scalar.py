@@ -36,6 +36,7 @@ def gfdlvitals_plot(
     nyears=None,
     plottype="average",
     raise_exception=True,
+    title="both",
 ):
     try:
         fig = gfdlvitals.plot_timeseries(
@@ -47,6 +48,7 @@ def gfdlvitals_plot(
             align_times=align,
             plottype=plottype,
             labels=labels,
+            title=title,
         )
         fig = fig[0]
         imgbuf = io.BytesIO()
@@ -66,7 +68,6 @@ def gfdlvitals_plot(
 
 @dora.route("/analysis/scalar")
 def scalardiags():
-
     idnum = request.args.getlist("id")
 
     if len(idnum) == 1:
@@ -123,8 +124,9 @@ def scalardiags():
                 smooth=smooth,
                 nyears=nyears,
                 plottype=plottype,
+                title="longname",
             )
-            yield uri
+            yield (x, uri)
 
     content = {
         "rows": plot_gen(),

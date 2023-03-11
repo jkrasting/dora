@@ -59,7 +59,10 @@
             </div>
             <div class="card-body">
                 {% for im_name in rows: %}
-                {{ im_name | safe }}<br>
+                    <div>
+                    <h4>{{ im_name[0] }}</h4>
+                    {{ im_name[1] | safe }}<br>
+                    </div>
                 {% endfor %}
             </div>
             <!-- /.card-body -->
