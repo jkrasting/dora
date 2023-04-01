@@ -62,6 +62,7 @@ class Experiment:
             cursor.execute(sql)
             result = cursor.fetchone()
             cursor.close()
+            result["requested_id"] = master_id
             return result
 
         if isinstance(input, dict):
@@ -122,6 +123,7 @@ class Experiment:
                 self.source = "sql"
                 result = _fetch_from_master(master_id, db=db)
                 result = fix_dir_paths(result)
+                result["requested_id"] = input
                 self.__dict__ = {**self.__dict__, **result}
             else:
                 self.__dict__ = {}
