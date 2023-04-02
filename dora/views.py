@@ -57,6 +57,13 @@ from .parameters import *
 from dora import dora
 
 
+# load mailer
+if dora.config["DO_MAIL"]:
+    from flask_mail import Mail, Message
+
+    mail = Mail(dora)
+
+
 # as a decorator
 @dora.errorhandler(500)
 def internal_server_error(e):
@@ -182,6 +189,52 @@ def dump_database():
     output = subprocess.check_output(cmd.split(" "))
     output = output.decode()
     return Response(output, mimetype="text/plain")
+
+
+@login_required
+@dora.route("/mailer")
+def simple_mailer():
+    action = {}
+
+    if not current_user.admin:
+        return "You must be an admin to use this feature."
+
+    mailto = request.args.get("mailto")
+    if mailto is None:
+        return "Destination not specified.  Use `mailto` cgi to specify address"
+    else:
+        action["mailto"] = mailto
+
+    if dora.config["DO_MAIL"] is False:
+        result = "Mail is not enabled. Set `DO_MAIL` to True."
+    else:
+        mail_config_items = [
+            "MAIL_DEFAULT_SENDER",
+            "MAIL_SERVER",
+            "MAIL_USE_SSL",
+            "MAIL_USE_TLS",
+            "MAIL_PORT",
+            "MAIL_USERNAME",
+            "MAIL_PASSWORD",
+            "MAIL_DEFAULT_SENDER",
+        ]
+        mail_config_items = {
+            k: v for k, v in dora.config.items() if k in mail_config_items
+        }
+        if mail_config_items["MAIL_PASSWORD"] is not None:
+            mail_config_items["MAIL_PASSWORD"] = "*" * len(
+                mail_config_items["MAIL_PASSWORD"]
+            )
+
+        result = {**mail_config_items, **action}
+
+        msg = Message("Test email from Dora.", recipients=[action["mailto"]])
+        msg.body = "This is an automatic test email message from the Dora system"
+        mail.send(msg)
+
+        result["status"] = "message sent"
+
+    return result
 
 
 @dora.teardown_appcontext
