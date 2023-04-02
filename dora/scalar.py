@@ -66,6 +66,13 @@ def gfdlvitals_plot(
     return uri
 
 
+def format_label(x):
+    """Formats the experiment label"""
+    label = f"{x.requested_id} - " if x.source == "sql" else ""
+    label = label + x.expName
+    return label
+
+
 @dora.route("/analysis/scalar")
 def scalardiags():
     idnum = request.args.getlist("id")
@@ -109,7 +116,7 @@ def scalardiags():
     dset = [f"{x.pathDB}/{region}Ave{realm}.db" for x in exper]
     dset = [gfdlvitals.open_db(x) for x in dset]
     dset = [x.build_netrad_toa() for x in dset]
-    labels = [x.expName for x in exper]
+    labels = [format_label(x) for x in exper]
     labels = str(",").join(labels)
 
     def plot_gen():
