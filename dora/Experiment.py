@@ -63,6 +63,7 @@ class Experiment:
             result = cursor.fetchone()
             cursor.close()
             result["requested_id"] = master_id
+            result["master_id"] = master_id
             return result
 
         if isinstance(input, dict):
