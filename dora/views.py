@@ -120,12 +120,12 @@ def before_first_request():
         create_tokens_table(db, cursor)
     if not check_sql_table_exists("logs", cursor):
         create_error_log_table(db, cursor)
-    else:
-        print("Resetting existing logs table")
-        sql = "DROP TABLE `logs`;"
-        cursor.execute(sql)
-        db.commit()
-        create_error_log_table(db, cursor)
+    #else:
+    #    print("Resetting existing logs table")
+    #    sql = "DROP TABLE `logs`;"
+    #    cursor.execute(sql)
+    #    db.commit()
+    #    create_error_log_table(db, cursor)
     cursor.close()
 
 
@@ -209,7 +209,6 @@ def simple_mailer():
         result = "Mail is not enabled. Set `DO_MAIL` to True."
     else:
         mail_config_items = [
-            "MAIL_DEFAULT_SENDER",
             "MAIL_SERVER",
             "MAIL_USE_SSL",
             "MAIL_USE_TLS",
