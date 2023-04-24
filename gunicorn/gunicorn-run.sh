@@ -1,5 +1,7 @@
 #!/bin/sh
 
+conda activate env
+
 # load environment variables 
 `sed -e "s/^/export /g" .env`
 
