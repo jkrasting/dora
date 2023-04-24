@@ -25,11 +25,11 @@ ENV PATH /opt/conda/envs/env/bin:$PATH
 # The code to run when container is started:
 ENV FLASK_APP run.py
 COPY run.py run.py
-COPY .env .env
 COPY certs certs
 COPY gunicorn gunicorn
 RUN chmod +x gunicorn/gunicorn-run.sh
 EXPOSE 5050
 COPY dora dora
+COPY .env .env
 
 CMD ["/bin/bash", "gunicorn/gunicorn-run.sh"]
