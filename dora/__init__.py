@@ -50,7 +50,7 @@ for k, v in config.items():
 # Mail username and password configuration
 dora.config["MAIL_USERNAME"] = os.getenv("MAIL_USERNAME")
 dora.config["MAIL_PASSWORD"] = os.getenv("MAIL_PASSWORD")
-dora.config["MAIL_DEFAULT_SENDER"] = os.getenv("MAIL_DEFAULT_SENDER")
+dora.config["MAIL_DEFAULT_SENDER"] = f"DORA <{os.getenv('MAIL_DEFAULT_SENDER')}>"
 dora.config["MAIL_MAX_EMAILS"] = os.getenv("MAIL_MAX_EMAILS")
 
 
