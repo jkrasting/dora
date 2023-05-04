@@ -12,6 +12,7 @@ model_types = sorted(
         "ESM4p5",
         "ESM4",
         "ESM2G",
+        "M6R",
         "OM4p5",
         "CM3",
         "LM3",
