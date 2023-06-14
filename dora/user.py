@@ -1,6 +1,7 @@
 from flask_login import UserMixin
 from dora.db import get_db
 from .project_util import *
+import datetime
 import socket
 
 # from .user import user_experiment_count
@@ -103,7 +104,6 @@ class User(UserMixin):
         db = get_db()
         cursor = db.cursor()
         sql = f"UPDATE users SET {key}='{value}' WHERE id='{self.id}'"
-        print(sql)
         cursor.execute(sql)
         db.commit()
         cursor.close()
@@ -261,12 +261,28 @@ class Token:
         if attrs is not None:
             self.__dict__ = {**self.__dict__, **attrs}
 
-        print(self.__dict__)
 
     @property
     def user(self):
         result = User(None, None, None, None, None, None).get(self.email, key="email")
         return result
+
+    @property
+    def is_expired(self):
+        return datetime.datetime.now() > self.expires
+
+    @property
+    def is_active(self):
+        try:
+            active = True if self.active == 1 else False
+        except:
+            active = False
+        return active
+
+    @property
+    def is_valid(self):
+        valid = True if (self.is_active and not self.is_expired) else False
+        return valid    
 
     def __repr__(self):
         return str(self.token)

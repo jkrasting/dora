@@ -165,6 +165,9 @@ class Experiment:
         attrs = {k: v for (k, v) in attrs.items() if v is not None}
         attrs = {k: v for (k, v) in attrs.items() if v != ""}
 
+        # perform some basic validation checks
+        if "pathPP" not in list(attrs.keys()):
+            raise ValueError("Experiment must be associated with a post-processing path")
         if "owner" not in list(attrs.keys()):
             attrs["owner"] = attrs["userName"]
         if "id" in list(attrs.keys()):
@@ -172,16 +175,29 @@ class Experiment:
         if "source" in list(attrs.keys()):
             del attrs["source"]
 
+        db = get_db() if db is None else db
+        cursor = db.cursor()
+
+        # check if experiment may already exist
+        _pathPP = attrs["pathPP"]
+        assert len(_pathPP) > 0, "pathPP is zero length"
+        _pathPP = _pathPP[:-1] if _pathPP[-1]=="/" else _pathPP
+        sql = f"SELECT id from `master` where `pathPP` LIKE '%{_pathPP}%' LIMIT 1"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        if result is not None:
+            raise ValueError(f"Experiment already exists as id {result['id']}")
+
         keys, values = list(zip(*attrs.items()))
         keys = str(tuple([str(x) for x in keys])).replace("'", "")
         values = str(tuple([str(x) for x in values]))
         sql = f"insert into master {keys} values {values}"
-        db = get_db() if db is None else db
-        cursor = db.cursor()
+
         cursor.execute(sql)
         db.commit()
         cursor.execute("SELECT @@IDENTITY")
         result = cursor.fetchone()
+
         cursor.close()
         return result["@@IDENTITY"]
 
