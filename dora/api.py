@@ -8,7 +8,7 @@ from flask_login import current_user
 from .Experiment import Experiment
 from .db import get_db
 from .projects import fetch_project_info
-from .user import Token
+from .user import Token, User
 
 import datetime
 
@@ -25,17 +25,35 @@ def add():
         return "API Token required for this operation."
 
     token = Token(token)
+    
+    try:
+        assert token.is_valid, "Specified token is not valid. See administrator."
+    except AssertionError as exc:
+        return str(exc)
 
-    if not hasattr(token, "token"):
-        return "Invalid token specified."
+    # if not hasattr(token, "token"):
+    #     return "Invalid token specified."
 
-    if token.active == 0:
-        return "Specified token is not active."
+    # if token.active == 0:
+    #     return "Specified token is not active."
 
-    if datetime.datetime.now() > token.expires:
-        return "Token is expired."
+    # if datetime.datetime.now() > token.expires:
+    #     return "Token is expired."
 
-    return f"Welcome {token.user.firstlast} ({token.user.name})."
+    # get parameters from url request
+    args = dict(request.args)
+
+    args = {k:args[k] for k in Experiment({}).expected_keys if k in args.keys()}
+    args["owner"] = token.user.firstlast
+
+    exp = Experiment(args)
+    
+    try:
+        result = str(exp.insert(None))
+    except Exception as exc:    
+        result = "Error: " + str(exc)
+
+    return result
 
 
 @dora.route("/api/info")

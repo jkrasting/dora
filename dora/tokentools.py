@@ -29,7 +29,6 @@ def list_tokens():
     cursor.close()
 
     token = get_api_token("krasting@gmail.com")
-    print("token: ", token)
 
     return render_template("examples-blank.html", tokens=tokens)
 
