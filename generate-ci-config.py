@@ -12,9 +12,8 @@ cfg = {'test': {'tags': ['dpdev'], 'environment': 'testing',
        'dora': {'tags': ['dora'], 'environment': 'production',
                 'secret_id': 'google_id_env_dora', 'secret_secret': 'google_secret_env_dora'}}
 
-dockerprefix = 'docker-compose -f docker-compose.gfdl.yml'
-
 def build_script(action, in_pipe, in_full):
+  dockerprefix = f'docker-compose -f docker-compose.{in_pipe}.yml'
   my_env = cfg[in_pipe]['environment']
   my_machine = cfg[in_pipe]['tags'][0]
   secret_id = cfg[in_pipe]['secret_id']

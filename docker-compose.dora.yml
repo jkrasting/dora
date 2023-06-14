@@ -38,7 +38,7 @@ services:
         target: /archive
         read_only: true
         bind:
-            propagation: shared      
+            propagation: slave      
     ports:
       - "5050:5050"
     networks:
