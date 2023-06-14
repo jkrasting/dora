@@ -1,0 +1,144 @@
+version: '3.2'
+
+services:
+  mariadb:
+    restart: always
+    env_file: .dbenv
+    image: mariadb
+    hostname: "dbserver"
+    volumes:
+      - baksql:/docker-entrypoint-initdb.d
+    expose:
+      - "3306"
+    networks:
+      - db_network
+  phpmyadmin:
+    image: phpmyadmin
+    container_name: phpmyadmin
+    environment:
+     - PMA_ARBITRARY=1
+    ports:
+     - 8080:80
+    volumes:
+     - /sessions
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
+  webapp:
+    restart: always
+    env_file: .env
+    build: .
+    hostname: "dashboard"
+    volumes:
+      - /gfdlhome:/home:ro
+      - /nbhome:/nbhome:ro
+      - type: bind
+        source: /archive
+        target: /archive
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch0
+        target: /arch0
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch1
+        target: /arch1
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch2
+        target: /arch2
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch3
+        target: /arch3
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch4
+        target: /arch4
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch5
+        target: /arch5
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch6
+        target: /arch6
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch7
+        target: /arch7
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch8
+        target: /arch8
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arch9
+        target: /arch9
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /archa
+        target: /archa
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /archb
+        target: /archb
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /archc
+        target: /archc
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /archd
+        target: /archd
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
+        source: /arche
+        target: /arche
+        read_only: true
+        bind:
+            propagation: shared      
+    ports:
+      - "5050:5050"
+    networks:
+      - db_network
+    depends_on: 
+      - mariadb
+
+volumes:
+  baksql:
+    external: true
+networks:
+  db_network:
+    driver: bridge
