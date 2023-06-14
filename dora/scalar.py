@@ -113,8 +113,9 @@ def scalardiags():
             "page-500.html", msg=f"Unable to locate {str(',').join(failed)}"
         )
 
-    dset = [f"{x.pathDB}/{region}Ave{realm}.db" for x in exper]
-    dset = [gfdlvitals.open_db(x) for x in dset]
+    dbfilename = f"{region}Ave{realm}.db"
+    filepaths = [(idx, x.pathDB) for idx, x in zip(idnum, exper)]
+    dset = [gfdlvitals.open_db(f"{x[1]}{dbfilename}") for x in filepaths]
     dset = [x.build_netrad_toa() for x in dset]
     labels = [format_label(x) for x in exper]
     labels = str(",").join(labels)
@@ -139,5 +140,7 @@ def scalardiags():
         "rows": plot_gen(),
         "region": region.capitalize(),
         "realm": realm.capitalize(),
+        "filepaths": filepaths,
+        "dbfilename": dbfilename,
     }
     return Response(stream_template("scalar-diags.html", **content))

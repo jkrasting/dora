@@ -14,6 +14,9 @@ import traceback
 import yaml
 import subprocess
 import warnings
+import io
+import gfdlvitals
+import xarray as xr
 
 import flask
 
@@ -26,6 +29,7 @@ from flask import (
     render_template,
     request,
     send_from_directory,
+    send_file,
     url_for,
 )
 
@@ -190,6 +194,32 @@ def dump_database():
     output = subprocess.check_output(cmd.split(" "))
     output = output.decode()
     return Response(output, mimetype="text/plain")
+
+@dora.route("/dldb", methods=['GET'])
+def dump_gfdlvitals_nc():
+    filestub = request.args.get("file")
+    dl_name = request.args.get("dl_name")
+    def set_encoding(my_ds, my_attr):
+      for var in getattr(my_ds, my_attr):
+        if '_FillValue' not in my_ds[var].encoding.keys():
+          my_ds[var].encoding['_FillValue'] = None
+        if var == 'time':
+          continue
+        my_ds[var].attrs = db[var].attrs
+        remove = []
+        for k, v in my_ds[var].attrs.items():
+          if v is None:
+            remove.append(k)
+        for rm in remove:
+          del my_ds[var].attrs[rm]
+      return my_ds
+
+    db = gfdlvitals.open_db(filestub)
+    ds = xr.Dataset.from_dataframe(db)
+    ds = ds.rename({'index': 'time'})
+    ds = set_encoding(ds, "data_vars")
+    ds = set_encoding(ds, "coords")
+    return send_file(io.BytesIO(ds.to_netcdf()), as_attachment=True, download_name=dl_name)
 
 
 @login_required
