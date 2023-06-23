@@ -5,6 +5,7 @@ DB_HOSTNAME=localhost
 DB_USERNAME=mdtadmin
 DB_PASSWORD=adminpassword
 DB_DATABASE=mdt_tracker
+TRUSTED_BACKUP_DIR=/home/jpk/_backup/mdttracker-2
 HDF5_USE_FILE_LOCKING='FALSE'
 OM4LABS_PLATFORM=testing
 OM4LABS_CATALOG_DIR=/Users/krasting/dora/om4labs/om4labs/catalogs/

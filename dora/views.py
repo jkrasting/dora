@@ -13,6 +13,7 @@ import sqlite3
 import traceback
 import yaml
 import subprocess
+import warnings
 
 import flask
 
@@ -56,6 +57,7 @@ from .parameters import *
 # App modules
 from dora import dora
 
+from werkzeug.utils import secure_filename
 
 # load mailer
 if dora.config["DO_MAIL"]:
@@ -191,6 +193,42 @@ def dump_database():
 
 
 @login_required
+@dora.route("/restore", methods=['GET'])
+def upload_file():
+
+    if not current_user.admin:
+        return "You must be an admin to use this feature."
+
+    filestub = request.args.get("file")
+    file = secure_filename(filestub)
+    trusted_backup_directory = os.getenv("TRUSTED_BACKUP_DIR")
+    file = os.path.join(trusted_backup_directory, file)
+
+    if not os.path.exists(file):
+        raise ValueError(f"Unable to find file: {file}")
+
+    db = get_db()
+    cursor = db.cursor()
+    
+    sql = f"SELECT table_name from information_schema.tables WHERE table_schema = '{os.getenv('DB_DATABASE')}'"
+    cursor.execute(sql)
+    table_names = cursor.fetchall()
+
+    for name_dict in table_names:
+        table_name = name_dict['table_name']
+        drop_statement = f"DROP TABLE IF EXISTS `{table_name}`;"
+        print(drop_statement)
+        cursor.execute(drop_statement)
+
+    db.commit()
+    db.close()
+
+    cmd = f"mysql --host={os.getenv('DB_HOSTNAME')} --user={os.getenv('DB_USERNAME')} --password={os.getenv('DB_PASSWORD')} --database={os.getenv('DB_DATABASE')} < {file}"
+    subprocess.run(cmd, shell=True, check=True)
+    return Response("Success", mimetype="text/plain")
+
+
+@login_required
 @dora.route("/mailer")
 def simple_mailer():
     action = {}
@@ -240,7 +278,10 @@ def teardown_db(exception):
     db = g.pop("db", None)
 
     if db is not None:
-        db.close()
+        try:
+            db.close()
+        except Exception as exc:
+            warnings.warn("Unable to teardown database connection.")
 
 
 if __name__ == "__main__":
