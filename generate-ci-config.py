@@ -47,6 +47,10 @@ def build_script(action, in_pipe, in_full):
       script += build_before_statement
       script += ['sed -i \'s/google_id_env_ci/\'${' + secret_id + '}\'/\' .env']
       script += ['sed -i \'s/google_secret_env_ci/\'${' + secret_secret + '}\'/\' .env']
+      match in_pipe:
+        case "test":
+          script += ['sed -i \'/certfile/s/cert\.pem/gfdl.noaa.gov.crt/\' gunicorn/gunicorn-run.sh']
+          script += ['sed -i \'/keyfile/s/key\.pem/gfdl.noaa.gov.key/\' gunicorn/gunicorn-run.sh']
       script += build_statement
       script += build_after_statement
       return script

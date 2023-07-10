@@ -34,6 +34,12 @@ services:
       - /gfdlhome:/home:ro
       - /nbhome:/nbhome:ro
       - type: bind
+        source: /etc/httpd/conf.d
+        target: /etc/certificates
+        read_only: true
+        bind:
+            propagation: shared      
+      - type: bind
         source: /archive
         target: /archive
         read_only: true
