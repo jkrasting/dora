@@ -56,6 +56,7 @@ from .user import user_experiment_count, check_sql_table_exists, create_tokens_t
 from .logging import create_error_log_table
 from .usertools import *
 from .tokentools import *
+from .restart import *
 from .parameters import *
 
 # App modules
