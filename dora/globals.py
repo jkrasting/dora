@@ -5,6 +5,7 @@ model_types = sorted(
     [
         "AM5c96",
         "AM5c384",
+        "OM5",
         "CM4",
         "OM4",
         "AM4",
