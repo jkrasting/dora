@@ -59,7 +59,7 @@
             </div>
             <div class="card-header">
                 {% for experiment in filepaths: %}
-                <a class="btn btn-primary" role="button" href="../dldb?file={{ experiment[1] }}{{ dbfilename }}&dl_name={{ experiment[0] }}_{{ dbfilename.replace('.db','.nc') }}">Download {{ experiment[0] }}_{{ dbfilename.replace('.db','.nc') }}</a>
+                <a class="btn btn-primary" role="button" href="../dldb?file={{ experiment[1] }}{{ experiment[2] }}&dl_name={{ experiment[0] }}_{{ experiment[2].replace('.db','.nc') }}">Download {{ experiment[0] }}_{{ experiment[2].replace('.db','.nc') }}</a>
                 {% endfor %}
             </div>
             <div class="card-body">
