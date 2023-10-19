@@ -10,6 +10,7 @@ import gfdlvitals
 
 import io
 import base64
+import os
 
 import matplotlib.pyplot as plt
 
@@ -113,9 +114,29 @@ def scalardiags():
             "page-500.html", msg=f"Unable to locate {str(',').join(failed)}"
         )
 
+    def obgc_hack(in_path):
+        if "OBGC" in realm:
+            if not os.path.exists(in_path):
+                if not os.path.exists(in_path.replace("OBGC.db", "COBALT.db")):
+                    if not os.path.exists(in_path.replace("OBGC.db", "BLING.db")):
+                        raise FileNotFoundError(
+                            "Unable to locate appropriate OBGC, COBALT, or BLING .db file"
+                        )
+                    else:
+                        return in_path.replace("OBGC.db", "BLING.db")
+                else:
+                    return in_path.replace("OBGC.db", "COBALT.db")
+            else:
+                return in_path
+        else:
+            return in_path
+
     dbfilename = f"{region}Ave{realm}.db"
-    filepaths = [(idx, x.pathDB) for idx, x in zip(idnum, exper)]
-    dset = [gfdlvitals.open_db(f"{x[1]}{dbfilename}") for x in filepaths]
+    filepaths = [
+        (idx, x.pathDB, obgc_hack(f"{x.pathDB}{dbfilename}").replace(x.pathDB, ""))
+        for idx, x in zip(idnum, exper)
+    ]
+    dset = [gfdlvitals.open_db(f"{x[1]}{x[2]}") for x in filepaths]
     dset = [x.build_netrad_toa() for x in dset]
     labels = [format_label(x) for x in exper]
     labels = str(",").join(labels)
@@ -141,6 +162,5 @@ def scalardiags():
         "region": region.capitalize(),
         "realm": realm.capitalize(),
         "filepaths": filepaths,
-        "dbfilename": dbfilename,
     }
     return Response(stream_template("scalar-diags.html", **content))
