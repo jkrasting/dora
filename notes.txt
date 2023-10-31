@@ -34,9 +34,14 @@ Requirements:
 Download source code:
 git clone https://github.com/jkrasting/dora.git
 cd dora
+
 conda install mamba
 mamba env create -n doraenv -f envs/env.dev.yml
 conda activate doraenv
+
+cd mariadb
+docker build -t database .
+docker run -d -p 3306:3306 database
 
 ./run.py dev
 
