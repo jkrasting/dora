@@ -5,7 +5,7 @@ from operator import itemgetter
 import os
 import traceback
 
-import om4labs
+import omlabs
 from flask import render_template
 from flask import request
 from flask import send_file
@@ -37,10 +37,10 @@ def base64it(imgbuf):
 
 
 class Diagnostic:
-    """Container class for an OM4labs diagnostic"""
+    """Container class for an omlabs diagnostic"""
 
     def __init__(self, name, component, pptype="av", varlist=[]):
-        """Initalize an OM4Labs diagnostic
+        """Initalize an omlabs diagnostic
 
         Parameters
         ----------
@@ -55,10 +55,10 @@ class Diagnostic:
         self.name = self.name.replace("_z", "").replace("_rho", "")
         # Intialize and empty dictionary of options pertaining to the
         # requested diagnostic
-        self.args = om4labs.diags.__dict__[self.name].parse(template=True)
-        # Tell OM4Labs where to find the observational data
+        self.args = omlabs.diags.__dict__[self.name].parse(template=True)
+        # Tell omlabs where to find the observational data
         self.args["platform"] = os.environ["OM4LABS_PLATFORM"]
-        # Tell OM4Labs we want streaming image buffers back
+        # Tell omlabs we want streaming image buffers back
         self.args["format"] = "stream"
         # Remove any cases where a diagnostic defines a default model
         # configuration and rely solely on the experiment's static file
@@ -162,7 +162,7 @@ class Diagnostic:
         return self
 
     def run(self):
-        """Runs the OM4Labs diagnostic
+        """Runs the omlabs diagnostic
 
         Returns
         -------
@@ -177,7 +177,7 @@ class Diagnostic:
                 self.args["dpi"] = 200
 
             # run the diagnostic
-            results = om4labs.diags.__dict__[self.name].run(self.args)
+            results = omlabs.diags.__dict__[self.name].run(self.args)
 
             # some diagnostics may return images and a file, separate them here
             if isinstance(results, tuple):
@@ -198,9 +198,9 @@ class Diagnostic:
         return self
 
 
-@dora.route("/analysis/om4labs", methods=["GET"])
-def om4labs_start():
-    """Flask route for calling OM4Labs
+@dora.route("/analysis/omlabs", methods=["GET"])
+def omlabs_start():
+    """Flask route for calling omlabs
 
     Returns
     -------
@@ -224,15 +224,15 @@ def om4labs_start():
         )
 
     # Get the requested analysis from the URL or provide user with
-    # a menu of available diagnostics in OM4Labs
+    # a menu of available diagnostics in omlabs
     analysis = request.args.getlist("analysis")
     if analysis == []:
         year_range = experiment.year_range()
-        avail_diags = [x for x in dir(om4labs.diags) if not x.startswith("__")]
+        avail_diags = [x for x in dir(omlabs.diags) if not x.startswith("__")]
         exclude = ["avail", "generic"]
         avail_diags = [x for x in avail_diags if not any(diag in x for diag in exclude)]
         avail_diags = [
-            (diag, eval(f"om4labs.diags.{diag}.__description__"))
+            (diag, eval(f"omlabs.diags.{diag}.__description__"))
             for diag in avail_diags
         ]
         moc_diags = [x for x in avail_diags if x[0] == "moc"]
