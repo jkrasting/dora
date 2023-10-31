@@ -12,7 +12,6 @@ import os
 import traceback
 import xarray as xr
 
-import om4labs
 from flask import render_template
 from flask import request
 from flask import send_file
