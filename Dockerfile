@@ -26,4 +26,4 @@ EXPOSE 5050
 COPY dora dora
 COPY .env .env
 
-#CMD ["/bin/bash", "gunicorn/gunicorn-run.sh"]
+CMD ["/bin/bash", "gunicorn/gunicorn-run.sh"]
